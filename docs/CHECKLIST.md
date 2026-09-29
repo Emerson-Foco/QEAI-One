@@ -67,7 +67,9 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [ ] Inbox unificado: e-mail (SMTP + IMAP) e chat no site
 - [ ] Notificações (e-mail/in-app)
 - [ ] Onboarding da organização (primeiros passos)
-- [ ] Campos customizados
+- [x] **Campos personalizados** (defaults Status/Temperatura + campos próprios) e **visões** de contatos (Tabela/Quadro agrupado por campo)
+- [ ] Templates de campos criados pelo ADM Root (aplicáveis a novas organizações)
+- [ ] Visões extras (calendário, galeria) e filtros salvos
 
 ## Fase 2 — Chatbot + WhatsApp
 - [ ] Construtor de fluxo (sem IA)

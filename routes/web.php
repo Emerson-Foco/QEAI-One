@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\Crm\CompanyController;
 use App\Http\Controllers\Crm\ContactController;
+use App\Http\Controllers\Crm\CustomFieldController;
 use App\Http\Controllers\Crm\DealController;
 use App\Http\Controllers\Crm\PipelineController;
 use App\Http\Controllers\Crm\TaskController;
@@ -74,6 +75,11 @@ Route::middleware(['auth', 'installed', 'org'])
     ->group(function () {
         Route::get('/', [OrganizationPanelController::class, 'show'])->name('show');
         Route::get('logs', [OrganizationController::class, 'logs'])->name('logs');
+
+        Route::get('crm/campos', [CustomFieldController::class, 'index'])->name('fields.index');
+        Route::post('crm/campos', [CustomFieldController::class, 'store'])->name('fields.store');
+        Route::put('crm/campos/{field}', [CustomFieldController::class, 'update'])->name('fields.update');
+        Route::delete('crm/campos/{field}', [CustomFieldController::class, 'destroy'])->name('fields.destroy');
 
         Route::get('crm/contatos', [ContactController::class, 'index'])->name('contacts.index');
         Route::post('crm/contatos', [ContactController::class, 'store'])->name('contacts.store');

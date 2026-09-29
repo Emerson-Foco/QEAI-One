@@ -74,4 +74,9 @@ class Organization extends Model
     {
         return $this->hasMany(Task::class);
     }
+
+    public function customFields(): HasMany
+    {
+        return $this->hasMany(CustomField::class);
+    }
 }

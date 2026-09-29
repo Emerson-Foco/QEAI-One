@@ -52,6 +52,7 @@ class OrganizationController extends Controller
             }
 
             \App\Models\Pipeline::ensureDefaultFor($organization);
+            \App\Support\CustomFields::ensureDefaults($organization, 'contact');
 
             return $organization;
         });

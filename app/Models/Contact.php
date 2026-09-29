@@ -10,8 +10,13 @@ class Contact extends Model
 {
     protected $fillable = [
         'organization_id', 'company_id', 'name', 'email', 'phone', 'whatsapp',
-        'job_title', 'source', 'notes', 'owner_user_id', 'created_by',
+        'job_title', 'source', 'notes', 'custom', 'owner_user_id', 'created_by',
     ];
+
+    protected function casts(): array
+    {
+        return ['custom' => 'array'];
+    }
 
     public function organization(): BelongsTo
     {

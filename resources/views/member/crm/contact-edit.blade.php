@@ -22,6 +22,7 @@
       <label>Origem<input name="source" value="{{ old('source', $contact->source) }}" maxlength="60"></label>
       <label>Empresa<select name="company_id"><option value="">—</option>@foreach ($companies as $company)<option value="{{ $company->id }}" @selected($contact->company_id === $company->id)>{{ $company->name }}</option>@endforeach</select></label>
       <label>Tags (separadas por vírgula)<input name="tags" value="{{ old('tags', $contact->tags->pluck('name')->implode(', ')) }}" maxlength="300"></label>
+      @include('member.crm.partials.field-inputs', ['fields' => $fields, 'values' => $contact->custom ?? []])
       <label class="full">Observações<textarea name="notes" rows="4" maxlength="5000">{{ old('notes', $contact->notes) }}</textarea></label>
     </div>
     <div class="btn-row">
