@@ -86,4 +86,54 @@
     </tbody>
   </table>
 </div>
+
+@if (session('new_inbound_url'))
+  <div class="alert ok">Endpoint de entrada criado. URL: <code style="word-break:break-all">{{ session('new_inbound_url') }}</code></div>
+@endif
+@if (session('new_meta_url'))
+  <div class="alert ok">Endpoint do Meta criado. URL de callback: <code style="word-break:break-all">{{ session('new_meta_url') }}</code> <small>(use no webhook do app Meta; o token de verificação está no endpoint)</small></div>
+@endif
+
+<div class="card">
+  <h2>Entrada de leads</h2>
+  <p class="muted">Receba leads de ferramentas externas (Zapier, Make, N8N, formulários externos) ou do Meta Lead Ads.</p>
+  <div class="grid-2">
+    <form method="post" action="{{ route('member.org.integrations.inbound.store', $organization) }}">
+      @csrf
+      <h3>Endpoint genérico</h3>
+      <label>Nome<input name="name" required maxlength="120" placeholder="Site / N8N"></label>
+      <button class="btn">Criar endpoint</button>
+    </form>
+    <form method="post" action="{{ route('member.org.integrations.inbound.storeMeta', $organization) }}">
+      @csrf
+      <h3>Meta Lead Ads</h3>
+      <label>Nome<input name="name" required maxlength="120" placeholder="Campanha Meta"></label>
+      <label>Token de verificação<input name="meta_verify_token" maxlength="64" placeholder="gerado se vazio"></label>
+      <label>Page access token<input name="meta_page_access_token" required></label>
+      <label>App secret (opcional)<input name="meta_app_secret"></label>
+      <button class="btn">Criar endpoint Meta</button>
+    </form>
+  </div>
+  <table class="table">
+    <thead><tr><th>Nome</th><th>Fonte</th><th>URL</th><th>Último recebido</th><th></th></tr></thead>
+    <tbody>
+      @forelse ($inbounds as $inbound)
+        <tr>
+          <td>{{ $inbound->name }}</td>
+          <td>{{ $inbound->source === 'meta_lead_ads' ? 'Meta Lead Ads' : 'Genérico' }}</td>
+          <td style="word-break:break-all"><code>{{ $inbound->source === 'meta_lead_ads' ? url('/hooks/meta/' . $inbound->token) : url('/hooks/' . $inbound->token) }}</code></td>
+          <td>{{ $inbound->last_received_at?->format('d/m/Y H:i') ?? '—' }}</td>
+          <td class="right">
+            <div class="row-actions inline">
+              <form method="post" action="{{ route('member.org.integrations.inbound.toggle', [$organization, $inbound]) }}">@csrf<button class="btn secondary small">{{ $inbound->is_active ? 'Desativar' : 'Ativar' }}</button></form>
+              <form method="post" action="{{ route('member.org.integrations.inbound.destroy', [$organization, $inbound]) }}" onsubmit="return confirm('Remover endpoint?');">@csrf @method('DELETE')<button class="btn secondary small">Excluir</button></form>
+            </div>
+          </td>
+        </tr>
+      @empty
+        <tr><td colspan="5" class="muted">Nenhum endpoint de entrada.</td></tr>
+      @endforelse
+    </tbody>
+  </table>
+</div>
 @endsection

@@ -19,8 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.key' => \App\Http\Middleware\AuthenticateApiKey::class,
         ]);
 
-        // A API pública usa chave própria, sem CSRF.
-        $middleware->validateCsrfTokens(except: ['api/*']);
+        // API pública (chave própria) e webhooks de entrada não usam CSRF.
+        $middleware->validateCsrfTokens(except: ['api/*', 'hooks/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

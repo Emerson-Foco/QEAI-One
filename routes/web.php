@@ -8,6 +8,7 @@ use App\Http\Controllers\Crm\DealController;
 use App\Http\Controllers\Crm\FormController;
 use App\Http\Controllers\Crm\IntegrationController;
 use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\InboundReceiveController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Crm\PipelineController;
 use App\Http\Controllers\Crm\TaskController;
@@ -76,6 +77,11 @@ Route::middleware('api.key')->prefix('api/v1')->group(function () {
     Route::post('/leads', [LeadController::class, 'store'])->name('api.leads.store');
 });
 
+// Entrada de leads (webhooks de entrada / Meta Lead Ads)
+Route::get('/hooks/meta/{token}', [InboundReceiveController::class, 'metaVerify'])->name('hooks.meta.verify');
+Route::post('/hooks/meta/{token}', [InboundReceiveController::class, 'metaReceive'])->name('hooks.meta.receive');
+Route::post('/hooks/{token}', [InboundReceiveController::class, 'generic'])->name('hooks.generic');
+
 // Área do membro (usuário da organização)
 Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.')->group(function () {
     Route::get('/', [MemberController::class, 'index'])->name('dashboard');
@@ -129,6 +135,11 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::post('integracoes/webhooks', [IntegrationController::class, 'storeWebhook'])->name('integrations.webhooks.store');
         Route::post('integracoes/webhooks/{webhook}/alternar', [IntegrationController::class, 'toggleWebhook'])->name('integrations.webhooks.toggle');
         Route::delete('integracoes/webhooks/{webhook}', [IntegrationController::class, 'destroyWebhook'])->name('integrations.webhooks.destroy');
+
+        Route::post('integracoes/entrada', [IntegrationController::class, 'storeInbound'])->name('integrations.inbound.store');
+        Route::post('integracoes/entrada/meta', [IntegrationController::class, 'storeMeta'])->name('integrations.inbound.storeMeta');
+        Route::post('integracoes/entrada/{inbound}/alternar', [IntegrationController::class, 'toggleInbound'])->name('integrations.inbound.toggle');
+        Route::delete('integracoes/entrada/{inbound}', [IntegrationController::class, 'destroyInbound'])->name('integrations.inbound.destroy');
 
         Route::post('membros', [OrganizationMemberController::class, 'store'])->name('members.store');
         Route::put('membros/{membership}', [OrganizationMemberController::class, 'update'])->name('members.update');

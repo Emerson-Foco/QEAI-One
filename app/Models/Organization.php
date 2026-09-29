@@ -94,4 +94,9 @@ class Organization extends Model
     {
         return $this->hasMany(WebhookEndpoint::class);
     }
+
+    public function inboundEndpoints(): HasMany
+    {
+        return $this->hasMany(InboundEndpoint::class);
+    }
 }

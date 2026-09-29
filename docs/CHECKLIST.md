@@ -66,7 +66,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **API pública de captação** com chave por organização (`POST /api/v1/leads`, `X-Api-Key`)
 - [x] **Webhooks de saída (triggers)** assinados (HMAC) ao criar lead — estilo N8N/Zapier/Make
 - [x] Consentimento (LGPD) + honeypot + rate limit na captação
-- [ ] Webhooks de **entrada** de anúncios (ex.: Meta Lead Ads) com credenciais do cliente
+- [x] **Webhooks de entrada**: endpoint genérico (`/hooks/{token}`) + **Meta Lead Ads** (`/hooks/meta/{token}` com verify token, app secret e busca no Graph API) usando credenciais do cliente
 - [ ] Inbox unificado: e-mail (SMTP + IMAP) e chat no site
 - [ ] Notificações (e-mail/in-app)
 - [ ] Onboarding da organização (primeiros passos)
