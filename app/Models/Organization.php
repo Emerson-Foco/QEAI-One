@@ -109,4 +109,14 @@ class Organization extends Model
     {
         return $this->hasMany(Conversation::class);
     }
+
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
 }

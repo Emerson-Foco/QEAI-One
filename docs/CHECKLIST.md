@@ -81,7 +81,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [ ] Base de conhecimento + IA (opcional) com transbordo humano
 
 ## Fase 3 — Social + Ads
-- [ ] Publicação nas redes sociais (APIs oficiais)
+- [x] **Publicação em redes sociais**: contas, compositor, **agendamento** e publicador (webhook de automação ou página do Facebook)
 - [ ] Relatórios e gestão de anúncios
 
 ## Fase 4 — Canais extras + modo agência

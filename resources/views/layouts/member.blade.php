@@ -56,6 +56,9 @@
             <a class="{{ request()->routeIs('member.org.channels.*') ? 'active' : '' }}" href="{{ route('member.org.channels.index', $organization) }}">Canais</a>
           @endif
           <a class="{{ request()->routeIs('member.org.forms.*') ? 'active' : '' }}" href="{{ route('member.org.forms.index', $organization) }}">Formulários</a>
+          @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.social'))
+            <a class="{{ request()->routeIs('member.org.social.*') ? 'active' : '' }}" href="{{ route('member.org.social.index', $organization) }}">Social</a>
+          @endif
           @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.settings'))
             <a class="{{ request()->routeIs('member.org.fields.*') ? 'active' : '' }}" href="{{ route('member.org.fields.index', $organization) }}">Campos</a>
           @endif

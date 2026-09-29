@@ -16,6 +16,8 @@ class OrgPermissions
             'org.leads' => 'Leads e CRM',
             'org.conversations' => 'Atendimento',
             'org.automations' => 'Automações',
+            'org.social' => 'Redes sociais (publicação)',
+            'org.ads' => 'Anúncios',
             'org.reports' => 'Relatórios',
             'org.api_keys' => 'Chaves de API',
         ];
@@ -29,7 +31,7 @@ class OrgPermissions
         return [
             ['name' => 'Proprietário', 'slug' => 'owner', 'permissions' => ['*'], 'is_system' => true],
             ['name' => 'Administrador', 'slug' => 'admin', 'permissions' => $all, 'is_system' => true],
-            ['name' => 'Gerente', 'slug' => 'manager', 'permissions' => ['org.channels', 'org.leads', 'org.conversations', 'org.automations', 'org.reports', 'org.logs'], 'is_system' => true],
+            ['name' => 'Gerente', 'slug' => 'manager', 'permissions' => ['org.channels', 'org.leads', 'org.conversations', 'org.automations', 'org.social', 'org.ads', 'org.reports', 'org.logs'], 'is_system' => true],
             ['name' => 'Agente', 'slug' => 'agent', 'permissions' => ['org.leads', 'org.conversations', 'org.reports'], 'is_system' => true],
         ];
     }

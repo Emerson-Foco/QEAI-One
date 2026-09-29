@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 // Notifica tarefas vencendo (requer cron: php artisan schedule:run a cada minuto).
 Schedule::command('tasks:notify-due')->hourly();
+Schedule::command('posts:publish-due')->everyMinute();

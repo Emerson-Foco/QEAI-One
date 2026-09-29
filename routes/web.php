@@ -11,6 +11,7 @@ use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Crm\ChannelController;
 use App\Http\Controllers\Crm\InboxController;
+use App\Http\Controllers\Crm\SocialController;
 use App\Http\Controllers\InboundReceiveController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Crm\PipelineController;
@@ -158,6 +159,14 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::post('atendimento/{conversation}/responder', [InboxController::class, 'reply'])->name('inbox.reply');
         Route::post('atendimento/{conversation}/status', [InboxController::class, 'status'])->name('inbox.status');
         Route::post('atendimento/{conversation}/atribuir', [InboxController::class, 'assign'])->name('inbox.assign');
+
+        Route::get('social', [SocialController::class, 'index'])->name('social.index');
+        Route::post('social/contas', [SocialController::class, 'storeAccount'])->name('social.accounts.store');
+        Route::post('social/contas/{account}/alternar', [SocialController::class, 'toggleAccount'])->name('social.accounts.toggle');
+        Route::delete('social/contas/{account}', [SocialController::class, 'destroyAccount'])->name('social.accounts.destroy');
+        Route::post('social/posts', [SocialController::class, 'storePost'])->name('social.posts.store');
+        Route::post('social/posts/{post}/publicar', [SocialController::class, 'publishNow'])->name('social.posts.publish');
+        Route::delete('social/posts/{post}', [SocialController::class, 'destroyPost'])->name('social.posts.destroy');
 
         Route::get('integracoes', [IntegrationController::class, 'index'])->name('integrations.index');
         Route::post('integracoes/chaves', [IntegrationController::class, 'storeKey'])->name('integrations.keys.store');
