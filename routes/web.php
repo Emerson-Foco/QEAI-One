@@ -12,6 +12,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Crm\ChannelController;
 use App\Http\Controllers\Crm\InboxController;
 use App\Http\Controllers\Crm\SocialController;
+use App\Http\Controllers\Crm\AdsController;
 use App\Http\Controllers\InboundReceiveController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Crm\PipelineController;
@@ -85,6 +86,7 @@ Route::middleware('api.key')->prefix('api/v1')->group(function () {
 // Entrada de leads (webhooks de entrada / Meta Lead Ads)
 Route::get('/hooks/meta/{token}', [InboundReceiveController::class, 'metaVerify'])->name('hooks.meta.verify');
 Route::post('/hooks/meta/{token}', [InboundReceiveController::class, 'metaReceive'])->name('hooks.meta.receive');
+Route::post('/hooks/ads/{token}', [\App\Http\Controllers\AdsImportController::class, 'store'])->name('hooks.ads');
 Route::post('/hooks/{token}', [InboundReceiveController::class, 'generic'])->name('hooks.generic');
 
 // Chat público no site do cliente
@@ -167,6 +169,13 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::post('social/posts', [SocialController::class, 'storePost'])->name('social.posts.store');
         Route::post('social/posts/{post}/publicar', [SocialController::class, 'publishNow'])->name('social.posts.publish');
         Route::delete('social/posts/{post}', [SocialController::class, 'destroyPost'])->name('social.posts.destroy');
+
+        Route::get('anuncios', [AdsController::class, 'index'])->name('ads.index');
+        Route::post('anuncios/contas', [AdsController::class, 'storeAccount'])->name('ads.accounts.store');
+        Route::post('anuncios/contas/{account}/alternar', [AdsController::class, 'toggleAccount'])->name('ads.accounts.toggle');
+        Route::delete('anuncios/contas/{account}', [AdsController::class, 'destroyAccount'])->name('ads.accounts.destroy');
+        Route::post('anuncios/metricas', [AdsController::class, 'storeMetric'])->name('ads.metrics.store');
+        Route::delete('anuncios/metricas/{metric}', [AdsController::class, 'destroyMetric'])->name('ads.metrics.destroy');
 
         Route::get('integracoes', [IntegrationController::class, 'index'])->name('integrations.index');
         Route::post('integracoes/chaves', [IntegrationController::class, 'storeKey'])->name('integrations.keys.store');

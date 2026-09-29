@@ -82,7 +82,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 
 ## Fase 3 — Social + Ads
 - [x] **Publicação em redes sociais**: contas, compositor, **agendamento** e publicador (webhook de automação ou página do Facebook)
-- [ ] Relatórios e gestão de anúncios
+- [x] **Anúncios**: contas, importação de métricas por webhook, lançamento manual e **relatório** (investimento, CTR, CPC, CPA)
 
 ## Fase 4 — Canais extras + modo agência
 - [ ] SMS e voz

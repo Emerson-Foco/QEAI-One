@@ -119,4 +119,14 @@ class Organization extends Model
     {
         return $this->hasMany(Post::class);
     }
+
+    public function adAccounts(): HasMany
+    {
+        return $this->hasMany(AdAccount::class);
+    }
+
+    public function adMetrics(): HasMany
+    {
+        return $this->hasMany(AdMetric::class);
+    }
 }

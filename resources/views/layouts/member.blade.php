@@ -59,6 +59,9 @@
           @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.social'))
             <a class="{{ request()->routeIs('member.org.social.*') ? 'active' : '' }}" href="{{ route('member.org.social.index', $organization) }}">Social</a>
           @endif
+          @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.ads'))
+            <a class="{{ request()->routeIs('member.org.ads.*') ? 'active' : '' }}" href="{{ route('member.org.ads.index', $organization) }}">Anúncios</a>
+          @endif
           @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.settings'))
             <a class="{{ request()->routeIs('member.org.fields.*') ? 'active' : '' }}" href="{{ route('member.org.fields.index', $organization) }}">Campos</a>
           @endif
