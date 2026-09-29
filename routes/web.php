@@ -52,6 +52,9 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
 
+    Route::get('/cadastro', [\App\Http\Controllers\Auth\RegisterController::class, 'show'])->name('register');
+    Route::post('/cadastro', [\App\Http\Controllers\Auth\RegisterController::class, 'store']);
+
     Route::get('/esqueci-senha', [PasswordResetController::class, 'request'])->name('password.request');
     Route::post('/esqueci-senha', [PasswordResetController::class, 'email'])->name('password.email');
     Route::get('/redefinir-senha/{token}', [PasswordResetController::class, 'show'])->name('password.reset');

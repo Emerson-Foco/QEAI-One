@@ -23,7 +23,10 @@
       <label class="check"><input type="checkbox" name="remember" value="1"> Lembrar de mim</label>
       <button class="btn full">Entrar</button>
     </form>
-    <p class="muted" style="margin-top:14px;font-size:.8rem"><a href="{{ route('password.request') }}">Esqueci minha senha</a></p>
+    <p class="muted" style="margin-top:14px;font-size:.8rem">
+      <a href="{{ route('password.request') }}">Esqueci minha senha</a>
+      · <a href="{{ route('register') }}">Criar conta</a>
+    </p>
   </div>
 </div>
 @endsection

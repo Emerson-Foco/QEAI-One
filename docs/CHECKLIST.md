@@ -24,6 +24,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **2FA (TOTP)** — ativação com QR/segredo, desafio no login, desativação com senha
 - [x] **Verificação de e-mail** — ADM verificado na instalação; convidado verificado ao aceitar; reenvio com link assinado
 - [x] Página **Segurança** no painel (senha, 2FA, situação do e-mail)
+- [x] **Auto-cadastro B2B**: página pública `/cadastro` cria a organização + proprietário e entra direto
 
 ### Multi-tenancy e RBAC
 - [x] Organizações, membros e grupos de acesso (permissões configuráveis)
@@ -58,6 +59,10 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [ ] Encarregado (DPO) com contato público
 
 ---
+
+### Design e UX
+- [x] **Design system** documentado em `docs/DESIGN-SYSTEM.md` + CSS profissional (tokens, componentes, responsivo)
+- [x] Acesso do **Root** ao painel da organização (botões na lista/detalhe + "Minhas organizações")
 
 ## Fase 1 — MVP operacional (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)

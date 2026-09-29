@@ -34,7 +34,12 @@
           <td>{{ $organization->document ?: '—' }}</td>
           <td>{{ $organization->memberships_count }}</td>
           <td><span class="badge">{{ $organization->status }}</span></td>
-          <td class="right"><a class="btn secondary" href="{{ route('panel.organizations.show', $organization) }}">Abrir</a></td>
+          <td class="right">
+            <div class="row-actions inline">
+              <a class="btn secondary small" href="{{ route('member.org.show', $organization) }}">Painel</a>
+              <a class="btn secondary small" href="{{ route('panel.organizations.show', $organization) }}">Detalhes</a>
+            </div>
+          </td>
         </tr>
       @empty
         <tr><td colspan="5" class="muted">Nenhuma organização cadastrada ainda.</td></tr>

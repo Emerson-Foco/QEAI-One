@@ -7,6 +7,7 @@
   <div>
     <a class="muted" href="{{ route('panel.organizations.index') }}">← Organizações</a>
     <h1>{{ $organization->name }}</h1>
+    <a class="btn secondary small" href="{{ route('member.org.show', $organization) }}" style="margin-bottom:10px">Abrir painel da organização ↗</a>
     <p class="muted">
       <span class="badge">{{ $organization->status }}</span>
       <span>·</span> {{ $organization->slug }}

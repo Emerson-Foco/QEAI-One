@@ -31,37 +31,7 @@ class OrganizationController extends Controller
             'country' => ['nullable', 'string', 'size:2'],
         ]);
 
-        $organization = DB::transaction(function () use ($data) {
-            $organization = Organization::create([
-                'name' => $data['name'],
-                'slug' => $this->uniqueSlug($data['name']),
-                'document' => $data['document'] ?? null,
-                'country' => strtoupper($data['country'] ?? 'BR'),
-                'status' => 'active',
-                'owner_user_id' => auth()->id(),
-                'plan_id' => \App\Models\Plan::where('slug', 'free')->value('id'),
-            ]);
-
-            foreach (OrgPermissions::defaults() as $role) {
-                $organization->roles()->create([
-                    'name' => $role['name'],
-                    'slug' => $role['slug'],
-                    'permissions' => $role['permissions'],
-                    'is_system' => $role['is_system'],
-                ]);
-            }
-
-            \App\Models\Pipeline::ensureDefaultFor($organization);
-
-            $template = \App\Models\FieldTemplate::defaultTemplate();
-            if ($template !== null) {
-                \App\Support\CustomFields::applyTemplate($organization, $template->fields ?? []);
-            } else {
-                \App\Support\CustomFields::ensureDefaults($organization, 'contact');
-            }
-
-            return $organization;
-        });
+        $organization = \App\Support\Organizations::provision($data['name'], $data['document'] ?? null, auth()->user());
 
         Audit::log('organization.created', 'platform', null, 'organization', $organization->id, null, ['name' => $organization->name]);
 
