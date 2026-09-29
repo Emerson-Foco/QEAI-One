@@ -62,8 +62,11 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 ## Fase 1 — MVP operacional (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)
 - [x] CRM: pipelines/negócios (kanban por etapas, valor, ganho/perdido) e tarefas/atividades
-- [ ] Captação: formulários embutidos + API pública (chave por organização)
-- [ ] Webhooks de captação (ex.: Meta Lead Ads) com credenciais do cliente
+- [x] **Captação: formulários personalizados** (com campos customizados) + página pública + incorporação por iframe
+- [x] **API pública de captação** com chave por organização (`POST /api/v1/leads`, `X-Api-Key`)
+- [x] **Webhooks de saída (triggers)** assinados (HMAC) ao criar lead — estilo N8N/Zapier/Make
+- [x] Consentimento (LGPD) + honeypot + rate limit na captação
+- [ ] Webhooks de **entrada** de anúncios (ex.: Meta Lead Ads) com credenciais do cliente
 - [ ] Inbox unificado: e-mail (SMTP + IMAP) e chat no site
 - [ ] Notificações (e-mail/in-app)
 - [ ] Onboarding da organização (primeiros passos)

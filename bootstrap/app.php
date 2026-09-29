@@ -16,7 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'root' => \App\Http\Middleware\EnsureRootAdmin::class,
             'member' => \App\Http\Middleware\EnsureMember::class,
             'org' => \App\Http\Middleware\EnsureOrganizationAccess::class,
+            'api.key' => \App\Http\Middleware\AuthenticateApiKey::class,
         ]);
+
+        // A API pública usa chave própria, sem CSRF.
+        $middleware->validateCsrfTokens(except: ['api/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

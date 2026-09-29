@@ -5,6 +5,10 @@ use App\Http\Controllers\Crm\CompanyController;
 use App\Http\Controllers\Crm\ContactController;
 use App\Http\Controllers\Crm\CustomFieldController;
 use App\Http\Controllers\Crm\DealController;
+use App\Http\Controllers\Crm\FormController;
+use App\Http\Controllers\Crm\IntegrationController;
+use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Crm\PipelineController;
 use App\Http\Controllers\Crm\TaskController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -63,6 +67,15 @@ Route::post('/convite/{token}', [InviteAcceptController::class, 'accept']);
 Route::get('/convite/{token}/nao-reconheco', [InviteAcceptController::class, 'reportForm'])->name('invite.report.form');
 Route::post('/convite/{token}/nao-reconheco', [InviteAcceptController::class, 'report'])->name('invite.report');
 
+// Formulários públicos de captação
+Route::get('/f/{slug}', [PublicFormController::class, 'show'])->name('form.show');
+Route::post('/f/{slug}', [PublicFormController::class, 'submit'])->name('form.submit');
+
+// API pública de captação (chave por organização)
+Route::middleware('api.key')->prefix('api/v1')->group(function () {
+    Route::post('/leads', [LeadController::class, 'store'])->name('api.leads.store');
+});
+
 // Área do membro (usuário da organização)
 Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.')->group(function () {
     Route::get('/', [MemberController::class, 'index'])->name('dashboard');
@@ -104,6 +117,18 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::post('crm/tarefas', [TaskController::class, 'store'])->name('tasks.store');
         Route::post('crm/tarefas/{task}/alternar', [TaskController::class, 'toggle'])->name('tasks.toggle');
         Route::delete('crm/tarefas/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+
+        Route::get('crm/formularios', [FormController::class, 'index'])->name('forms.index');
+        Route::post('crm/formularios', [FormController::class, 'store'])->name('forms.store');
+        Route::post('crm/formularios/{form}/alternar', [FormController::class, 'toggle'])->name('forms.toggle');
+        Route::delete('crm/formularios/{form}', [FormController::class, 'destroy'])->name('forms.destroy');
+
+        Route::get('integracoes', [IntegrationController::class, 'index'])->name('integrations.index');
+        Route::post('integracoes/chaves', [IntegrationController::class, 'storeKey'])->name('integrations.keys.store');
+        Route::post('integracoes/chaves/{key}/revogar', [IntegrationController::class, 'revokeKey'])->name('integrations.keys.revoke');
+        Route::post('integracoes/webhooks', [IntegrationController::class, 'storeWebhook'])->name('integrations.webhooks.store');
+        Route::post('integracoes/webhooks/{webhook}/alternar', [IntegrationController::class, 'toggleWebhook'])->name('integrations.webhooks.toggle');
+        Route::delete('integracoes/webhooks/{webhook}', [IntegrationController::class, 'destroyWebhook'])->name('integrations.webhooks.destroy');
 
         Route::post('membros', [OrganizationMemberController::class, 'store'])->name('members.store');
         Route::put('membros/{membership}', [OrganizationMemberController::class, 'update'])->name('members.update');

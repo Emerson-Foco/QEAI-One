@@ -47,8 +47,12 @@
           <a class="{{ request()->routeIs('member.org.companies.*') ? 'active' : '' }}" href="{{ route('member.org.companies.index', $organization) }}">Empresas</a>
           <a class="{{ request()->routeIs('member.org.pipeline.*') || request()->routeIs('member.org.deals.*') ? 'active' : '' }}" href="{{ route('member.org.pipeline.index', $organization) }}">Negócios</a>
           <a class="{{ request()->routeIs('member.org.tasks.*') ? 'active' : '' }}" href="{{ route('member.org.tasks.index', $organization) }}">Tarefas</a>
+          <a class="{{ request()->routeIs('member.org.forms.*') ? 'active' : '' }}" href="{{ route('member.org.forms.index', $organization) }}">Formulários</a>
           @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.settings'))
             <a class="{{ request()->routeIs('member.org.fields.*') ? 'active' : '' }}" href="{{ route('member.org.fields.index', $organization) }}">Campos</a>
+          @endif
+          @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.api_keys'))
+            <a class="{{ request()->routeIs('member.org.integrations.*') ? 'active' : '' }}" href="{{ route('member.org.integrations.index', $organization) }}">Integrações</a>
           @endif
         @endif
         @if (! empty($canLogs))
