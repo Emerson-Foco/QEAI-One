@@ -55,4 +55,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Membership::class);
     }
+
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Notification::class)->latest('id');
+    }
+
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->whereNull('read_at')->count();
+    }
 }

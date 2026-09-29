@@ -66,6 +66,7 @@ class LeadIntake
 
         Audit::log('lead.created', 'organization', $organization->id, 'contact', $contact->id, null, ['origin' => $origin] + $meta);
         Webhooks::dispatch($organization, 'lead.created', self::payload($contact));
+        Notify::leadCreated($organization, $contact);
 
         return $contact;
     }

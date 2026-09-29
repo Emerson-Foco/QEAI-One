@@ -45,6 +45,7 @@ class ChatController extends Controller
         $conversation = $this->conversationFor($channel, $visitor, $data);
         $conversation->messages()->create(['direction' => 'in', 'body' => $data['body']]);
         $conversation->update(['last_message_at' => now(), 'status' => 'open']);
+        \App\Support\Notify::chatMessage($channel->organization, $conversation, $data['body']);
 
         if ($request->expectsJson()) {
             return response()->json(['ok' => true]);

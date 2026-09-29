@@ -32,6 +32,20 @@
   </ul>
 </div>
 
+@if ($onboardingPending && ! empty($onboarding))
+  <div class="card">
+    <h2>Primeiros passos</h2>
+    <ul class="onboarding-list">
+      @foreach ($onboarding as $step)
+        <li class="{{ $step['done'] ? 'done' : '' }}">
+          <span>{{ $step['done'] ? '✓' : '○' }}</span>
+          @if ($step['done']) {{ $step['label'] }} @else <a href="{{ $step['url'] }}">{{ $step['label'] }}</a> @endif
+        </li>
+      @endforeach
+    </ul>
+  </div>
+@endif
+
 @if ($canMembers)
   @include('organizations.partials.members', ['routeBase' => 'member.org.', 'memberships' => $memberships, 'roles' => $roles])
   @include('organizations.partials.invites', ['routeBase' => 'member.org.', 'invites' => $invites, 'roles' => $roles])

@@ -29,6 +29,8 @@
           @endforeach
         </select>
       @endif
+      @php $unreadCount = auth()->user()->unreadNotificationsCount(); @endphp
+      <a class="bell" href="{{ route('member.notifications.index') }}" aria-label="Notificações">🔔@if ($unreadCount)<span class="badge">{{ $unreadCount }}</span>@endif</a>
       <span>{{ auth()->user()->name }}</span>
       <form method="post" action="{{ route('logout') }}">
         @csrf

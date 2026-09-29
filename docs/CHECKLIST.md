@@ -69,8 +69,8 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **Webhooks de entrada**: endpoint genérico (`/hooks/{token}`) + **Meta Lead Ads** (`/hooks/meta/{token}` com verify token, app secret e busca no Graph API) usando credenciais do cliente
 - [x] **Inbox unificado**: chat no site (widget/iframe) + canal de e-mail (envio via SMTP) + caixa unificada (status, atribuição, vínculo com o contato)
 - [ ] **Recebimento de e-mail (IMAP)** para respostas caírem no inbox automaticamente (envio já funciona)
-- [ ] Notificações (e-mail/in-app)
-- [ ] Onboarding da organização (primeiros passos)
+- [x] **Notificações** in-app (sino) + e-mail: novo lead, nova mensagem e tarefa vencendo (comando agendado)
+- [x] **Onboarding da organização** (checklist de primeiros passos no painel da organização)
 - [x] **Campos personalizados** (defaults Status/Temperatura + campos próprios) e **visões** de contatos (Tabela/Quadro agrupado por campo)
 - [x] **Templates de campos pelo ADM Root** (template padrão para novas organizações + aplicar a organizações existentes)
 - [ ] Visões extras (calendário, galeria) e filtros salvos

@@ -16,6 +16,8 @@
   <div class="container">
     <a href="{{ route('panel.dashboard') }}"><img src="{{ asset('img/logo.svg') }}" alt="QEAI One" width="120"></a>
     <div class="userbox">
+      @php $unreadCount = auth()->user()->unreadNotificationsCount(); @endphp
+      <a class="bell" href="{{ route('member.notifications.index') }}" aria-label="Notificações">🔔@if ($unreadCount)<span class="badge">{{ $unreadCount }}</span>@endif</a>
       <span>{{ auth()->user()->name }} · {{ auth()->user()->email }}</span>
       <form method="post" action="{{ route('logout') }}">
         @csrf

@@ -94,6 +94,10 @@ Route::get('/chat/{token}/messages', [ChatController::class, 'messages'])->name(
 // Área do membro (usuário da organização)
 Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.')->group(function () {
     Route::get('/', [MemberController::class, 'index'])->name('dashboard');
+
+    Route::get('notificacoes', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notificacoes/ler-todas', [\App\Http\Controllers\NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('notificacoes/{notification}/ler', [\App\Http\Controllers\NotificationController::class, 'read'])->name('notifications.read');
 });
 
 // Painel da organização (escopado por organização e permissão)

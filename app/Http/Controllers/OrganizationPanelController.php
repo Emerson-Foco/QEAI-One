@@ -18,6 +18,18 @@ class OrganizationPanelController extends Controller
         $canLogs = OrgAccess::can($user, $organization, 'org.logs');
         $canSettings = OrgAccess::can($user, $organization, 'org.settings');
 
+        $onboarding = [];
+        if (OrgAccess::canData($user, $organization, 'org.channels')) {
+            $onboarding[] = ['label' => 'Conectar um canal (chat ou e-mail)', 'done' => $organization->channels()->exists(), 'url' => route('member.org.channels.index', $organization)];
+        }
+        if (OrgAccess::canData($user, $organization, 'org.leads')) {
+            $onboarding[] = ['label' => 'Criar um formulário de captação', 'done' => $organization->forms()->exists(), 'url' => route('member.org.forms.index', $organization)];
+            $onboarding[] = ['label' => 'Cadastrar o primeiro contato', 'done' => $organization->contacts()->exists(), 'url' => route('member.org.contacts.index', $organization)];
+        }
+        if ($canMembers) {
+            $onboarding[] = ['label' => 'Convidar a equipe', 'done' => $organization->memberships()->where('status', 'active')->count() > 1, 'url' => route('member.org.show', $organization)];
+        }
+
         return view('member.organization', [
             'organization' => $organization,
             'membership' => OrgAccess::membership($user, $organization),
@@ -28,6 +40,8 @@ class OrganizationPanelController extends Controller
             'canLogs' => $canLogs,
             'canSettings' => $canSettings,
             'features' => \App\Support\PlanResolver::summary($organization),
+            'onboarding' => $onboarding,
+            'onboardingPending' => collect($onboarding)->contains(fn ($s) => ! $s['done']),
             'invites' => $canMembers ? $organization->invites()->with('role')->latest('id')->limit(50)->get() : collect(),
             'audit' => $canLogs
                 ? AuditLog::where('scope', 'organization')->where('organization_id', $organization->id)->latest('id')->limit(20)->get()
