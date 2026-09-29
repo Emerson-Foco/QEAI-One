@@ -45,6 +45,8 @@
         @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.leads'))
           <a class="{{ request()->routeIs('member.org.contacts.*') ? 'active' : '' }}" href="{{ route('member.org.contacts.index', $organization) }}">Contatos</a>
           <a class="{{ request()->routeIs('member.org.companies.*') ? 'active' : '' }}" href="{{ route('member.org.companies.index', $organization) }}">Empresas</a>
+          <a class="{{ request()->routeIs('member.org.pipeline.*') || request()->routeIs('member.org.deals.*') ? 'active' : '' }}" href="{{ route('member.org.pipeline.index', $organization) }}">Negócios</a>
+          <a class="{{ request()->routeIs('member.org.tasks.*') ? 'active' : '' }}" href="{{ route('member.org.tasks.index', $organization) }}">Tarefas</a>
         @endif
         @if (! empty($canLogs))
           <a class="{{ request()->routeIs('member.org.logs') ? 'active' : '' }}" href="{{ route('member.org.logs', $organization) }}">Logs</a>

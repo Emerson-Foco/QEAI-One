@@ -54,6 +54,16 @@ small { font-weight: 400; color: var(--muted); }
 .row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .row-actions form { margin: 0; }
 .row-actions.inline { justify-content: flex-end; }
+.kanban { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 6px; }
+.kanban-col { min-width: 250px; flex: 1 0 250px; background: #FBFAFF; border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+.kanban-col h3 { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 12px; }
+.deal-card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.deal-card strong { display: block; font-size: .9rem; }
+.deal-value { color: var(--primary); font-weight: 700; font-size: .84rem; }
+.deal-meta { color: var(--muted); font-size: .72rem; margin-top: 4px; }
+.move-form { display: flex; gap: 6px; margin-top: 8px; }
+.move-form select { padding: 6px 8px; font-size: .74rem; }
+.task-done { text-decoration: line-through; color: var(--muted); }
 .btn.full { width: 100%; }
 .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 

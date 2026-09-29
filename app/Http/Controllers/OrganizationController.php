@@ -51,6 +51,8 @@ class OrganizationController extends Controller
                 ]);
             }
 
+            \App\Models\Pipeline::ensureDefaultFor($organization);
+
             return $organization;
         });
 

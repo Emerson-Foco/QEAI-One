@@ -3,6 +3,9 @@
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\Crm\CompanyController;
 use App\Http\Controllers\Crm\ContactController;
+use App\Http\Controllers\Crm\DealController;
+use App\Http\Controllers\Crm\PipelineController;
+use App\Http\Controllers\Crm\TaskController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -83,6 +86,18 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::get('crm/empresas/{company}/editar', [CompanyController::class, 'edit'])->name('companies.edit');
         Route::put('crm/empresas/{company}', [CompanyController::class, 'update'])->name('companies.update');
         Route::delete('crm/empresas/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
+
+        Route::get('crm/negocios', [PipelineController::class, 'index'])->name('pipeline.index');
+        Route::post('crm/negocios', [DealController::class, 'store'])->name('deals.store');
+        Route::get('crm/negocios/{deal}/editar', [DealController::class, 'edit'])->name('deals.edit');
+        Route::put('crm/negocios/{deal}', [DealController::class, 'update'])->name('deals.update');
+        Route::post('crm/negocios/{deal}/mover', [DealController::class, 'move'])->name('deals.move');
+        Route::delete('crm/negocios/{deal}', [DealController::class, 'destroy'])->name('deals.destroy');
+
+        Route::get('crm/tarefas', [TaskController::class, 'index'])->name('tasks.index');
+        Route::post('crm/tarefas', [TaskController::class, 'store'])->name('tasks.store');
+        Route::post('crm/tarefas/{task}/alternar', [TaskController::class, 'toggle'])->name('tasks.toggle');
+        Route::delete('crm/tarefas/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 
         Route::post('membros', [OrganizationMemberController::class, 'store'])->name('members.store');
         Route::put('membros/{membership}', [OrganizationMemberController::class, 'update'])->name('members.update');

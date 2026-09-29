@@ -61,7 +61,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 
 ## Fase 1 — MVP operacional (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)
-- [ ] CRM: pipelines/negócios (quadro por etapas) e tarefas/atividades
+- [x] CRM: pipelines/negócios (kanban por etapas, valor, ganho/perdido) e tarefas/atividades
 - [ ] Captação: formulários embutidos + API pública (chave por organização)
 - [ ] Webhooks de captação (ex.: Meta Lead Ads) com credenciais do cliente
 - [ ] Inbox unificado: e-mail (SMTP + IMAP) e chat no site
