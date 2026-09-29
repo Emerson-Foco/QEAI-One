@@ -50,4 +50,28 @@ class OrgAccess
     {
         return $user->is_root_admin || self::membership($user, $organization) !== null;
     }
+
+    /**
+     * Autorização para DADOS DE NEGÓCIO (CRM, atendimento).
+     * Aqui o ADM Root NÃO tem bypass: por governança, só acessa se for membro
+     * da organização com a permissão concedida.
+     */
+    public static function canData(User $user, Organization $organization, string $permission): bool
+    {
+        $membership = self::membership($user, $organization);
+        if ($membership === null) {
+            return false;
+        }
+
+        $permissions = $membership->role?->permissions ?? [];
+
+        return in_array('*', $permissions, true) || in_array($permission, $permissions, true);
+    }
+
+    public static function authorizeData(User $user, Organization $organization, string $permission): void
+    {
+        if (! self::canData($user, $organization, $permission)) {
+            abort(403);
+        }
+    }
 }

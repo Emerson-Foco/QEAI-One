@@ -49,4 +49,14 @@ class Organization extends Model
     {
         return $this->hasMany(OrganizationFeatureOverride::class);
     }
+
+    public function companies(): HasMany
+    {
+        return $this->hasMany(Company::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(Contact::class);
+    }
 }

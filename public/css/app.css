@@ -50,6 +50,10 @@ small { font-weight: 400; color: var(--muted); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; border: 1px solid transparent; border-radius: 10px; padding: 13px 20px; font: inherit; font-size: .88rem; font-weight: 650; cursor: pointer; background: var(--primary); color: #fff; }
 .btn:hover { text-decoration: none; filter: brightness(.95); }
 .btn.secondary { background: #fff; border-color: #D8D2E3; color: var(--dark); }
+.btn.small { padding: 8px 13px; font-size: .76rem; border-radius: 8px; }
+.row-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.row-actions form { margin: 0; }
+.row-actions.inline { justify-content: flex-end; }
 .btn.full { width: 100%; }
 .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 

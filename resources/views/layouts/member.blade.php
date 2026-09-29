@@ -42,6 +42,10 @@
     <nav class="panel-nav">
       <div class="container">
         <a class="{{ request()->routeIs('member.org.show') ? 'active' : '' }}" href="{{ route('member.org.show', $organization) }}">Visão geral</a>
+        @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.leads'))
+          <a class="{{ request()->routeIs('member.org.contacts.*') ? 'active' : '' }}" href="{{ route('member.org.contacts.index', $organization) }}">Contatos</a>
+          <a class="{{ request()->routeIs('member.org.companies.*') ? 'active' : '' }}" href="{{ route('member.org.companies.index', $organization) }}">Empresas</a>
+        @endif
         @if (! empty($canLogs))
           <a class="{{ request()->routeIs('member.org.logs') ? 'active' : '' }}" href="{{ route('member.org.logs', $organization) }}">Logs</a>
         @endif

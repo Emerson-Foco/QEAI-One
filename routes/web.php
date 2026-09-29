@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\Crm\CompanyController;
+use App\Http\Controllers\Crm\ContactController;
 use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -69,6 +71,18 @@ Route::middleware(['auth', 'installed', 'org'])
     ->group(function () {
         Route::get('/', [OrganizationPanelController::class, 'show'])->name('show');
         Route::get('logs', [OrganizationController::class, 'logs'])->name('logs');
+
+        Route::get('crm/contatos', [ContactController::class, 'index'])->name('contacts.index');
+        Route::post('crm/contatos', [ContactController::class, 'store'])->name('contacts.store');
+        Route::get('crm/contatos/{contact}/editar', [ContactController::class, 'edit'])->name('contacts.edit');
+        Route::put('crm/contatos/{contact}', [ContactController::class, 'update'])->name('contacts.update');
+        Route::delete('crm/contatos/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
+
+        Route::get('crm/empresas', [CompanyController::class, 'index'])->name('companies.index');
+        Route::post('crm/empresas', [CompanyController::class, 'store'])->name('companies.store');
+        Route::get('crm/empresas/{company}/editar', [CompanyController::class, 'edit'])->name('companies.edit');
+        Route::put('crm/empresas/{company}', [CompanyController::class, 'update'])->name('companies.update');
+        Route::delete('crm/empresas/{company}', [CompanyController::class, 'destroy'])->name('companies.destroy');
 
         Route::post('membros', [OrganizationMemberController::class, 'store'])->name('members.store');
         Route::put('membros/{membership}', [OrganizationMemberController::class, 'update'])->name('members.update');
