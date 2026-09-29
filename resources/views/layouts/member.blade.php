@@ -47,6 +47,12 @@
           <a class="{{ request()->routeIs('member.org.companies.*') ? 'active' : '' }}" href="{{ route('member.org.companies.index', $organization) }}">Empresas</a>
           <a class="{{ request()->routeIs('member.org.pipeline.*') || request()->routeIs('member.org.deals.*') ? 'active' : '' }}" href="{{ route('member.org.pipeline.index', $organization) }}">Negócios</a>
           <a class="{{ request()->routeIs('member.org.tasks.*') ? 'active' : '' }}" href="{{ route('member.org.tasks.index', $organization) }}">Tarefas</a>
+          @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.conversations'))
+            <a class="{{ request()->routeIs('member.org.inbox.*') ? 'active' : '' }}" href="{{ route('member.org.inbox.index', $organization) }}">Atendimento</a>
+          @endif
+          @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.channels'))
+            <a class="{{ request()->routeIs('member.org.channels.*') ? 'active' : '' }}" href="{{ route('member.org.channels.index', $organization) }}">Canais</a>
+          @endif
           <a class="{{ request()->routeIs('member.org.forms.*') ? 'active' : '' }}" href="{{ route('member.org.forms.index', $organization) }}">Formulários</a>
           @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.settings'))
             <a class="{{ request()->routeIs('member.org.fields.*') ? 'active' : '' }}" href="{{ route('member.org.fields.index', $organization) }}">Campos</a>

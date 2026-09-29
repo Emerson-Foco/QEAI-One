@@ -67,7 +67,8 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **Webhooks de saída (triggers)** assinados (HMAC) ao criar lead — estilo N8N/Zapier/Make
 - [x] Consentimento (LGPD) + honeypot + rate limit na captação
 - [x] **Webhooks de entrada**: endpoint genérico (`/hooks/{token}`) + **Meta Lead Ads** (`/hooks/meta/{token}` com verify token, app secret e busca no Graph API) usando credenciais do cliente
-- [ ] Inbox unificado: e-mail (SMTP + IMAP) e chat no site
+- [x] **Inbox unificado**: chat no site (widget/iframe) + canal de e-mail (envio via SMTP) + caixa unificada (status, atribuição, vínculo com o contato)
+- [ ] **Recebimento de e-mail (IMAP)** para respostas caírem no inbox automaticamente (envio já funciona)
 - [ ] Notificações (e-mail/in-app)
 - [ ] Onboarding da organização (primeiros passos)
 - [x] **Campos personalizados** (defaults Status/Temperatura + campos próprios) e **visões** de contatos (Tabela/Quadro agrupado por campo)

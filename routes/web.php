@@ -8,6 +8,9 @@ use App\Http\Controllers\Crm\DealController;
 use App\Http\Controllers\Crm\FormController;
 use App\Http\Controllers\Crm\IntegrationController;
 use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Crm\ChannelController;
+use App\Http\Controllers\Crm\InboxController;
 use App\Http\Controllers\InboundReceiveController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Crm\PipelineController;
@@ -83,6 +86,11 @@ Route::get('/hooks/meta/{token}', [InboundReceiveController::class, 'metaVerify'
 Route::post('/hooks/meta/{token}', [InboundReceiveController::class, 'metaReceive'])->name('hooks.meta.receive');
 Route::post('/hooks/{token}', [InboundReceiveController::class, 'generic'])->name('hooks.generic');
 
+// Chat público no site do cliente
+Route::get('/chat/{token}', [ChatController::class, 'show'])->name('chat.show');
+Route::post('/chat/{token}', [ChatController::class, 'send'])->name('chat.send');
+Route::get('/chat/{token}/messages', [ChatController::class, 'messages'])->name('chat.messages');
+
 // Área do membro (usuário da organização)
 Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.')->group(function () {
     Route::get('/', [MemberController::class, 'index'])->name('dashboard');
@@ -129,6 +137,18 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::post('crm/formularios', [FormController::class, 'store'])->name('forms.store');
         Route::post('crm/formularios/{form}/alternar', [FormController::class, 'toggle'])->name('forms.toggle');
         Route::delete('crm/formularios/{form}', [FormController::class, 'destroy'])->name('forms.destroy');
+
+        Route::get('canais', [ChannelController::class, 'index'])->name('channels.index');
+        Route::post('canais/chat', [ChannelController::class, 'storeChat'])->name('channels.chat.store');
+        Route::post('canais/email', [ChannelController::class, 'storeEmail'])->name('channels.email.store');
+        Route::post('canais/{channel}/alternar', [ChannelController::class, 'toggle'])->name('channels.toggle');
+        Route::delete('canais/{channel}', [ChannelController::class, 'destroy'])->name('channels.destroy');
+
+        Route::get('atendimento', [InboxController::class, 'index'])->name('inbox.index');
+        Route::get('atendimento/{conversation}', [InboxController::class, 'show'])->name('inbox.show');
+        Route::post('atendimento/{conversation}/responder', [InboxController::class, 'reply'])->name('inbox.reply');
+        Route::post('atendimento/{conversation}/status', [InboxController::class, 'status'])->name('inbox.status');
+        Route::post('atendimento/{conversation}/atribuir', [InboxController::class, 'assign'])->name('inbox.assign');
 
         Route::get('integracoes', [IntegrationController::class, 'index'])->name('integrations.index');
         Route::post('integracoes/chaves', [IntegrationController::class, 'storeKey'])->name('integrations.keys.store');

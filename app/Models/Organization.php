@@ -99,4 +99,14 @@ class Organization extends Model
     {
         return $this->hasMany(InboundEndpoint::class);
     }
+
+    public function channels(): HasMany
+    {
+        return $this->hasMany(Channel::class);
+    }
+
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
+    }
 }
