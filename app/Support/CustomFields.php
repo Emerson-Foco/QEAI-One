@@ -42,6 +42,48 @@ class CustomFields
         return Str::slug($label) ?: 'campo';
     }
 
+    /**
+     * Aplica uma definição de campos (template) a uma organização.
+     * Não remove campos existentes; só cria os que faltam.
+     *
+     * @param array<int, array{label:string,type:string,options:?array,required?:bool,show_in_list?:bool}> $definitions
+     */
+    public static function applyTemplate(Organization $organization, array $definitions, string $entity = 'contact'): int
+    {
+        $allowedTypes = array_keys(\App\Models\CustomField::types());
+        $created = 0;
+        $position = (int) $organization->customFields()->where('entity', $entity)->max('position');
+
+        foreach ($definitions as $definition) {
+            $label = trim((string) ($definition['label'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+            $type = in_array($definition['type'] ?? 'text', $allowedTypes, true) ? $definition['type'] : 'text';
+            $base = self::slug($label);
+            $key = $base;
+            $suffix = 2;
+            while ($organization->customFields()->where('entity', $entity)->where('key', $key)->exists()) {
+                $key = $base . '-' . $suffix++;
+            }
+
+            $organization->customFields()->create([
+                'entity' => $entity,
+                'key' => $key,
+                'label' => mb_substr($label, 0, 120),
+                'type' => $type,
+                'options' => $type === 'select' ? array_values($definition['options'] ?? []) : null,
+                'required' => (bool) ($definition['required'] ?? false),
+                'show_in_list' => (bool) ($definition['show_in_list'] ?? false),
+                'is_system' => false,
+                'position' => ++$position,
+            ]);
+            $created++;
+        }
+
+        return $created;
+    }
+
     /** @param Collection<int, CustomField> $fields */
     public static function rules(Collection $fields): array
     {

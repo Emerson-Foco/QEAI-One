@@ -27,6 +27,7 @@ use App\Http\Controllers\OrganizationPanelController;
 use App\Http\Controllers\OrganizationRoleController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlatformSettingsController;
+use App\Http\Controllers\FieldTemplateController;
 use App\Http\Controllers\SecurityController;
 use Illuminate\Support\Facades\Route;
 
@@ -189,6 +190,13 @@ Route::middleware(['auth', 'installed', 'root'])->prefix('painel')->name('panel.
     Route::get('configuracoes', [PlatformSettingsController::class, 'edit'])->name('settings.edit');
     Route::put('configuracoes', [PlatformSettingsController::class, 'update'])->name('settings.update');
     Route::post('configuracoes/email-teste', [PlatformSettingsController::class, 'testEmail'])->name('settings.test');
+
+    Route::get('templates', [FieldTemplateController::class, 'index'])->name('templates.index');
+    Route::post('templates', [FieldTemplateController::class, 'store'])->name('templates.store');
+    Route::put('templates/{template}', [FieldTemplateController::class, 'update'])->name('templates.update');
+    Route::delete('templates/{template}', [FieldTemplateController::class, 'destroy'])->name('templates.destroy');
+    Route::post('templates/{template}/padrao', [FieldTemplateController::class, 'setDefault'])->name('templates.default');
+    Route::post('organizacoes/{organization}/template', [FieldTemplateController::class, 'applyTo'])->name('organizations.template');
 
     Route::get('planos', [PlanController::class, 'index'])->name('plans.index');
     Route::post('planos', [PlanController::class, 'store'])->name('plans.store');

@@ -42,6 +42,20 @@
   @endif
 </div>
 
+@if ($templates->isNotEmpty())
+  <div class="card">
+    <h2>Template de campos</h2>
+    <p class="muted">Aplica os campos de um template a esta organização (adiciona os que faltam, sem remover os existentes).</p>
+    <form method="post" action="{{ route('panel.organizations.template', $organization) }}" class="inline-form">
+      @csrf
+      <select name="template_id" required>
+        @foreach ($templates as $template)<option value="{{ $template->id }}">{{ $template->name }}{{ $template->is_default ? ' (padrão)' : '' }}</option>@endforeach
+      </select>
+      <button class="btn secondary">Aplicar template</button>
+    </form>
+  </div>
+@endif
+
 <div class="card">
   <h2>Recursos e limites</h2>
   <p class="muted">Precedência: <strong>organização</strong> &gt; plano ({{ $organization->plan?->name ?? '—' }}) &gt; padrão. Deixe "Herdar" para usar o plano.</p>

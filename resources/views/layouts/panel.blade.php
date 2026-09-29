@@ -29,6 +29,7 @@
     <a class="{{ request()->routeIs('panel.dashboard') ? 'active' : '' }}" href="{{ route('panel.dashboard') }}">Visão geral</a>
     <a class="{{ request()->routeIs('panel.organizations.*') ? 'active' : '' }}" href="{{ route('panel.organizations.index') }}">Organizações</a>
     <a class="{{ request()->routeIs('panel.plans.*') ? 'active' : '' }}" href="{{ route('panel.plans.index') }}">Planos</a>
+    <a class="{{ request()->routeIs('panel.templates.*') ? 'active' : '' }}" href="{{ route('panel.templates.index') }}">Templates</a>
     <a class="{{ request()->routeIs('panel.security.*') ? 'active' : '' }}" href="{{ route('panel.security.index') }}">Segurança</a>
     <a class="{{ request()->routeIs('panel.logs.*') ? 'active' : '' }}" href="{{ route('panel.logs.index') }}">Logs</a>
     <a class="{{ request()->routeIs('panel.settings.*') ? 'active' : '' }}" href="{{ route('panel.settings.edit') }}">Configurações</a>

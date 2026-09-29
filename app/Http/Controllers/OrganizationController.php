@@ -52,7 +52,13 @@ class OrganizationController extends Controller
             }
 
             \App\Models\Pipeline::ensureDefaultFor($organization);
-            \App\Support\CustomFields::ensureDefaults($organization, 'contact');
+
+            $template = \App\Models\FieldTemplate::defaultTemplate();
+            if ($template !== null) {
+                \App\Support\CustomFields::applyTemplate($organization, $template->fields ?? []);
+            } else {
+                \App\Support\CustomFields::ensureDefaults($organization, 'contact');
+            }
 
             return $organization;
         });
@@ -74,6 +80,7 @@ class OrganizationController extends Controller
             'permissions' => OrgPermissions::catalog(),
             'plans' => \App\Models\Plan::orderBy('sort')->orderBy('price_cents')->get(),
             'planCatalog' => \App\Support\PlanFeatures::catalog(),
+            'templates' => \App\Models\FieldTemplate::orderBy('name')->get(),
             'features' => \App\Support\PlanResolver::summary($organization),
             'invites' => $organization->invites()->with('role')->latest('id')->limit(50)->get(),
             'audit' => \App\Models\AuditLog::query()

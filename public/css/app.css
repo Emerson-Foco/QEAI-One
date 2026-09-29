@@ -65,6 +65,9 @@ small { font-weight: 400; color: var(--muted); }
 .move-form select { padding: 6px 8px; font-size: .74rem; }
 .task-done { text-decoration: line-through; color: var(--muted); }
 .hp { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.field-row { display: grid; grid-template-columns: 1.4fr 1fr 1.4fr auto; gap: 12px; align-items: end; border-bottom: 1px solid var(--border); padding: 10px 0; }
+.field-row-checks { display: flex; gap: 14px; }
+@media (max-width: 820px) { .field-row { grid-template-columns: 1fr; } }
 .btn.full { width: 100%; }
 .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 

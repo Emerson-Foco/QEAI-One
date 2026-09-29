@@ -71,7 +71,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [ ] Notificações (e-mail/in-app)
 - [ ] Onboarding da organização (primeiros passos)
 - [x] **Campos personalizados** (defaults Status/Temperatura + campos próprios) e **visões** de contatos (Tabela/Quadro agrupado por campo)
-- [ ] Templates de campos criados pelo ADM Root (aplicáveis a novas organizações)
+- [x] **Templates de campos pelo ADM Root** (template padrão para novas organizações + aplicar a organizações existentes)
 - [ ] Visões extras (calendário, galeria) e filtros salvos
 
 ## Fase 2 — Chatbot + WhatsApp
