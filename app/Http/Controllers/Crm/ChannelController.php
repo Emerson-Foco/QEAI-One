@@ -80,6 +80,36 @@ class ChannelController extends Controller
         return back()->with('status', 'Canal de e-mail criado.');
     }
 
+    public function storeWhatsapp(Request $request, Organization $organization)
+    {
+        $this->authorize($organization);
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'phone_number_id' => ['required', 'string', 'max:60'],
+            'access_token' => ['required', 'string', 'max:2000'],
+            'app_secret' => ['nullable', 'string', 'max:255'],
+            'verify_token' => ['nullable', 'string', 'max:64'],
+        ]);
+
+        $channel = $organization->channels()->create([
+            'type' => 'whatsapp',
+            'name' => $data['name'],
+            'token' => Str::random(40),
+            'config' => ['phone_number_id' => $data['phone_number_id']],
+            'is_active' => true,
+        ]);
+        $channel->setSecrets([
+            'access_token' => $data['access_token'],
+            'app_secret' => $data['app_secret'] ?? '',
+            'verify_token' => $data['verify_token'] ?: Str::random(24),
+        ]);
+        $channel->save();
+
+        Audit::log('channel.created', 'organization', $organization->id, 'channel', $channel->id, null, ['type' => 'whatsapp']);
+
+        return back()->with('status', 'Canal de WhatsApp criado.')->with('new_whatsapp_url', url('/webhooks/whatsapp/' . $channel->token));
+    }
+
     public function toggle(Organization $organization, Channel $channel)
     {
         $this->authorize($organization);

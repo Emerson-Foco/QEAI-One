@@ -17,6 +17,12 @@
     <small>Incorpore no site: <code>&lt;iframe src="{{ session('new_chat_url') }}" style="width:100%;height:600px;border:0"&gt;&lt;/iframe&gt;</code></small>
   </div>
 @endif
+@if (session('new_whatsapp_url'))
+  <div class="alert ok">
+    WhatsApp criado. URL do webhook (use no app Meta): <code style="word-break:break-all">{{ session('new_whatsapp_url') }}</code>
+    <br><small>Configure a mensagem no produto WhatsApp; o verify token está no canal.</small>
+  </div>
+@endif
 
 <div class="card">
   <h2>Novo canal de chat no site</h2>
@@ -43,6 +49,22 @@
       <label>E-mail do remetente<input type="email" name="from_email" maxlength="180"></label>
     </div>
     <button class="btn">Criar canal de e-mail</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Novo canal de WhatsApp (Cloud API)</h2>
+  <p class="muted">Informe os dados do app Meta da organização. Ao criar, geramos a URL de webhook e o verify token.</p>
+  <form method="post" action="{{ route('member.org.channels.whatsapp.store', $organization) }}">
+    @csrf
+    <div class="grid-2">
+      <label>Nome<input name="name" required maxlength="120" placeholder="WhatsApp Atendimento"></label>
+      <label>Phone Number ID<input name="phone_number_id" required maxlength="60"></label>
+      <label>Access Token (permanente)<input name="access_token" required maxlength="2000"></label>
+      <label>App Secret (opcional)<input name="app_secret" maxlength="255"></label>
+      <label>Verify token (opcional)<input name="verify_token" maxlength="64" placeholder="gerado se vazio"></label>
+    </div>
+    <button class="btn">Criar canal de WhatsApp</button>
   </form>
 </div>
 

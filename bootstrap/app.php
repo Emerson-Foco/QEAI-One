@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // API pública (chave própria) e webhooks de entrada não usam CSRF.
-        $middleware->validateCsrfTokens(except: ['api/*', 'hooks/*']);
+        $middleware->validateCsrfTokens(except: ['api/*', 'hooks/*', 'webhooks/*']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

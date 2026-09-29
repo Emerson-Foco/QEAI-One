@@ -76,9 +76,9 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [ ] Visões extras (calendário, galeria) e filtros salvos
 
 ## Fase 2 — Chatbot + WhatsApp
+- [x] **WhatsApp Cloud API** (credenciais da própria organização): webhook de verificação/recebimento + envio pelo inbox
 - [ ] Construtor de fluxo (sem IA)
 - [ ] Base de conhecimento + IA (opcional) com transbordo humano
-- [ ] WhatsApp Cloud API (credenciais da própria organização)
 
 ## Fase 3 — Social + Ads
 - [ ] Publicação nas redes sociais (APIs oficiais)

@@ -59,12 +59,18 @@ class InboxController extends Controller
         $data = $request->validate(['body' => ['required', 'string', 'max:4000']]);
 
         $meta = null;
-        if ($conversation->channel->type === 'email' && $conversation->contact?->email) {
-            try {
-                ChannelMail::send($conversation->channel, $conversation->contact->email, 'Re: ' . ($conversation->subject ?: 'Atendimento'), $data['body']);
-            } catch (\Throwable $exception) {
-                $meta = ['error' => $exception->getMessage()];
+        $channel = $conversation->channel;
+        try {
+            if ($channel->type === 'email' && $conversation->contact?->email) {
+                ChannelMail::send($channel, $conversation->contact->email, 'Re: ' . ($conversation->subject ?: 'Atendimento'), $data['body']);
+            } elseif ($channel->type === 'whatsapp') {
+                $to = $conversation->visitor_token ?: $conversation->contact?->whatsapp;
+                if ($to) {
+                    \App\Support\WhatsApp::send($channel, (string) $to, $data['body']);
+                }
             }
+        } catch (\Throwable $exception) {
+            $meta = ['error' => $exception->getMessage()];
         }
 
         $conversation->messages()->create([
