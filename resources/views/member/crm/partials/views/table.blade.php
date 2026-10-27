@@ -1,0 +1,86 @@
+@if ($contacts->isEmpty())
+  <div class="card">
+    <div class="empty-state">
+      <x-icon name="users" :size="30"/>
+      <h2 style="margin-top:8px">{{ $search !== '' || $hasFilters ? 'Nenhum lead encontrado' : 'Nenhum lead cadastrado ainda' }}</h2>
+      <p class="muted">{{ $search !== '' || $hasFilters ? 'Ajuste a busca ou os filtros para ver mais resultados.' : 'Cadastre o primeiro lead para começar a acompanhar sua operação.' }}</p>
+      @if ($search === '' && ! $hasFilters)
+        <a class="btn" href="{{ route('member.org.contacts.create', $organization) }}"><x-icon name="plus" :size="16"/> Cadastrar primeiro lead</a>
+      @endif
+    </div>
+  </div>
+@else
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID do lead</th>
+            <th>Lead</th>
+            <th>Contato</th>
+            @foreach ($listFields as $field)
+              <th>{{ $field->label }}</th>
+            @endforeach
+            <th>Criado em</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach ($contacts as $contact)
+            <tr>
+              <td><a class="lead-id nowrap" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}" title="{{ $contact->lead_id }}">{{ $contact->lead_id }}</a></td>
+              <td>
+                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">{{ $contact->name }}</a>
+                @if ($contact->source)<small class="muted" style="display:block">{{ $contact->source }}</small>@endif
+              </td>
+              <td>
+                <span class="cell-stack">
+                  {{ $contact->email ?: '—' }}
+                  @if ($contact->phone || $contact->whatsapp)<small>{{ $contact->phone ?: $contact->whatsapp }}</small>@endif
+                </span>
+              </td>
+              @foreach ($listFields as $field)
+                @php
+                  $value = $contact->custom[$field->key] ?? null;
+                  $display = $value;
+                  $optionColors = [];
+                  if ($field->type === 'select') {
+                      $palette = ['#3B82F6', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9'];
+                      foreach (array_values($field->options ?? []) as $index => $option) {
+                          $optionColors[(string) $option] = $palette[$index % count($palette)];
+                      }
+                  }
+                  if ($field->type === 'boolean') {
+                      $display = $value ? 'Sim' : 'Não';
+                  } elseif ($field->type === 'date' && filled($value)) {
+                      try {
+                          $display = \Illuminate\Support\Carbon::parse($value)->format('d/m/Y');
+                      } catch (\Throwable) {
+                          $display = $value;
+                      }
+                  }
+                @endphp
+                <td class="nowrap">
+                  @if ($field->type === 'select' && filled($display))
+                    <span class="option-pill" style="--pill: {{ $optionColors[(string) $display] ?? '#94A3B8' }}">{{ $display }}</span>
+                  @else
+                    {{ filled($display) ? $display : '—' }}
+                  @endif
+                </td>
+              @endforeach
+              <td class="nowrap">{{ $contact->created_at?->format('d/m/Y') }}</td>
+              <td class="right">
+                <div class="row-actions inline">
+                  <a class="btn secondary small" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">Ver</a>
+                  <a class="btn secondary small" href="{{ route('member.org.contacts.edit', [$organization, $contact]) }}">Editar</a>
+                </div>
+              </td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+
+    {{ $contacts->links() }}
+  </div>
+@endif

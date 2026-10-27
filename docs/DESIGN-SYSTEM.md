@@ -159,12 +159,12 @@ Rótulo
 - Legenda com ponto de cor, origem e percentual.
 - Cores fixas: `#3B82F6`, `#7C3AED`, `#EC4899`, `#F59E0B`, `#10B981`, `#94A3B8`.
 
-### Lista de leads (`.lead-list`)
+### Tabela de leads (`.table-wrap`, `.table`)
 
-- Cada lead é uma linha/card com: avatar de iniciais, nome, e-mail/telefone, **ID permanente** e chips dos campos configurados.
-- Chips mostram o rótulo do campo e o valor (`Status`, `Temperatura`, `Segmento`, `Orçamento`).
-- Ações `Ver` e `Editar` ficam à direita; em telas pequenas a linha vira bloco vertical.
-- O ID longo é truncado visualmente na lista, mas o valor completo aparece no `title` e na tela de detalhe.
+- Colunas: **ID do lead**, Lead, Contato, campos marcados como “mostrar na lista”, criado em e ações.
+- O ID longo é truncado visualmente, com o valor completo no `title` e na tela de detalhe.
+- Valores de campos de seleção usam `.option-pill`, com cor consistente por opção.
+- Em telas menores a tabela rola horizontalmente dentro de `.table-wrap`.
 - Estado vazio orienta a cadastrar o primeiro lead.
 
 ### Detalhe do lead (`.lead-detail-grid`, `.detail-list`, `.timeline`)
@@ -173,6 +173,24 @@ Rótulo
 - Campos desativados continuam visíveis quando têm valor, com badge `desativado` — preservando o histórico.
 - O bloco **Histórico do lead** usa `.timeline` com ícone, título amigável, autor e data.
 - O ID do lead (`LD-...`) é exibido no cabeçalho e no detalhe, sempre em fonte monoespaçada.
+
+### Visões de leads (`.view-controls`, `.view-tabs`)
+
+A mesma lista de leads pode ser visualizada de quatro formas, sem duplicar dados:
+
+- **Tabela** — colunas fixas + campos marcados como “mostrar na lista”.
+- **Kanban** — agrupa por qualquer campo do tipo **Seleção**; permite arrastar cards entre colunas ou usar o seletor do card.
+- **Calendário** — mostra os leads no dia do campo de **Data** escolhido; navegação por mês.
+- **Cronograma** — barras entre um campo de **Data de início** e outro de **Data de fim**; janela de 3 meses com linha “hoje”.
+
+A barra de controles contém:
+- abas de visualização;
+- busca por ID, nome, e-mail ou telefone;
+- seletor de agrupamento (Kanban), campo de data (Calendário) ou início/fim (Cronograma);
+- navegação de período (Calendário/Cronograma);
+- painel **Filtros por campo**, com controles por tipo (seleção, data, sim/não, número e texto).
+
+As visões usam a mesma base filtrada. Se não houver campo de seleção/data, a tela orienta a criar o campo na Gestão de CRM.
 
 ### Gestão de CRM (`.guideline-list`, `.field-admin`)
 

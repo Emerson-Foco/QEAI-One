@@ -59,6 +59,13 @@
             <dd>
               @if ($field->type === 'boolean')
                 {{ $value ? 'Sim' : 'Não' }}
+              @elseif ($field->type === 'select' && filled($value))
+                @php
+                  $palette = ['#3B82F6', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9'];
+                  $optionIndex = array_search($value, $field->options ?? [], true);
+                  $color = $optionIndex === false ? '#94A3B8' : $palette[$optionIndex % count($palette)];
+                @endphp
+                <span class="option-pill" style="--pill: {{ $color }}">{{ $value }}</span>
               @elseif ($field->type === 'url' && filled($value))
                 <a href="{{ $value }}" target="_blank" rel="noopener noreferrer">{{ $value }}</a>
               @else

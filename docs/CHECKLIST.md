@@ -69,7 +69,11 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 
 ### Núcleo atual — Leads e Gestão de CRM
 - [x] **ID permanente do lead** (`LD-...`) gerado no cadastro, usado na busca, no histórico e na API/webhooks
-- [x] **Lista de leads** em cards com ID, contato, campos configurados e ações
+- [x] **Lista de leads** com **4 visões**: Tabela, Kanban, Calendário e Cronograma
+- [x] **Kanban** agrupado por campo de seleção, com arrastar-e-soltar e seletor de movimentação
+- [x] **Calendário** por campo de data, com navegação mensal
+- [x] **Cronograma** com campos de início/fim e janela de 3 meses
+- [x] **Filtros por campo** (seleção, data, sim/não, número e texto) compartilhados entre as visões
 - [x] **Cadastro/edição de lead** com campos fixos + campos personalizados ativos
 - [x] **Detalhe do lead** com dados, campos (inclusive desativados) e **histórico** de movimentações
 - [x] **Gestão de CRM** com criação de campos (nome, tipo, opções, obrigatório, mostrar na lista)

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Company;
 use App\Models\Contact;
+use App\Models\CustomField;
 use App\Models\Organization;
 use App\Models\Tag;
 use App\Models\User;
@@ -13,7 +14,11 @@ use App\Support\Audit;
 use App\Support\CustomFields;
 use App\Support\OrgAccess;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ContactController extends Controller
 {
@@ -32,27 +37,95 @@ class ContactController extends Controller
         $this->authorize($organization);
 
         $fields = CustomFields::forEntity($organization, 'contact');
-        $listFields = $fields->where('show_in_list', true);
+        $listFields = $fields->where('show_in_list', true)->values();
+        $selectFields = $fields->where('type', 'select')->values();
+        $dateFields = $fields->where('type', 'date')->values();
 
-        $query = Contact::with(['company', 'tags'])->where('organization_id', $organization->id);
-        if ($search = trim((string) $request->input('q'))) {
-            $query->where(function ($where) use ($search) {
-                $where->where('lead_id', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('whatsapp', 'like', "%{$search}%");
-            });
+        $view = in_array($request->input('view'), ['table', 'board', 'calendar', 'timeline'], true)
+            ? (string) $request->input('view')
+            : 'table';
+
+        $groupKey = (string) $request->input('group', (string) optional($selectFields->first())->key);
+        $groupField = $selectFields->firstWhere('key', $groupKey);
+        $dateKey = (string) $request->input('date_field', (string) optional($dateFields->first())->key);
+        $dateField = $dateFields->firstWhere('key', $dateKey);
+        $startKey = (string) $request->input('start_field', (string) optional($dateFields->first())->key);
+        $startField = $dateFields->firstWhere('key', $startKey);
+        $endKey = (string) $request->input('end_field', (string) optional($dateFields->last())->key);
+        $endField = $dateFields->firstWhere('key', $endKey);
+
+        $search = trim((string) $request->input('q'));
+        $filters = (array) $request->input('filters', []);
+        $contacts = $this->filteredContacts($organization, $search, $filters, $fields);
+
+        $month = $this->parseMonth($request->input('month'));
+
+        $table = null;
+        if ($view === 'table') {
+            $perPage = 25;
+            $page = max(1, (int) $request->input('page', 1));
+            $table = new LengthAwarePaginator(
+                $contacts->forPage($page, $perPage)->values(),
+                $contacts->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
+        $boardGroups = [];
+        if ($view === 'board' && $groupField !== null) {
+            foreach (($groupField->options ?? []) as $option) {
+                $boardGroups[$option] = $contacts
+                    ->filter(fn (Contact $contact) => (string) ($contact->custom[$groupKey] ?? '') === (string) $option)
+                    ->values();
+            }
+            $boardGroups['Sem valor'] = $contacts
+                ->filter(fn (Contact $contact) => blank($contact->custom[$groupKey] ?? null))
+                ->values();
+        }
+
+        $calendarDays = [];
+        $calendarUndated = 0;
+        if ($view === 'calendar' && $dateField !== null) {
+            [$calendarDays, $calendarUndated] = $this->buildCalendar($contacts, $dateField, $month);
+        }
+
+        $timeline = [
+            'bars' => [],
+            'months' => [],
+            'start' => $month->copy()->startOfMonth(),
+            'end' => $month->copy()->startOfMonth()->addMonthsNoOverflow(3)->subDay(),
+            'total_days' => 0,
+            'today_left' => null,
+            'undated' => 0,
+        ];
+        if ($view === 'timeline') {
+            $timeline = $this->buildTimeline($contacts, $startField, $endField, $groupField, $month);
         }
 
         return view('member.crm.contacts', [
             'organization' => $organization,
-            'contacts' => $query->latest('id')->paginate(25)->withQueryString(),
-            'search' => $search,
+            'view' => $view,
             'fields' => $fields,
             'listFields' => $listFields,
+            'selectFields' => $selectFields,
+            'dateFields' => $dateFields,
+            'groupField' => $groupField,
+            'dateField' => $dateField,
+            'startField' => $startField,
+            'endField' => $endField,
+            'search' => $search,
+            'filters' => $filters,
+            'contacts' => $table,
+            'filteredCount' => $contacts->count(),
             'total' => Contact::where('organization_id', $organization->id)->count(),
             'newThisMonth' => Contact::where('organization_id', $organization->id)->where('created_at', '>=', now()->startOfMonth())->count(),
+            'boardGroups' => $boardGroups,
+            'month' => $month,
+            'calendarDays' => $calendarDays,
+            'calendarUndated' => $calendarUndated,
+            'timeline' => $timeline,
         ]);
     }
 
@@ -186,6 +259,289 @@ class ContactController extends Controller
         Audit::log('contact.deleted', 'organization', $organization->id, 'contact', $contactId, ['name' => $name], null);
 
         return redirect()->route('member.org.contacts.index', $organization)->with('status', 'Lead removido.');
+    }
+
+    public function updateField(Request $request, Organization $organization, Contact $contact)
+    {
+        $this->authorize($organization);
+        $this->ensure($organization, $contact);
+
+        $data = $request->validate([
+            'field' => ['required', 'string', 'max:120'],
+            'value' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $field = CustomFields::forEntity($organization, 'contact')->firstWhere('key', $data['field']);
+        if ($field === null || $field->type !== 'select') {
+            return $this->fieldError($request, 'Campo inválido para movimentação.');
+        }
+
+        $value = trim((string) ($data['value'] ?? ''));
+        $value = $value === '' ? null : $value;
+        if ($value !== null && ! in_array($value, $field->options ?? [], true)) {
+            return $this->fieldError($request, 'Valor inválido para este campo.');
+        }
+        if ($value === null && $field->required) {
+            return $this->fieldError($request, 'Este campo é obrigatório e não pode ficar vazio.');
+        }
+
+        $custom = $contact->custom ?: [];
+        $custom[$field->key] = $value;
+        $contact->update(['custom' => $custom]);
+
+        Audit::log('contact.field_updated', 'organization', $organization->id, 'contact', $contact->id, null, [
+            'lead_id' => $contact->lead_id,
+            'field' => $field->key,
+            'field_id' => $field->field_id,
+            'value' => $value,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'field' => $field->key, 'value' => $value]);
+        }
+
+        return back()->with('status', 'Lead movimentado para “'.($value ?? 'Sem valor').'”.');
+    }
+
+    private function fieldError(Request $request, string $message)
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['error' => ['message' => $message]], 422);
+        }
+
+        throw ValidationException::withMessages(['field' => $message]);
+    }
+
+    private function filteredContacts(Organization $organization, string $search, array $filters, Collection $fields): Collection
+    {
+        $query = Contact::with(['company', 'tags'])->where('organization_id', $organization->id);
+
+        if ($search !== '') {
+            $query->where(function ($where) use ($search) {
+                $where->where('lead_id', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('whatsapp', 'like', "%{$search}%");
+            });
+        }
+
+        $contacts = $query->latest('id')->get();
+
+        foreach ($fields as $field) {
+            if (! array_key_exists($field->key, $filters)) {
+                continue;
+            }
+
+            $filter = $filters[$field->key];
+            if (! is_array($filter)) {
+                $filter = ['value' => $filter];
+            }
+
+            if ($field->type === 'date') {
+                $from = $this->parseDateInput($filter['from'] ?? null);
+                $to = $this->parseDateInput($filter['to'] ?? null);
+                if ($from === null && $to === null) {
+                    continue;
+                }
+
+                $contacts = $contacts->filter(function (Contact $contact) use ($field, $from, $to) {
+                    $value = $this->customDate($contact, $field->key);
+                    if ($value === null) {
+                        return false;
+                    }
+                    if ($from !== null && $value->lt($from)) {
+                        return false;
+                    }
+                    if ($to !== null && $value->gt($to)) {
+                        return false;
+                    }
+
+                    return true;
+                })->values();
+
+                continue;
+            }
+
+            $value = trim((string) ($filter['value'] ?? ''));
+            if ($value === '') {
+                continue;
+            }
+            if ($field->type === 'select' && ! in_array($value, $field->options ?? [], true)) {
+                continue;
+            }
+
+            $contacts = $contacts->filter(function (Contact $contact) use ($field, $value) {
+                $raw = $contact->custom[$field->key] ?? null;
+
+                return match ($field->type) {
+                    'select' => (string) $raw === $value,
+                    'boolean' => (bool) $raw === ($value === '1'),
+                    'number' => is_numeric($raw) && (float) $raw === (float) $value,
+                    default => mb_stripos((string) $raw, $value) !== false,
+                };
+            })->values();
+        }
+
+        return $contacts;
+    }
+
+    /** @return array{0: array<int, array<string, mixed>>, 1: int} */
+    private function buildCalendar(Collection $contacts, CustomField $dateField, Carbon $month): array
+    {
+        $grouped = [];
+        $undated = 0;
+
+        foreach ($contacts as $contact) {
+            $date = $this->customDate($contact, $dateField->key);
+            if ($date === null) {
+                $undated++;
+
+                continue;
+            }
+            $grouped[$date->toDateString()][] = $contact;
+        }
+
+        $gridStart = $month->copy()->startOfWeek(Carbon::SUNDAY);
+        $gridEnd = $month->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY);
+        $days = [];
+
+        for ($day = $gridStart->copy(); $day->lte($gridEnd); $day->addDay()) {
+            $key = $day->toDateString();
+            $days[] = [
+                'date' => $day->copy(),
+                'in_month' => $day->month === $month->month && $day->year === $month->year,
+                'is_today' => $day->isToday(),
+                'leads' => $grouped[$key] ?? [],
+            ];
+        }
+
+        return [$days, $undated];
+    }
+
+    /** @return array<string, mixed> */
+    private function buildTimeline(Collection $contacts, ?CustomField $startField, ?CustomField $endField, ?CustomField $colorField, Carbon $month): array
+    {
+        $windowStart = $month->copy()->startOfMonth();
+        $windowEnd = $windowStart->copy()->addMonthsNoOverflow(3)->subDay();
+        $totalDays = (int) $windowStart->diffInDays($windowEnd) + 1;
+
+        $palette = ['#3B82F6', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9', '#84CC16'];
+        $colors = [];
+        foreach (($colorField?->options ?? []) as $index => $option) {
+            $colors[(string) $option] = $palette[$index % count($palette)];
+        }
+
+        $bars = [];
+        $undated = 0;
+        foreach ($contacts as $contact) {
+            $start = $startField !== null ? $this->customDate($contact, $startField->key) : $contact->created_at?->copy()->startOfDay();
+            if ($start === null) {
+                $undated++;
+
+                continue;
+            }
+
+            $end = $endField !== null ? $this->customDate($contact, $endField->key) : null;
+            $end = $end ?? $start->copy();
+            if ($end->lt($start)) {
+                [$start, $end] = [$end, $start];
+            }
+
+            if ($end->lt($windowStart) || $start->gt($windowEnd)) {
+                continue;
+            }
+
+            $startOffset = max(0, (int) $windowStart->diffInDays($start->copy()->startOfDay(), false));
+            $endOffset = min($totalDays, (int) $windowStart->diffInDays($end->copy()->startOfDay(), false) + 1);
+            if ($endOffset <= $startOffset) {
+                $endOffset = $startOffset + 1;
+            }
+
+            $colorValue = $colorField !== null ? (string) ($contact->custom[$colorField->key] ?? '') : '';
+
+            $bars[] = [
+                'contact' => $contact,
+                'start' => $start,
+                'end' => $end,
+                'left' => round($startOffset / $totalDays * 100, 3),
+                'width' => max(1.5, round(($endOffset - $startOffset) / $totalDays * 100, 3)),
+                'color' => $colors[$colorValue] ?? '#6D3DF5',
+            ];
+        }
+
+        usort($bars, fn ($a, $b) => $a['start']->timestamp <=> $b['start']->timestamp);
+
+        $monthNames = [1 => 'Jan', 2 => 'Fev', 3 => 'Mar', 4 => 'Abr', 5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago', 9 => 'Set', 10 => 'Out', 11 => 'Nov', 12 => 'Dez'];
+        $months = [];
+        $cursor = $windowStart->copy()->startOfMonth();
+        while ($cursor->lte($windowEnd)) {
+            $from = $cursor->copy()->lt($windowStart) ? $windowStart->copy() : $cursor->copy();
+            $to = $cursor->copy()->endOfMonth()->gt($windowEnd) ? $windowEnd->copy() : $cursor->copy()->endOfMonth();
+            $days = (int) $from->diffInDays($to) + 1;
+            $months[] = [
+                'label' => $monthNames[$cursor->month].' '.$cursor->year,
+                'width' => round($days / $totalDays * 100, 3),
+            ];
+            $cursor->addMonthNoOverflow()->startOfMonth();
+        }
+
+        $todayLeft = null;
+        if (today()->betweenIncluded($windowStart, $windowEnd)) {
+            $todayOffset = (int) $windowStart->diffInDays(today(), false);
+            $todayLeft = round($todayOffset / $totalDays * 100, 3);
+        }
+
+        return [
+            'bars' => $bars,
+            'months' => $months,
+            'start' => $windowStart,
+            'end' => $windowEnd,
+            'total_days' => $totalDays,
+            'today_left' => $todayLeft,
+            'undated' => $undated,
+            'colors' => $colors,
+        ];
+    }
+
+    private function parseMonth(mixed $value): Carbon
+    {
+        if (is_string($value) && preg_match('/^\d{4}-\d{2}$/', $value) === 1) {
+            try {
+                return Carbon::createFromFormat('Y-m', $value)->startOfMonth();
+            } catch (\Throwable) {
+                // Mantém o mês atual.
+            }
+        }
+
+        return now()->startOfMonth();
+    }
+
+    private function parseDateInput(mixed $value): ?Carbon
+    {
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse($value)->startOfDay();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    private function customDate(Contact $contact, string $key): ?Carbon
+    {
+        $raw = $contact->custom[$key] ?? null;
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::parse((string) $raw)->startOfDay();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     private function validated(Request $request, Organization $organization, $fields): array

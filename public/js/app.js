@@ -63,5 +63,57 @@
         window.setTimeout(function () { alert.remove(); }, 360);
       }, 7000);
     });
+
+    document.querySelectorAll('[data-board]').forEach(function (board) {
+      var dragged = null;
+
+      board.querySelectorAll('[data-board-card]').forEach(function (card) {
+        card.addEventListener('dragstart', function (event) {
+          if (event.target.closest('select, input, button, a')) {
+            event.preventDefault();
+            return;
+          }
+          dragged = card;
+          card.classList.add('is-dragging');
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', card.dataset.leadId || '');
+          }
+        });
+
+        card.addEventListener('dragend', function () {
+          card.classList.remove('is-dragging');
+          board.querySelectorAll('.is-drop-target').forEach(function (column) {
+            column.classList.remove('is-drop-target');
+          });
+          dragged = null;
+        });
+      });
+
+      board.querySelectorAll('[data-board-column]').forEach(function (column) {
+        column.addEventListener('dragover', function (event) {
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+          column.classList.add('is-drop-target');
+        });
+
+        column.addEventListener('dragleave', function () {
+          column.classList.remove('is-drop-target');
+        });
+
+        column.addEventListener('drop', function (event) {
+          event.preventDefault();
+          column.classList.remove('is-drop-target');
+          if (!dragged) return;
+
+          var form = dragged.querySelector('form');
+          var select = form ? form.querySelector('select') : null;
+          if (!form || !select) return;
+
+          select.value = column.dataset.value || '';
+          form.submit();
+        });
+      });
+    });
   });
 })();
