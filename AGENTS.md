@@ -4,6 +4,7 @@ Leia antes de alterar a plataforma:
 
 - `docs/DESIGN-SYSTEM.md` — padrão visual, componentes, motion e regras de UI.
 - `docs/SECURITY.md` — checklist e regras de segurança.
+- `docs/DEPLOY-HOSTINGER.md` — publicação, cron, SMTP e validação pós-deploy.
 - `docs/CHECKLIST.md` — estado atual do produto e roadmap.
 
 Regras essenciais:
