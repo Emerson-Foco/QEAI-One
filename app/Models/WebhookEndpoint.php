@@ -11,7 +11,7 @@ class WebhookEndpoint extends Model
 
     protected function casts(): array
     {
-        return ['events' => 'array', 'is_active' => 'boolean', 'last_called_at' => 'datetime'];
+        return ['events' => 'array', 'is_active' => 'boolean', 'last_called_at' => 'datetime', 'secret' => 'encrypted'];
     }
 
     public function organization(): BelongsTo

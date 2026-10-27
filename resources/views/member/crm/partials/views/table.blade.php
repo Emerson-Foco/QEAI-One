@@ -36,7 +36,7 @@
                 @continue($field->key === 'nome')
                 @php
                   $value = $contact->custom[$field->key] ?? null;
-                  $display = $value;
+                  $display = \App\Support\FieldValue::display($field, $value);
                   $optionColors = [];
                   if ($field->type === 'select') {
                       $palette = ['#3B82F6', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9'];
@@ -44,21 +44,12 @@
                           $optionColors[(string) $option] = $palette[$index % count($palette)];
                       }
                   }
-                  if ($field->type === 'boolean') {
-                      $display = $value ? 'Sim' : 'Não';
-                  } elseif ($field->type === 'date' && filled($value)) {
-                      try {
-                          $display = \Illuminate\Support\Carbon::parse($value)->format('d/m/Y');
-                      } catch (\Throwable) {
-                          $display = $value;
-                      }
-                  }
                 @endphp
                 <td class="nowrap">
-                  @if ($field->type === 'select' && filled($display))
-                    <span class="option-pill" style="--pill: {{ $optionColors[(string) $display] ?? '#94A3B8' }}">{{ $display }}</span>
+                  @if ($field->type === 'select' && filled($value))
+                    <span class="option-pill" style="--pill: {{ $optionColors[(string) $value] ?? '#94A3B8' }}">{{ $value }}</span>
                   @else
-                    {{ filled($display) ? $display : '—' }}
+                    {{ $display }}
                   @endif
                 </td>
               @endforeach

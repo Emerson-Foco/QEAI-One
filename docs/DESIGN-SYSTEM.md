@@ -175,7 +175,9 @@ Data inicial e Próximo contato**.
 - Nenhum campo é obrigatório por padrão.
 - O rótulo do lead usa o campo `nome` quando preenchido; caso contrário, usa o ID permanente.
 - O formulário de lead renderiza somente os campos ativos do CRM.
+- Campos de data podem ser **Data**, **Hora** ou **Data e hora**, conforme a necessidade da agenda.
 - Na visão Tabela, o campo `nome` vira a coluna **Lead**; os demais campos aparecem como colunas próprias.
+- O usuário pode salvar filtros e configurações por visão; ao voltar para a visão, a preferência é aplicada automaticamente.
 
 ### Tabela de leads (`.table-wrap`, `.table`)
 
@@ -209,6 +211,8 @@ A barra de controles contém:
 - painel **Filtros por campo**, com controles por tipo (seleção, data, sim/não, número e texto).
 
 As visões usam a mesma base filtrada. Se não houver campo de seleção/data, a tela orienta a criar o campo na Gestão de CRM.
+
+Cada usuário pode **salvar a preferência de filtros por visão** (Tabela, Kanban, Calendário ou Cronograma). Ao retornar àquela visão sem filtros explícitos, a preferência é aplicada e sinalizada no topo. A preferência é privada por usuário e organização.
 
 ### Gestão de CRM (`.guideline-list`, `.field-admin`)
 
@@ -340,27 +344,17 @@ Teste sempre: 360px (celular), 768px (tablet), 1024px, 1366px e 1920px.
 - Use os tokens de cor; nunca valores soltos (`#6D3DF5` apenas no token).
 - Prefira textos curtos, em pt-BR, com verbos de ação.
 - Coloque uma ação primária por tela/bloco.
-- Exiba estados vazios com orientação do próximo passo.
-- Use `confirm()` para ações destrutivas e `@method('DELETE')` nos formulários.
-- Mantenha os formulários com `maxlength`, `autocomplete` e validação no servidor.
+- Exiba estados vazios com orientaç
 
-**Evite**
-- Cards aninhados em excesso ou sombras fortes.
-- Mais de 3 níveis de navegação.
-- Tabelas sem ação clara ou sem estado vazio.
-- Ícones sem rótulo em ações importantes.
-- Cores de status fora dos tokens (`--ok`, `--warn`, `--err`).
+## 11. Instruções para agentes de IA e desenvolvedores
 
----
-
-## 10. Checklist de revisão de UI
-
-- [ ] A tela funciona em 360px, 768px e 1366px.
-- [ ] Sidebar e topbar mantêm o item ativo correto.
-- [ ] A ação principal está visível sem rolar a tela.
-- [ ] Formulários exibem erros e sucesso.
-- [ ] Tabelas têm cabeçalho legível e ações à direita.
-- [ ] Estados vazios orientam o próximo passo.
-- [ ] Nenhuma cor hardcoded fora dos tokens.
-- [ ] Foco de teclado visível em todos os controles.
-- [ ] Textos em pt-BR e sem jargão desnecessário.
+1. Leia este documento e `SECURITY.md` antes de alterar qualquer tela.
+2. Preserve o design system; não introduza Bootstrap ou bibliotecas de UI.
+3. Regras de negócio, autorização e validação ficam no backend.
+4. Toda consulta de dados de negócio deve ser escopada por organização.
+5. Nomeie componentes e classes seguindo os padrões existentes.
+6. Views longas devem ser divididas em parciais em `resources/views/member/crm/partials`.
+7. Novos campos devem usar os tipos de `App\Models\CustomField` e a formatação de `App\Support\FieldValue`.
+8. Novas visões devem reutilizar a base filtrada do `ContactController` e registrar preferência por visão.
+9. Nunca publique textos de teste, demonstração, debug ou instruções internas.
+10. Após alterações, rode `php artisan test`, `vendor/bin/pint` e `php artisan view:cache`.

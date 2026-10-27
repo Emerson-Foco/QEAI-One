@@ -37,12 +37,14 @@ class WhatsAppController extends Controller
         }
 
         $appSecret = (string) ($channel->secret('app_secret') ?? '');
-        if ($appSecret !== '') {
-            $signature = (string) $request->header('X-Hub-Signature-256');
-            $expected = 'sha256=' . hash_hmac('sha256', (string) $request->getContent(), $appSecret);
-            if (! hash_equals($expected, $signature)) {
-                return response('Invalid signature', 401);
-            }
+        if ($appSecret === '') {
+            return response('Forbidden', 403);
+        }
+
+        $signature = (string) $request->header('X-Hub-Signature-256');
+        $expected = 'sha256='.hash_hmac('sha256', (string) $request->getContent(), $appSecret);
+        if (! hash_equals($expected, $signature)) {
+            return response('Invalid signature', 401);
         }
 
         foreach ((array) $request->input('entry', []) as $entry) {
@@ -51,7 +53,7 @@ class WhatsAppController extends Controller
                 $name = $value['contacts'][0]['profile']['name'] ?? 'WhatsApp';
                 foreach ((array) ($value['messages'] ?? []) as $message) {
                     $from = (string) ($message['from'] ?? '');
-                    $body = $message['text']['body'] ?? ('[' . ($message['type'] ?? 'mensagem') . ']');
+                    $body = $message['text']['body'] ?? ('['.($message['type'] ?? 'mensagem').']');
                     if ($from === '') {
                         continue;
                     }

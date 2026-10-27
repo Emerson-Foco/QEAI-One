@@ -3,11 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Models\FieldTemplate;
 use App\Models\Organization;
+use App\Models\Plan;
 use App\Support\Audit;
+use App\Support\Csv;
+use App\Support\OrgAccess;
+use App\Support\Organizations;
 use App\Support\OrgPermissions;
+use App\Support\PlanFeatures;
+use App\Support\PlanResolver;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -31,7 +37,7 @@ class OrganizationController extends Controller
             'country' => ['nullable', 'string', 'size:2'],
         ]);
 
-        $organization = \App\Support\Organizations::provision($data['name'], $data['document'] ?? null, auth()->user());
+        $organization = Organizations::provision($data['name'], $data['document'] ?? null, auth()->user());
 
         Audit::log('organization.created', 'platform', null, 'organization', $organization->id, null, ['name' => $organization->name]);
 
@@ -43,33 +49,40 @@ class OrganizationController extends Controller
         $organization->load(['memberships.user', 'memberships.role', 'roles', 'plan.features']);
         $roles = $organization->roles()->orderByDesc('is_system')->orderBy('name')->get();
 
+        $auditQuery = AuditLog::query()
+            ->where('scope', 'organization')
+            ->where('organization_id', $organization->id);
+
+        if (auth()->user()->is_root_admin && OrgAccess::membership(auth()->user(), $organization) === null) {
+            $auditQuery = Audit::onlyAdministrative($auditQuery);
+        }
+
         return view('organizations.show', [
             'organization' => $organization,
             'memberships' => $organization->memberships->sortBy(fn ($m) => $m->user?->name),
             'roles' => $roles,
             'permissions' => OrgPermissions::catalog(),
-            'plans' => \App\Models\Plan::orderBy('sort')->orderBy('price_cents')->get(),
-            'planCatalog' => \App\Support\PlanFeatures::catalog(),
-            'templates' => \App\Models\FieldTemplate::orderBy('name')->get(),
-            'features' => \App\Support\PlanResolver::summary($organization),
+            'plans' => Plan::orderBy('sort')->orderBy('price_cents')->get(),
+            'planCatalog' => PlanFeatures::catalog(),
+            'templates' => FieldTemplate::orderBy('name')->get(),
+            'features' => PlanResolver::summary($organization),
             'invites' => $organization->invites()->with('role')->latest('id')->limit(50)->get(),
-            'audit' => \App\Models\AuditLog::query()
-                ->where('scope', 'organization')
-                ->where('organization_id', $organization->id)
-                ->latest('id')
-                ->limit(20)
-                ->get(),
+            'audit' => $auditQuery->latest('id')->limit(20)->get(),
         ]);
     }
 
     public function logs(Request $request, Organization $organization)
     {
-        \App\Support\OrgAccess::authorize(auth()->user(), $organization, 'org.logs');
+        OrgAccess::authorize(auth()->user(), $organization, 'org.logs');
 
         $query = AuditLog::query()->where('scope', 'organization')->where('organization_id', $organization->id);
 
+        if (auth()->user()->is_root_admin && OrgAccess::membership(auth()->user(), $organization) === null) {
+            $query = Audit::onlyAdministrative($query);
+        }
+
         if ($action = $request->input('action')) {
-            $query->where('action', 'like', '%' . $action . '%');
+            $query->where('action', 'like', '%'.$action.'%');
         }
         if ($from = $request->input('from')) {
             $query->whereDate('created_at', '>=', $from);
@@ -79,7 +92,7 @@ class OrganizationController extends Controller
         }
 
         if ($request->input('export') === 'csv') {
-            return $this->csvLogs($query, 'logs-' . $organization->slug . '.csv');
+            return $this->csvLogs($query, 'logs-'.$organization->slug.'.csv');
         }
 
         return view('logs.organization', [
@@ -95,10 +108,10 @@ class OrganizationController extends Controller
             $out = fopen('php://output', 'w');
             fputcsv($out, ['id', 'actor_type', 'actor_user_id', 'action', 'entity_type', 'entity_id', 'ip', 'created_at', 'hash_self']);
             foreach ($query->latest('id')->cursor() as $log) {
-                fputcsv($out, [
+                fputcsv($out, array_map([Csv::class, 'cell'], [
                     $log->id, $log->actor_type, $log->actor_user_id, $log->action, $log->entity_type,
                     $log->entity_id, $log->ip, optional($log->created_at)->toDateTimeString(), $log->hash_self,
-                ]);
+                ]));
             }
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
@@ -122,8 +135,9 @@ class OrganizationController extends Controller
         $slug = $base;
         $suffix = 2;
         while (Organization::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $suffix++;
+            $slug = $base.'-'.$suffix++;
         }
+
         return $slug;
     }
 }

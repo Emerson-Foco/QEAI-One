@@ -20,7 +20,8 @@ class Webhooks
                 continue;
             }
             if (! self::isSafeUrl((string) $endpoint->url)) {
-                Log::warning('[QEAI webhook] URL insegura ignorada: ' . $endpoint->url);
+                Log::warning('[QEAI webhook] URL insegura ignorada: '.$endpoint->url);
+
                 continue;
             }
 
@@ -45,7 +46,7 @@ class Webhooks
 
                 $endpoint->forceFill(['last_status' => $response->status(), 'last_called_at' => now()])->save();
             } catch (\Throwable $exception) {
-                Log::warning('[QEAI webhook] falha: ' . $exception->getMessage());
+                Log::warning('[QEAI webhook] falha: '.$exception->getMessage());
                 $endpoint->forceFill(['last_status' => 0, 'last_called_at' => now()])->save();
             }
         }
@@ -68,6 +69,20 @@ class Webhooks
         }
         if (filter_var($host, FILTER_VALIDATE_IP)) {
             return (bool) filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        }
+
+        if (! app()->environment('production')) {
+            return true;
+        }
+
+        $addresses = gethostbynamel($host);
+        if ($addresses === false || $addresses === []) {
+            return false;
+        }
+        foreach ($addresses as $address) {
+            if (! filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return false;
+            }
         }
 
         return true;

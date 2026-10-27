@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\OrganizationInvite;
 use App\Models\User;
 use App\Support\Audit;
-use App\Support\OrgAccess;
+use App\Support\PlanResolver;
+use App\Support\PlatformAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class InviteAcceptController extends Controller
 {
@@ -68,7 +71,7 @@ class InviteAcceptController extends Controller
         }
 
         // Limite de usuários do plano/override (não se aplica a quem já é membro).
-        if (! $alreadyMember && ! \App\Support\PlanResolver::withinLimit($invite->organization, 'users', 1)) {
+        if (! $alreadyMember && ! PlanResolver::withinLimit($invite->organization, 'users', 1)) {
             return view('invites.limit', ['invite' => $invite]);
         }
 
@@ -115,6 +118,12 @@ class InviteAcceptController extends Controller
 
     public function report(Request $request, string $token)
     {
+        $key = 'invite-report|'.$token.'|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            return view('invites.reported');
+        }
+        RateLimiter::hit($key, 3600);
+
         $invite = $this->find($token);
 
         if ($invite) {
@@ -132,9 +141,9 @@ class InviteAcceptController extends Controller
             ]);
 
             try {
-                \App\Support\PlatformAlert::inviteReported($invite);
+                PlatformAlert::inviteReported($invite);
             } catch (\Throwable $exception) {
-                \Illuminate\Support\Facades\Log::warning('[QEAI alert] ' . $exception->getMessage());
+                Log::warning('[QEAI alert] '.$exception->getMessage());
             }
         }
 

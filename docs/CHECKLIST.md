@@ -75,7 +75,11 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **Lista de leads** com **4 visões**: Tabela, Kanban, Calendário e Cronograma
 - [x] **Kanban** agrupado por campo de seleção, com arrastar-e-soltar e seletor de movimentação
 - [x] **Calendário** por campo de data, com navegação mensal
-- [x] **Cronograma** com campos de início/fim e janela de 3 meses
+- [x] **Campos de data e hora**: data, hora e data/hora para agenda e cronograma
+- [x] **Preferência de filtros por usuário e visão** (tabela, kanban, calendário, cronograma)
+- [x] **Cronograma** com janela de 1/3/6/12 meses, grade visual e linha do tempo
+- [x] **Segurança**: headers/CSP, neutralização de CSV, URL segura, auditoria e documentação em `docs/SECURITY.md`
+- [x] **Padrão de UI e instruções para agentes** em `docs/DESIGN-SYSTEM.md` + `AGENTS.md`
 - [x] **Filtros por campo** (seleção, data, sim/não, número e texto) compartilhados entre as visões
 - [x] **Cadastro/edição de lead** com campos fixos + campos personalizados ativos
 - [x] **Detalhe do lead** com dados, campos (inclusive desativados) e **histórico** de movimentações
@@ -86,6 +90,8 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] Permissão dedicada **`org.crm_fields`** para configurar o CRM
 - [x] **Módulos** controlados por `config/modules.php` (`QEAI_MODULES`): não-core ocultos da navegação
 - [x] **Isolamento por organização** validado em testes para leads, campos e permissões
+- [x] **Governança do Root**: sem vínculo, só eventos administrativos de auditoria (sem leads/atendimento)
+- [x] **Segurança**: headers/CSP, CSV seguro, URLs seguras, segredos de webhook criptografados, WhatsApp com assinatura e rate limits
 
 ## Fase 1 — MVP operacional (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)

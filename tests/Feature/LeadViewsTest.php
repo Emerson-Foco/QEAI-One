@@ -212,4 +212,102 @@ class LeadViewsTest extends TestCase
 
         $this->assertSame('Varejo', $leadA->fresh()->custom['segmento']);
     }
+
+    public function test_user_saves_filters_per_view_and_other_users_are_not_affected(): void
+    {
+        $admin = $this->user('admin@empresa.com');
+        $other = $this->user('outro@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $admin, 'admin');
+        $this->addMember($organization, $other, 'agent');
+        $this->field($organization, 'segmento', 'Segmento', 'select', ['Varejo', 'Serviços']);
+
+        Contact::create(['organization_id' => $organization->id, 'name' => 'Cliente Varejo', 'custom' => ['segmento' => 'Varejo']]);
+        Contact::create(['organization_id' => $organization->id, 'name' => 'Cliente Serviços', 'custom' => ['segmento' => 'Serviços']]);
+
+        $this->actingAs($admin)->post(route('member.org.contacts.preference.store', $organization), [
+            'view' => 'table',
+            'filters' => ['segmento' => 'Varejo'],
+        ])->assertRedirect(route('member.org.contacts.index', ['organization' => $organization, 'view' => 'table']));
+
+        $this->actingAs($admin)->get(route('member.org.contacts.index', [
+            'organization' => $organization,
+            'view' => 'table',
+        ]))
+            ->assertOk()
+            ->assertSee('Preferência de filtros aplicada')
+            ->assertSee('Cliente Varejo')
+            ->assertDontSee('Cliente Serviços');
+
+        $this->actingAs($other)->get(route('member.org.contacts.index', [
+            'organization' => $organization,
+            'view' => 'table',
+        ]))
+            ->assertOk()
+            ->assertDontSee('Preferência de filtros aplicada')
+            ->assertSee('Cliente Varejo')
+            ->assertSee('Cliente Serviços');
+
+        $this->actingAs($admin)->delete(route('member.org.contacts.preference.destroy', $organization), ['view' => 'table'])
+            ->assertRedirect(route('member.org.contacts.index', ['organization' => $organization, 'view' => 'table']));
+
+        $this->actingAs($admin)->get(route('member.org.contacts.index', [
+            'organization' => $organization,
+            'view' => 'table',
+        ]))->assertOk()->assertDontSee('Preferência de filtros aplicada');
+    }
+
+    public function test_time_and_datetime_fields_are_stored_and_displayed(): void
+    {
+        $admin = $this->user('admin@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $admin, 'admin');
+        $this->field($organization, 'horario', 'Horário', 'time');
+        $this->field($organization, 'agendamento', 'Agendamento', 'datetime');
+
+        $this->actingAs($admin)->get(route('member.org.contacts.create', $organization))
+            ->assertOk()
+            ->assertSee('type="time"', false)
+            ->assertSee('type="datetime-local"', false);
+
+        $this->actingAs($admin)->post(route('member.org.contacts.store', $organization), [
+            'custom' => [
+                'horario' => '14:30',
+                'agendamento' => '2026-10-15T14:30',
+            ],
+        ])->assertRedirect();
+
+        $lead = Contact::firstOrFail();
+        $this->assertSame('14:30', $lead->custom['horario']);
+        $this->assertSame('2026-10-15 14:30:00', $lead->custom['agendamento']);
+
+        $this->actingAs($admin)->get(route('member.org.contacts.index', [
+            'organization' => $organization,
+            'view' => 'table',
+        ]))
+            ->assertOk()
+            ->assertSee('14:30')
+            ->assertSee('15/10/2026 14:30');
+    }
+
+    public function test_calendar_accepts_datetime_fields(): void
+    {
+        $admin = $this->user('admin@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $admin, 'admin');
+        $this->field($organization, 'agendamento', 'Agendamento', 'datetime');
+
+        Contact::create([
+            'organization_id' => $organization->id,
+            'name' => 'Lead Agendado',
+            'custom' => ['agendamento' => '2026-10-15 14:30:00'],
+        ]);
+
+        $this->actingAs($admin)->get(route('member.org.contacts.index', [
+            'organization' => $organization,
+            'view' => 'calendar',
+            'date_field' => 'agendamento',
+            'month' => '2026-10',
+        ]))->assertOk()->assertSee('Lead Agendado');
+    }
 }

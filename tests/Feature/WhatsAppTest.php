@@ -47,7 +47,7 @@ class WhatsAppTest extends TestCase
             'type' => 'whatsapp', 'name' => 'WhatsApp', 'token' => 'wa-token',
             'config' => ['phone_number_id' => '123456'], 'is_active' => true,
         ]);
-        $channel->setSecrets(['access_token' => 'token-abc', 'app_secret' => '', 'verify_token' => 'verify-wa']);
+        $channel->setSecrets(['access_token' => 'token-abc', 'app_secret' => 'secret-wa', 'verify_token' => 'verify-wa']);
         $channel->save();
 
         return $channel;
@@ -65,11 +65,16 @@ class WhatsAppTest extends TestCase
             ->assertOk()->assertSee('CHAL');
         $this->get('/webhooks/whatsapp/wa-token?hub.mode=subscribe&hub.verify_token=errado&hub.challenge=X')->assertStatus(403);
 
-        $this->postJson('/webhooks/whatsapp/wa-token', [
+        $payload = [
             'entry' => [['changes' => [['value' => [
                 'contacts' => [['profile' => ['name' => 'Cliente Zap']]],
                 'messages' => [['from' => '5511999998888', 'id' => 'm1', 'type' => 'text', 'text' => ['body' => 'Olá pelo WhatsApp']]],
             ]]]]],
+        ];
+        $body = json_encode($payload);
+
+        $this->postJson('/webhooks/whatsapp/wa-token', $payload, [
+            'X-Hub-Signature-256' => 'sha256='.hash_hmac('sha256', $body, 'secret-wa'),
         ])->assertOk();
 
         $contact = Contact::firstOrFail();

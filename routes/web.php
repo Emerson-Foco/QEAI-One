@@ -143,6 +143,8 @@ Route::middleware(['auth', 'installed', 'org', 'module'])
         Route::get('crm/contatos/{contact}/editar', [ContactController::class, 'edit'])->name('contacts.edit');
         Route::put('crm/contatos/{contact}', [ContactController::class, 'update'])->name('contacts.update');
         Route::post('crm/contatos/{contact}/campo', [ContactController::class, 'updateField'])->name('contacts.field');
+        Route::post('crm/contatos/preferencia', [ContactController::class, 'storePreference'])->name('contacts.preference.store');
+        Route::delete('crm/contatos/preferencia', [ContactController::class, 'destroyPreference'])->name('contacts.preference.destroy');
         Route::delete('crm/contatos/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
 
         Route::get('crm/campos', [CustomFieldController::class, 'index'])->name('fields.index');

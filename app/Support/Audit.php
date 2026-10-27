@@ -3,9 +3,25 @@
 namespace App\Support;
 
 use App\Models\AuditLog;
+use Illuminate\Database\Eloquent\Builder;
 
 class Audit
 {
+    /** Ações administrativas que podem ser expostas ao ADM Root sem vínculo. */
+    public static function administrativePrefixes(): array
+    {
+        return ['organization.', 'member.', 'role.', 'invite.', 'plan.', 'feature.', 'custom_field.', 'field_template.'];
+    }
+
+    public static function onlyAdministrative(Builder $query): Builder
+    {
+        return $query->where(function (Builder $where) {
+            foreach (self::administrativePrefixes() as $prefix) {
+                $where->orWhere('action', 'like', $prefix.'%');
+            }
+        });
+    }
+
     /**
      * Registra uma ação de forma encadeada (hash_prev + hash_self) para permitir
      * verificação de integridade da trilha de auditoria.
@@ -52,7 +68,7 @@ class Audit
             'ip' => (string) request()->ip(),
             'user_agent' => mb_substr((string) request()->userAgent(), 0, 300),
             'hash_prev' => $hashPrev,
-            'hash_self' => hash('sha256', $hashPrev . '|' . $payload),
+            'hash_self' => hash('sha256', $hashPrev.'|'.$payload),
         ]);
     }
 }

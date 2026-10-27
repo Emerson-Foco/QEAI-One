@@ -7,11 +7,13 @@ use App\Models\AuditLog;
 use App\Models\Company;
 use App\Models\Contact;
 use App\Models\CustomField;
+use App\Models\LeadViewPreference;
 use App\Models\Organization;
 use App\Models\Tag;
 use App\Models\User;
 use App\Support\Audit;
 use App\Support\CustomFields;
+use App\Support\FieldValue;
 use App\Support\OrgAccess;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -39,26 +41,39 @@ class ContactController extends Controller
         $fields = CustomFields::forEntity($organization, 'contact');
         $listFields = $fields->where('show_in_list', true)->values();
         $selectFields = $fields->where('type', 'select')->values();
-        $dateFields = $fields->where('type', 'date')->values();
+        $dateFields = $fields->whereIn('type', ['date', 'datetime'])->values();
 
         $view = in_array($request->input('view'), ['table', 'board', 'calendar', 'timeline'], true)
             ? (string) $request->input('view')
             : 'table';
 
-        $groupKey = (string) $request->input('group', (string) optional($selectFields->first())->key);
-        $groupField = $selectFields->firstWhere('key', $groupKey);
-        $dateKey = (string) $request->input('date_field', (string) optional($dateFields->first())->key);
-        $dateField = $dateFields->firstWhere('key', $dateKey);
-        $startKey = (string) $request->input('start_field', (string) optional($dateFields->first())->key);
-        $startField = $dateFields->firstWhere('key', $startKey);
-        $endKey = (string) $request->input('end_field', (string) optional($dateFields->last())->key);
-        $endField = $dateFields->firstWhere('key', $endKey);
+        $preference = LeadViewPreference::where('user_id', auth()->id())
+            ->where('organization_id', $organization->id)
+            ->where('view', $view)
+            ->first();
 
-        $search = trim((string) $request->input('q'));
-        $filters = (array) $request->input('filters', []);
+        $explicitQuery = $request->hasAny(['q', 'filters', 'group', 'date_field', 'start_field', 'end_field', 'month', 'range', 'reset']);
+        $saved = $preference !== null && ! $explicitQuery ? ($preference->preferences ?? []) : [];
+        $usingSavedPreference = $saved !== [];
+
+        $groupKey = (string) ($saved['group'] ?? $request->input('group', (string) optional($selectFields->first())->key));
+        $groupField = $selectFields->firstWhere('key', $groupKey) ?? $selectFields->first();
+        $dateKey = (string) ($saved['date_field'] ?? $request->input('date_field', (string) optional($dateFields->first())->key));
+        $dateField = $dateFields->firstWhere('key', $dateKey) ?? $dateFields->first();
+        $startKey = (string) ($saved['start_field'] ?? $request->input('start_field', (string) optional($dateFields->first())->key));
+        $startField = $dateFields->firstWhere('key', $startKey) ?? $dateFields->first();
+        $endKey = (string) ($saved['end_field'] ?? $request->input('end_field', (string) optional($dateFields->last())->key));
+        $endField = $dateFields->firstWhere('key', $endKey) ?? $dateFields->last();
+
+        $search = trim((string) ($saved['q'] ?? $request->input('q')));
+        $filters = (array) ($saved['filters'] ?? $request->input('filters', []));
         $contacts = $this->filteredContacts($organization, $search, $filters, $fields);
 
-        $month = $this->parseMonth($request->input('month'));
+        $month = $this->parseMonth($saved['month'] ?? $request->input('month'));
+        $range = (int) ($saved['range'] ?? $request->input('range', 3));
+        if (! in_array($range, [1, 3, 6, 12], true)) {
+            $range = 3;
+        }
 
         $table = null;
         if ($view === 'table') {
@@ -101,7 +116,7 @@ class ContactController extends Controller
             'undated' => 0,
         ];
         if ($view === 'timeline') {
-            $timeline = $this->buildTimeline($contacts, $startField, $endField, $groupField, $month);
+            $timeline = $this->buildTimeline($contacts, $startField, $endField, $groupField, $month, $range);
         }
 
         return view('member.crm.contacts', [
@@ -126,7 +141,62 @@ class ContactController extends Controller
             'calendarDays' => $calendarDays,
             'calendarUndated' => $calendarUndated,
             'timeline' => $timeline,
+            'range' => $range,
+            'preference' => $preference,
+            'usingSavedPreference' => $usingSavedPreference,
         ]);
+    }
+
+    public function storePreference(Request $request, Organization $organization)
+    {
+        $this->authorize($organization);
+
+        $data = $request->validate([
+            'view' => ['required', 'in:table,board,calendar,timeline'],
+            'q' => ['nullable', 'string', 'max:180'],
+            'filters' => ['nullable', 'array'],
+            'group' => ['nullable', 'string', 'max:120'],
+            'date_field' => ['nullable', 'string', 'max:120'],
+            'start_field' => ['nullable', 'string', 'max:120'],
+            'end_field' => ['nullable', 'string', 'max:120'],
+            'month' => ['nullable', 'string', 'max:7'],
+            'range' => ['nullable', 'integer', 'in:1,3,6,12'],
+        ]);
+
+        LeadViewPreference::updateOrCreate(
+            ['user_id' => auth()->id(), 'organization_id' => $organization->id, 'view' => $data['view']],
+            ['preferences' => [
+                'q' => trim((string) ($data['q'] ?? '')),
+                'filters' => (array) ($data['filters'] ?? []),
+                'group' => $data['group'] ?? null,
+                'date_field' => $data['date_field'] ?? null,
+                'start_field' => $data['start_field'] ?? null,
+                'end_field' => $data['end_field'] ?? null,
+                'month' => $data['month'] ?? null,
+                'range' => (int) ($data['range'] ?? 3),
+            ]]
+        );
+
+        return redirect()
+            ->route('member.org.contacts.index', ['organization' => $organization, 'view' => $data['view']])
+            ->with('status', 'Preferência de filtros salva para esta visão.');
+    }
+
+    public function destroyPreference(Request $request, Organization $organization)
+    {
+        $this->authorize($organization);
+        $view = in_array($request->input('view'), ['table', 'board', 'calendar', 'timeline'], true)
+            ? (string) $request->input('view')
+            : 'table';
+
+        LeadViewPreference::where('user_id', auth()->id())
+            ->where('organization_id', $organization->id)
+            ->where('view', $view)
+            ->delete();
+
+        return redirect()
+            ->route('member.org.contacts.index', ['organization' => $organization, 'view' => $view])
+            ->with('status', 'Preferência de filtros removida.');
     }
 
     public function create(Organization $organization)
@@ -338,7 +408,7 @@ class ContactController extends Controller
                 $filter = ['value' => $filter];
             }
 
-            if ($field->type === 'date') {
+            if (FieldValue::isDateLike($field->type)) {
                 $from = $this->parseDateInput($filter['from'] ?? null);
                 $to = $this->parseDateInput($filter['to'] ?? null);
                 if ($from === null && $to === null) {
@@ -363,6 +433,24 @@ class ContactController extends Controller
                 continue;
             }
 
+            if ($field->type === 'time') {
+                $from = trim((string) ($filter['from'] ?? ''));
+                $to = trim((string) ($filter['to'] ?? ''));
+                if ($from === '' && $to === '') {
+                    continue;
+                }
+
+                $contacts = $contacts->filter(function (Contact $contact) use ($field, $from, $to) {
+                    $raw = substr((string) ($contact->custom[$field->key] ?? ''), 0, 5);
+                    if (preg_match('/^\d{2}:\d{2}$/', $raw) !== 1) {
+                        return false;
+                    }
+
+                    return ($from === '' || $raw >= $from) && ($to === '' || $raw <= $to);
+                })->values();
+
+                continue;
+            }
             $value = trim((string) ($filter['value'] ?? ''));
             if ($value === '') {
                 continue;
@@ -420,10 +508,10 @@ class ContactController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function buildTimeline(Collection $contacts, ?CustomField $startField, ?CustomField $endField, ?CustomField $colorField, Carbon $month): array
+    private function buildTimeline(Collection $contacts, ?CustomField $startField, ?CustomField $endField, ?CustomField $colorField, Carbon $month, int $range = 3): array
     {
         $windowStart = $month->copy()->startOfMonth();
-        $windowEnd = $windowStart->copy()->addMonthsNoOverflow(3)->subDay();
+        $windowEnd = $windowStart->copy()->addMonthsNoOverflow($range)->subDay();
         $totalDays = (int) $windowStart->diffInDays($windowEnd) + 1;
 
         $palette = ['#3B82F6', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9', '#84CC16'];

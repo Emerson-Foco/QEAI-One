@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Channel;
-use App\Models\Contact;
 use App\Models\Conversation;
-use App\Support\Audit;
+use App\Support\LeadIntake;
+use App\Support\Notify;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ChatController extends Controller
 {
@@ -36,6 +38,12 @@ class ChatController extends Controller
         $channel = $this->channel($token);
         $visitor = $this->visitorToken($request, $channel);
 
+        $key = 'chat-send|'.$channel->id.'|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($key, 30)) {
+            throw ValidationException::withMessages(['body' => 'Muitas mensagens. Aguarde um instante.']);
+        }
+        RateLimiter::hit($key, 60);
+
         $data = $request->validate([
             'body' => ['required', 'string', 'max:4000'],
             'name' => ['nullable', 'string', 'max:120'],
@@ -45,7 +53,7 @@ class ChatController extends Controller
         $conversation = $this->conversationFor($channel, $visitor, $data);
         $conversation->messages()->create(['direction' => 'in', 'body' => $data['body']]);
         $conversation->update(['last_message_at' => now(), 'status' => 'open']);
-        \App\Support\Notify::chatMessage($channel->organization, $conversation, $data['body']);
+        Notify::chatMessage($channel->organization, $conversation, $data['body']);
 
         if ($request->expectsJson()) {
             return response()->json(['ok' => true]);
@@ -77,7 +85,7 @@ class ChatController extends Controller
 
     private function visitorToken(Request $request, Channel $channel): string
     {
-        $key = 'chat_visitor_' . $channel->id;
+        $key = 'chat_visitor_'.$channel->id;
         if (! $request->session()->has($key)) {
             $request->session()->put($key, Str::random(40));
         }
@@ -100,13 +108,11 @@ class ChatController extends Controller
         $email = trim((string) ($data['email'] ?? ''));
         $name = trim((string) ($data['name'] ?? ''));
         if ($email !== '' || $name !== '') {
-            $contact = Contact::create([
-                'organization_id' => $channel->organization_id,
-                'name' => mb_substr($name !== '' ? $name : 'Visitante', 0, 180),
-                'email' => $email !== '' ? mb_substr($email, 0, 180) : null,
+            $contact = LeadIntake::create($channel->organization, [
+                'name' => $name !== '' ? $name : 'Visitante',
+                'email' => $email !== '' ? $email : null,
                 'source' => 'Chat no site',
-            ]);
-            Audit::log('contact.created', 'organization', $channel->organization_id, 'contact', $contact->id, null, ['origin' => 'chat']);
+            ], 'chat', ['channel_id' => $channel->id]);
         }
 
         return Conversation::create([

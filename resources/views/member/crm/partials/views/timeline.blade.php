@@ -17,6 +17,7 @@
         <p class="muted">
           Início: <strong>{{ $startField?->label ?? 'Criado em' }}</strong>
           · Fim: <strong>{{ $endField?->label ?? 'Mesma data' }}</strong>
+          · Janela: <strong>{{ $range }} {{ $range === 1 ? 'mês' : 'meses' }}</strong>
           @if ($timeline['undated'] > 0) · {{ $timeline['undated'] }} lead(s) sem data @endif
         </p>
       </div>
@@ -45,6 +46,9 @@
               @foreach ($timeline['months'] as $monthBlock)
                 <span style="width: {{ $monthBlock['width'] }}%">{{ $monthBlock['label'] }}</span>
               @endforeach
+              @if ($timeline['today_left'] !== null)
+                <i class="timeline-today" style="left: {{ $timeline['today_left'] }}%" title="Hoje"></i>
+              @endif
             </div>
           </div>
 

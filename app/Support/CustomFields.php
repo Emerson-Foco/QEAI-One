@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\CustomField;
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -137,6 +138,8 @@ class CustomFields
             $rule[] = match ($field->type) {
                 'number' => 'numeric',
                 'date' => 'date',
+                'time' => 'date_format:H:i',
+                'datetime' => 'date',
                 'email' => 'email',
                 'url' => 'url',
                 'boolean' => 'boolean',
@@ -164,6 +167,19 @@ class CustomFields
             }
             $value = $request->input('custom.'.$key);
             $values[$key] = is_string($value) ? trim($value) : $value;
+
+            if (is_string($values[$key]) && $values[$key] !== '') {
+                try {
+                    $values[$key] = match ($field->type) {
+                        'date' => Carbon::parse($values[$key])->format('Y-m-d'),
+                        'time' => Carbon::parse($values[$key])->format('H:i'),
+                        'datetime' => Carbon::parse($values[$key])->format('Y-m-d H:i:s'),
+                        default => $values[$key],
+                    };
+                } catch (\Throwable) {
+                    // Mantém o valor original para a validação reportar o formato.
+                }
+            }
         }
 
         return $values;

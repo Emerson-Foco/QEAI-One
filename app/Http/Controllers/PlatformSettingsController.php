@@ -65,16 +65,16 @@ class PlatformSettingsController extends Controller
         try {
             PlatformMail::send(
                 $data['to'],
-                'Teste de e-mail — ' . Setting::get('company_name', 'QEAI One'),
+                'Verificação de e-mail - '.Setting::get('company_name', 'QEAI One'),
                 '<p>Se você recebeu este e-mail, o SMTP da plataforma está funcionando.</p>'
             );
         } catch (\Throwable $exception) {
-            return back()->withErrors(['to' => 'Falha ao enviar: ' . $exception->getMessage()]);
+            return back()->withErrors(['to' => 'Falha ao enviar: '.$exception->getMessage()]);
         }
 
         Audit::log('platform.email_test', 'platform', null, 'settings', null, null, ['to' => $data['to']]);
 
-        return back()->with('status', 'E-mail de teste enviado para ' . $data['to'] . '.');
+        return back()->with('status', 'E-mail de teste enviado para '.$data['to'].'.');
     }
 
     /** @return array<string, string> */

@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureMember;
 use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\EnsureOrganizationAccess;
 use App\Http\Middleware\EnsureRootAdmin;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -28,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // API pública (chave própria) e webhooks de entrada não usam CSRF.
         $middleware->validateCsrfTokens(except: ['api/*', 'hooks/*', 'webhooks/*']);
+
+        $middleware->web(append: [SecurityHeaders::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

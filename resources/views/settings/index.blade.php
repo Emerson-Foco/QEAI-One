@@ -55,12 +55,12 @@
 </form>
 
 <div class="card">
-  <h2>Teste de entrega</h2>
-  <p class="muted">Envie uma mensagem de teste para confirmar o SMTP.</p>
+  <h2>Verificação de entrega</h2>
+  <p class="muted">Envie uma mensagem de verificação para confirmar o SMTP.</p>
   <form method="post" action="{{ route('panel.settings.test') }}" class="inline-form">
     @csrf
     <input type="email" name="to" value="{{ old('to', $settings['contact_email']) }}" placeholder="voce@empresa.com" required>
-    <button class="btn secondary">Enviar e-mail de teste</button>
+    <button class="btn secondary">Enviar e-mail de verificação</button>
   </form>
 </div>
 @endsection

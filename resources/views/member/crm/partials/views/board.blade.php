@@ -29,7 +29,7 @@
               @if ($dateFieldForCard)
                 @php $dateValue = $contact->custom[$dateFieldForCard->key] ?? null; @endphp
                 @if (filled($dateValue))
-                  <span class="board-date"><x-icon name="calendar" :size="12"/> {{ \Illuminate\Support\Carbon::parse($dateValue)->format('d/m/Y') }}</span>
+                  <span class="board-date"><x-icon name="calendar" :size="12"/> {{ \App\Support\FieldValue::display($dateFieldForCard, $dateValue) }}</span>
                 @endif
               @endif
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use App\Models\Organization;
+use App\Support\Audit;
 use App\Support\OrgAccess;
 use App\Support\OrgPermissions;
 use App\Support\PlanResolver;
@@ -18,6 +19,14 @@ class OrganizationPanelController extends Controller
         $canMembers = OrgAccess::can($user, $organization, 'org.members');
         $canLogs = OrgAccess::can($user, $organization, 'org.logs');
         $canSettings = OrgAccess::can($user, $organization, 'org.settings');
+        $isRootWithoutMembership = $user->is_root_admin && OrgAccess::membership($user, $organization) === null;
+
+        $auditQuery = AuditLog::query()
+            ->where('scope', 'organization')
+            ->where('organization_id', $organization->id);
+        if ($isRootWithoutMembership) {
+            $auditQuery = Audit::onlyAdministrative($auditQuery);
+        }
 
         $onboarding = [];
         if (OrgAccess::canData($user, $organization, 'org.leads')) {
@@ -44,7 +53,7 @@ class OrganizationPanelController extends Controller
             'onboardingPending' => collect($onboarding)->contains(fn ($s) => ! $s['done']),
             'invites' => $canMembers ? $organization->invites()->with('role')->latest('id')->limit(50)->get() : collect(),
             'audit' => $canLogs
-                ? AuditLog::where('scope', 'organization')->where('organization_id', $organization->id)->latest('id')->limit(20)->get()
+                ? $auditQuery->latest('id')->limit(20)->get()
                 : collect(),
         ]);
     }

@@ -112,7 +112,7 @@
 <section class="landing-cta">
   <div class="container">
     <h2>Comece a organizar sua operação hoje</h2>
-    <p>Crie sua organização e teste o QEAI One com a sua equipe.</p>
+    <p>Crie sua organização e comece a usar o QEAI One com a sua equipe.</p>
     <a class="btn" href="{{ route('register') }}">Criar conta grátis <x-icon name="arrow-right" :size="17"/></a>
   </div>
 </section>

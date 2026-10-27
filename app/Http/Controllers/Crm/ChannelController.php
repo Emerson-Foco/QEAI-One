@@ -42,7 +42,7 @@ class ChannelController extends Controller
 
         Audit::log('channel.created', 'organization', $organization->id, 'channel', $channel->id, null, ['type' => 'web_chat']);
 
-        return back()->with('status', 'Canal de chat criado.')->with('new_chat_url', url('/chat/' . $channel->token));
+        return back()->with('status', 'Canal de chat criado.')->with('new_chat_url', url('/chat/'.$channel->token));
     }
 
     public function storeEmail(Request $request, Organization $organization)
@@ -87,7 +87,7 @@ class ChannelController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'phone_number_id' => ['required', 'string', 'max:60'],
             'access_token' => ['required', 'string', 'max:2000'],
-            'app_secret' => ['nullable', 'string', 'max:255'],
+            'app_secret' => ['required', 'string', 'max:255'],
             'verify_token' => ['nullable', 'string', 'max:64'],
         ]);
 
@@ -107,7 +107,7 @@ class ChannelController extends Controller
 
         Audit::log('channel.created', 'organization', $organization->id, 'channel', $channel->id, null, ['type' => 'whatsapp']);
 
-        return back()->with('status', 'Canal de WhatsApp criado.')->with('new_whatsapp_url', url('/webhooks/whatsapp/' . $channel->token));
+        return back()->with('status', 'Canal de WhatsApp criado.')->with('new_whatsapp_url', url('/webhooks/whatsapp/'.$channel->token));
     }
 
     public function toggle(Organization $organization, Channel $channel)
@@ -118,7 +118,7 @@ class ChannelController extends Controller
         $channel->update(['is_active' => ! $channel->is_active]);
         Audit::log('channel.toggled', 'organization', $organization->id, 'channel', $channel->id, null, ['active' => $channel->is_active]);
 
-        return back()->with('status', 'Canal ' . ($channel->is_active ? 'ativado' : 'desativado') . '.');
+        return back()->with('status', 'Canal '.($channel->is_active ? 'ativado' : 'desativado').'.');
     }
 
     public function destroy(Organization $organization, Channel $channel)

@@ -48,9 +48,7 @@
               @unless ($field->is_active)<span class="badge warn">desativado</span>@endunless
             </dt>
             <dd>
-              @if ($field->type === 'boolean')
-                {{ $value ? 'Sim' : 'Não' }}
-              @elseif ($field->type === 'select' && filled($value))
+              @if ($field->type === 'select' && filled($value))
                 @php
                   $palette = ['#3B82F6', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#0EA5E9'];
                   $optionIndex = array_search($value, $field->options ?? [], true);
@@ -58,11 +56,13 @@
                 @endphp
                 <span class="option-pill" style="--pill: {{ $color }}">{{ $value }}</span>
               @elseif ($field->type === 'url' && filled($value))
-                <a href="{{ $value }}" target="_blank" rel="noopener noreferrer">{{ $value }}</a>
-              @elseif ($field->type === 'date' && filled($value))
-                {{ \Illuminate\Support\Carbon::parse($value)->format('d/m/Y') }}
+                @if ($safeUrl = \App\Support\FieldValue::safeUrl($value))
+                  <a href="{{ $safeUrl }}" target="_blank" rel="noopener noreferrer">{{ $value }}</a>
+                @else
+                  {{ $value }}
+                @endif
               @else
-                {{ filled($value) ? $value : '—' }}
+                {{ \App\Support\FieldValue::display($field, $value) }}
               @endif
             </dd>
           </div>

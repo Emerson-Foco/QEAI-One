@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
+use App\Support\Csv;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -26,7 +27,7 @@ class AuditController extends Controller
     private function filtered(Request $request, $query)
     {
         if ($action = $request->input('action')) {
-            $query->where('action', 'like', '%' . $action . '%');
+            $query->where('action', 'like', '%'.$action.'%');
         }
         if ($from = $request->input('from')) {
             $query->whereDate('created_at', '>=', $from);
@@ -36,9 +37,9 @@ class AuditController extends Controller
         }
         if ($q = $request->input('q')) {
             $query->where(function ($where) use ($q) {
-                $where->where('ip', 'like', '%' . $q . '%')
-                    ->orWhere('entity_type', 'like', '%' . $q . '%')
-                    ->orWhere('entity_id', 'like', '%' . $q . '%');
+                $where->where('ip', 'like', '%'.$q.'%')
+                    ->orWhere('entity_type', 'like', '%'.$q.'%')
+                    ->orWhere('entity_id', 'like', '%'.$q.'%');
             });
         }
 
@@ -51,11 +52,11 @@ class AuditController extends Controller
             $out = fopen('php://output', 'w');
             fputcsv($out, ['id', 'scope', 'organization_id', 'actor_type', 'actor_user_id', 'action', 'entity_type', 'entity_id', 'ip', 'created_at', 'hash_self']);
             foreach ($query->latest('id')->cursor() as $log) {
-                fputcsv($out, [
+                fputcsv($out, array_map([Csv::class, 'cell'], [
                     $log->id, $log->scope, $log->organization_id, $log->actor_type, $log->actor_user_id,
                     $log->action, $log->entity_type, $log->entity_id, $log->ip,
                     optional($log->created_at)->toDateTimeString(), $log->hash_self,
-                ]);
+                ]));
             }
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);

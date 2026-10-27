@@ -54,6 +54,8 @@ class CustomField extends Model
             'textarea' => 'Texto longo',
             'number' => 'Número',
             'date' => 'Data',
+            'time' => 'Hora',
+            'datetime' => 'Data e hora',
             'select' => 'Seleção',
             'boolean' => 'Sim/Não',
             'email' => 'E-mail',

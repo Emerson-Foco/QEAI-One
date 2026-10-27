@@ -8,7 +8,6 @@ use App\Support\Audit;
 use App\Support\Organizations;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
@@ -25,7 +24,7 @@ class RegisterController extends Controller
 
     public function store(Request $request)
     {
-        $key = 'register|' . $request->ip();
+        $key = 'register|'.$request->ip();
         if (RateLimiter::tooManyAttempts($key, 5)) {
             throw ValidationException::withMessages(['email' => 'Muitas tentativas. Aguarde alguns minutos.']);
         }
