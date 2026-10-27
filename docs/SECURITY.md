@@ -139,6 +139,12 @@ A suíte cobre autenticação, organizações, permissões, convites, limites de
 CRM, campos personalizados, leads, visões, preferências, módulos, API, webhooks,
 inbox, social, anúncios, segurança de headers, CSV e isolamento entre organizações.
 
+- **126 testes automatizados / 539 asserções** executados com sucesso.
+- **44 verificações do site institucional** executadas com sucesso.
+- Verificações específicas: headers/CSP, XSS em URL, CSV injection, SSRF de webhooks,
+  preferências por usuário/organização, isolamento de leads e campos, governança do
+  Root sem vínculo e assinatura de webhooks.
+
 Para executar localmente:
 
 ```bash
