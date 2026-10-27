@@ -15,9 +15,6 @@ class LeadController extends Controller
 
         $payload = $request->json()->all() ?: $request->all();
 
-        if (empty($payload['name']) && empty($payload['email']) && empty($payload['phone']) && empty($payload['whatsapp'])) {
-            return response()->json(['error' => ['code' => 'validation_error', 'message' => 'Informe ao menos nome, e-mail ou telefone.']], 422);
-        }
         if (! empty($payload['email']) && ! filter_var($payload['email'], FILTER_VALIDATE_EMAIL)) {
             return response()->json(['error' => ['code' => 'validation_error', 'message' => 'E-mail inválido.']], 422);
         }
@@ -31,7 +28,7 @@ class LeadController extends Controller
             'data' => [
                 'id' => $contact->id,
                 'lead_id' => $contact->lead_id,
-                'name' => $contact->name,
+                'name' => $contact->displayName(),
                 'email' => $contact->email,
             ],
         ], 201);

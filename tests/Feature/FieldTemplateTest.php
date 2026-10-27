@@ -76,8 +76,8 @@ class FieldTemplateTest extends TestCase
 
         $labels = $organization->customFields()->pluck('label')->all();
         $this->assertContains('Convênio', $labels);
-        // O template substitui os defaults hardcoded.
-        $this->assertNotContains('Status', $labels);
+        $this->assertContains('Status', $labels);
+        $this->assertContains('Data inicial', $labels);
     }
 
     public function test_without_default_template_org_gets_builtin_defaults(): void

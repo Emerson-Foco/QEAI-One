@@ -35,9 +35,9 @@
             <span class="calendar-day-number">{{ $day['date']->day }}</span>
             <div class="calendar-events">
               @foreach (array_slice($day['leads'], 0, 3) as $lead)
-                <a class="calendar-event" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}" title="{{ $lead->name }}">
+                <a class="calendar-event" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}" title="{{ $lead->displayName() }}">
                   <span class="calendar-dot"></span>
-                  <span>{{ \Illuminate\Support\Str::limit($lead->name, 18) }}</span>
+                  <span>{{ \Illuminate\Support\Str::limit($lead->displayName(), 18) }}</span>
                 </a>
               @endforeach
               @if (count($day['leads']) > 3)

@@ -17,8 +17,8 @@
           <tr>
             <th>ID do lead</th>
             <th>Lead</th>
-            <th>Contato</th>
             @foreach ($listFields as $field)
+              @continue($field->key === 'nome')
               <th>{{ $field->label }}</th>
             @endforeach
             <th>Criado em</th>
@@ -30,16 +30,10 @@
             <tr>
               <td><a class="lead-id nowrap" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}" title="{{ $contact->lead_id }}">{{ $contact->lead_id }}</a></td>
               <td>
-                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">{{ $contact->name }}</a>
-                @if ($contact->source)<small class="muted" style="display:block">{{ $contact->source }}</small>@endif
-              </td>
-              <td>
-                <span class="cell-stack">
-                  {{ $contact->email ?: '—' }}
-                  @if ($contact->phone || $contact->whatsapp)<small>{{ $contact->phone ?: $contact->whatsapp }}</small>@endif
-                </span>
+                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">{{ $contact->displayName() }}</a>
               </td>
               @foreach ($listFields as $field)
+                @continue($field->key === 'nome')
                 @php
                   $value = $contact->custom[$field->key] ?? null;
                   $display = $value;

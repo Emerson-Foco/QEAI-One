@@ -19,28 +19,44 @@ class LeadIntake
 
         $custom = [];
         foreach ((array) ($data['custom'] ?? []) as $key => $value) {
-            $field = $fields->firstWhere('key', $key);
-            if ($field === null) {
-                continue;
+            self::setCustomValue($custom, $fields, (string) $key, $value);
+        }
+
+        foreach ((array) ($data['fields'] ?? []) as $key => $value) {
+            self::setCustomValue($custom, $fields, (string) $key, $value);
+        }
+
+        $legacyMap = [
+            'name' => 'nome',
+            'email' => 'email',
+            'phone' => 'telefone',
+            'whatsapp' => 'whatsapp',
+            'source' => 'origem',
+            'notes' => 'observacoes',
+            'job_title' => 'cargo',
+        ];
+        foreach ($legacyMap as $input => $key) {
+            if (array_key_exists($input, $data) && ! array_key_exists($key, $custom)) {
+                $value = $data[$input];
+                if ($value !== null && $value !== '') {
+                    $custom[$key] = is_string($value) ? trim($value) : $value;
+                }
             }
-            if (is_string($value)) {
-                $value = trim($value);
-            }
-            if ($field->type === 'select' && $value !== null && $value !== '' && ! in_array($value, $field->options ?? [], true)) {
-                continue;
-            }
-            $custom[$key] = $value;
+        }
+
+        if (! array_key_exists('origem', $custom) && $fields->contains('key', 'origem')) {
+            $custom['origem'] = $origin;
         }
 
         $contact = Contact::create([
             'organization_id' => $organization->id,
-            'name' => mb_substr(trim((string) ($data['name'] ?? '')) ?: 'Lead', 0, 180),
-            'email' => self::text($data['email'] ?? null, 180),
-            'phone' => self::text($data['phone'] ?? null, 40),
-            'whatsapp' => self::text($data['whatsapp'] ?? null, 40),
-            'job_title' => self::text($data['job_title'] ?? null, 120),
-            'source' => mb_substr((string) ($data['source'] ?? $origin), 0, 60),
-            'notes' => self::text($data['notes'] ?? null, 5000),
+            'name' => mb_substr(trim((string) (($custom['nome'] ?? null) ?: ($data['name'] ?? null) ?: 'Lead')), 0, 180),
+            'email' => self::text($custom['email'] ?? ($data['email'] ?? null), 180),
+            'phone' => self::text($custom['telefone'] ?? ($data['phone'] ?? null), 40),
+            'whatsapp' => self::text($custom['whatsapp'] ?? ($data['whatsapp'] ?? null), 40),
+            'job_title' => self::text($custom['cargo'] ?? ($data['job_title'] ?? null), 120),
+            'source' => self::text($custom['origem'] ?? ($data['source'] ?? $origin), 60),
+            'notes' => self::text($custom['observacoes'] ?? ($data['notes'] ?? null), 5000),
             'custom' => $custom ?: null,
             'created_by' => auth()->id(),
         ]);
@@ -71,13 +87,30 @@ class LeadIntake
         return $contact;
     }
 
+    private static function setCustomValue(array &$custom, $fields, string $key, mixed $value): void
+    {
+        $field = $fields->first(fn ($candidate) => $candidate->key === $key || $candidate->field_id === $key);
+        if ($field === null) {
+            return;
+        }
+
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+        if ($field->type === 'select' && $value !== null && $value !== '' && ! in_array($value, $field->options ?? [], true)) {
+            return;
+        }
+
+        $custom[$field->key] = $value;
+    }
+
     public static function payload(Contact $contact): array
     {
         return [
             'id' => $contact->id,
             'lead_id' => $contact->lead_id,
             'organization_id' => $contact->organization_id,
-            'name' => $contact->name,
+            'name' => $contact->displayName(),
             'email' => $contact->email,
             'phone' => $contact->phone,
             'whatsapp' => $contact->whatsapp,
@@ -108,7 +141,7 @@ class LeadIntake
 
     private static function text($value, int $max): ?string
     {
-        if ($value === null || $value === '') {
+        if ($value === null || $value === '' || is_array($value)) {
             return null;
         }
 

@@ -21,8 +21,8 @@ class InboundReceiveController extends Controller
             return response()->json(['error' => 'Endpoint inválido.'], 404);
         }
 
-        if (! RateLimiter::tooManyAttempts('hook-' . $endpoint->id, 120)) {
-            RateLimiter::hit('hook-' . $endpoint->id, 60);
+        if (! RateLimiter::tooManyAttempts('hook-'.$endpoint->id, 120)) {
+            RateLimiter::hit('hook-'.$endpoint->id, 60);
         } else {
             return response()->json(['error' => 'Limite excedido.'], 429);
         }
@@ -36,11 +36,8 @@ class InboundReceiveController extends Controller
         }
 
         $payload = $request->json()->all() ?: $request->all();
-        if (empty($payload['name']) && empty($payload['email']) && empty($payload['phone']) && empty($payload['whatsapp'])) {
-            return response()->json(['error' => 'Informe ao menos nome, e-mail ou telefone.'], 422);
-        }
 
-        $contact = LeadIntake::create($endpoint->organization, $payload, 'webhook: ' . $endpoint->name, [
+        $contact = LeadIntake::create($endpoint->organization, $payload, 'webhook: '.$endpoint->name, [
             'inbound_endpoint_id' => $endpoint->id,
             'ip' => $request->ip(),
         ]);
@@ -77,7 +74,7 @@ class InboundReceiveController extends Controller
         $raw = $request->getContent();
         if ($endpoint->meta_app_secret) {
             $signature = (string) $request->header('X-Hub-Signature-256');
-            $expected = 'sha256=' . hash_hmac('sha256', (string) $raw, (string) $endpoint->meta_app_secret);
+            $expected = 'sha256='.hash_hmac('sha256', (string) $raw, (string) $endpoint->meta_app_secret);
             if (! hash_equals($expected, $signature)) {
                 return response('Invalid signature', 401);
             }
@@ -93,13 +90,13 @@ class InboundReceiveController extends Controller
                 try {
                     $payload = $this->fetchMetaLead((string) $leadgenId, $endpoint);
                     if ($payload !== null) {
-                        LeadIntake::create($endpoint->organization, $payload, 'meta_lead_ads: ' . $endpoint->name, [
+                        LeadIntake::create($endpoint->organization, $payload, 'meta_lead_ads: '.$endpoint->name, [
                             'inbound_endpoint_id' => $endpoint->id, 'leadgen_id' => $leadgenId,
                         ]);
                         $created++;
                     }
                 } catch (\Throwable $exception) {
-                    Log::warning('[QEAI meta lead] ' . $exception->getMessage());
+                    Log::warning('[QEAI meta lead] '.$exception->getMessage());
                 }
             }
         }
@@ -114,13 +111,14 @@ class InboundReceiveController extends Controller
     /** Busca os dados do lead no Graph API e mapeia para o nosso formato. */
     private function fetchMetaLead(string $leadgenId, InboundEndpoint $endpoint): ?array
     {
-        $response = Http::timeout(10)->get('https://graph.facebook.com/v21.0/' . $leadgenId, [
+        $response = Http::timeout(10)->get('https://graph.facebook.com/v21.0/'.$leadgenId, [
             'access_token' => (string) $endpoint->meta_page_access_token,
             'fields' => 'field_data,created_time',
         ]);
 
         if (! $response->ok()) {
-            Log::warning('[QEAI meta lead] Graph respondeu ' . $response->status());
+            Log::warning('[QEAI meta lead] Graph respondeu '.$response->status());
+
             return null;
         }
 
@@ -138,7 +136,7 @@ class InboundReceiveController extends Controller
                 $payload[$builtin[$key]] = $value;
             } else {
                 $payload['custom'][$key] = $value;
-                $notes[] = $key . ': ' . $value;
+                $notes[] = $key.': '.$value;
             }
         }
 

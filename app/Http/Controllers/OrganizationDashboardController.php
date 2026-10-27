@@ -38,9 +38,9 @@ class OrganizationDashboardController extends Controller
         $fields = CustomFields::forEntity($organization, 'contact');
 
         $sources = $this->contactsBetween($organization, $from, $to)
-            ->select('source')
+            ->select('source', 'custom')
             ->get()
-            ->groupBy(fn (Contact $contact) => $contact->source ?: 'Não informado')
+            ->groupBy(fn (Contact $contact) => (string) ($contact->custom['origem'] ?? '') ?: ($contact->source ?: 'Não informado'))
             ->map->count()
             ->sortDesc();
         $sourceTotal = (int) $sources->sum();

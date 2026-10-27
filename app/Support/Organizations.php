@@ -32,11 +32,11 @@ class Organizations
 
             Pipeline::ensureDefaultFor($organization);
 
+            CustomFields::ensureDefaults($organization, 'contact');
+
             $template = FieldTemplate::defaultTemplate();
             if ($template !== null) {
                 CustomFields::applyTemplate($organization, $template->fields ?? []);
-            } else {
-                CustomFields::ensureDefaults($organization, 'contact');
             }
 
             return $organization;
@@ -49,7 +49,7 @@ class Organizations
         $slug = $base;
         $suffix = 2;
         while (Organization::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $suffix++;
+            $slug = $base.'-'.$suffix++;
         }
 
         return $slug;

@@ -69,6 +69,9 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 
 ### Núcleo atual — Leads e Gestão de CRM
 - [x] **ID permanente do lead** (`LD-...`) gerado no cadastro, usado na busca, no histórico e na API/webhooks
+- [x] **Somente ID, datas e histórico são fixos**; Nome, E-mail, Telefone, WhatsApp, Origem, Observações, Cargo, Status, Temperatura, Data inicial e Próximo contato são campos personalizáveis (defaults editáveis/desativáveis)
+- [x] Nenhum campo é obrigatório por padrão; o formulário de lead permite criar só com o ID automático
+- [x] Dados antigos dos campos fixos migrados automaticamente para os campos personalizados equivalentes
 - [x] **Lista de leads** com **4 visões**: Tabela, Kanban, Calendário e Cronograma
 - [x] **Kanban** agrupado por campo de seleção, com arrastar-e-soltar e seletor de movimentação
 - [x] **Calendário** por campo de data, com navegação mensal

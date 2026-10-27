@@ -12,7 +12,7 @@
   <div>
     <span class="page-kicker">CRM · Leads</span>
     <h1>{{ $editing ? 'Editar lead' : 'Novo lead' }}</h1>
-    <p class="muted">{{ $editing ? 'Os dados ficam vinculados ao ID imutável deste lead.' : 'Preencha os dados abaixo. O ID do lead será gerado automaticamente.' }}</p>
+    <p class="muted">O ID, a data de criação e o histórico são automáticos. Todos os demais dados são campos do CRM.</p>
   </div>
   <div class="page-actions">
     <a class="btn secondary" href="{{ $editing ? route('member.org.contacts.show', [$organization, $contact]) : route('member.org.contacts.index', $organization) }}">Cancelar</a>
@@ -26,6 +26,13 @@
     <span class="badge">permanente</span>
     <span class="muted" style="margin-left:auto">Criado em {{ $contact->created_at?->format('d/m/Y H:i') }}</span>
   </div>
+@else
+  <div class="lead-id-banner">
+    <span class="muted">ID do lead</span>
+    <strong>Gerado automaticamente ao salvar</strong>
+    <span class="badge">permanente</span>
+    <span class="muted" style="margin-left:auto">Data de criação e histórico também são automáticos</span>
+  </div>
 @endif
 
 <form method="post" action="{{ $editing ? route('member.org.contacts.update', [$organization, $contact]) : route('member.org.contacts.store', $organization) }}">
@@ -35,38 +42,8 @@
   <div class="card">
     <div class="card-head">
       <div>
-        <h2>Dados principais</h2>
-        <p class="muted">Informações fixas de identificação do lead.</p>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <label>Nome do lead
-        <input name="name" value="{{ old('name', $contact?->name) }}" required maxlength="180" placeholder="Nome da pessoa ou contato" autofocus>
-      </label>
-      <label>E-mail
-        <input type="email" name="email" value="{{ old('email', $contact?->email) }}" maxlength="180" placeholder="email@exemplo.com">
-      </label>
-      <label>Telefone
-        <input name="phone" value="{{ old('phone', $contact?->phone) }}" maxlength="40" placeholder="(11) 99999-9999">
-      </label>
-      <label>WhatsApp
-        <input name="whatsapp" value="{{ old('whatsapp', $contact?->whatsapp) }}" maxlength="40" placeholder="(11) 99999-9999">
-      </label>
-      <label>Origem
-        <input name="source" value="{{ old('source', $contact?->source) }}" maxlength="60" placeholder="Site, indicação, anúncio…">
-      </label>
-      <label>Observações
-        <textarea name="notes" rows="3" maxlength="5000" placeholder="Anotações internas sobre o lead">{{ old('notes', $contact?->notes) }}</textarea>
-      </label>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-head">
-      <div>
-        <h2>Campos do CRM</h2>
-        <p class="muted">Campos criados pela sua organização para este tipo de lead.</p>
+        <h2>Campos do lead</h2>
+        <p class="muted">Preencha os campos configurados pela sua organização. Nenhum deles é obrigatório pelo sistema.</p>
       </div>
       @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.crm_fields'))
         <a class="btn secondary small" href="{{ route('member.org.fields.index', $organization) }}"><x-icon name="settings" :size="15"/> Gerenciar campos</a>
@@ -75,8 +52,9 @@
 
     <div class="grid-2">
       @if ($fields->isEmpty())
-        <div class="full empty-state" style="padding:22px">
-          <p class="muted" style="margin:0">Nenhum campo ativo no momento. Ative ou crie campos na Gestão de CRM.</p>
+        <div class="full empty-state" style="padding:24px">
+          <x-icon name="list-check" :size="26"/>
+          <p class="muted" style="margin:8px 0 0">Nenhum campo ativo. Crie ou reative campos na Gestão de CRM para preencher este lead.</p>
         </div>
       @else
         @include('member.crm.partials.field-inputs', ['fields' => $fields, 'values' => $values])

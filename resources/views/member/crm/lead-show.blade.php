@@ -1,12 +1,12 @@
 @extends('layouts.member')
 
-@section('title', $contact->name . ' — ' . $organization->name)
+@section('title', $contact->displayName() . ' — ' . $organization->name)
 
 @section('panel')
 <div class="page-header">
   <div>
     <span class="page-kicker">CRM · Lead</span>
-    <h1>{{ $contact->name }}</h1>
+    <h1>{{ $contact->displayName() }}</h1>
     <p class="muted">ID permanente <strong class="lead-id">{{ $contact->lead_id }}</strong> · criado em {{ $contact->created_at?->format('d/m/Y H:i') }}</p>
   </div>
   <div class="page-actions">
@@ -18,25 +18,16 @@
 <div class="lead-detail-grid">
   <section class="panel-card">
     <div class="panel-head">
-      <div class="panel-title"><x-icon name="user-plus" :size="18"/><h2>Dados do lead</h2></div>
+      <div class="panel-title"><x-icon name="shield" :size="18"/><h2>Dados fixos</h2></div>
     </div>
     <dl class="detail-list">
       <div><dt>ID do lead</dt><dd><span class="lead-id">{{ $contact->lead_id }}</span></dd></div>
-      <div><dt>Nome</dt><dd>{{ $contact->name }}</dd></div>
-      <div><dt>E-mail</dt><dd>{{ $contact->email ?: '—' }}</dd></div>
-      <div><dt>Telefone</dt><dd>{{ $contact->phone ?: '—' }}</dd></div>
-      <div><dt>WhatsApp</dt><dd>{{ $contact->whatsapp ?: '—' }}</dd></div>
-      <div><dt>Origem</dt><dd>{{ $contact->source ?: '—' }}</dd></div>
-      @if ($contact->company)<div><dt>Empresa</dt><dd>{{ $contact->company->name }}</dd></div>@endif
-      <div><dt>Responsável</dt><dd>{{ $contact->owner?->name ?? '—' }}</dd></div>
+      <div><dt>Criado em</dt><dd>{{ $contact->created_at?->format('d/m/Y H:i') }}</dd></div>
       <div><dt>Atualizado em</dt><dd>{{ $contact->updated_at?->format('d/m/Y H:i') }}</dd></div>
+      <div><dt>Responsável</dt><dd>{{ $contact->owner?->name ?? '—' }}</dd></div>
+      @if ($contact->company)<div><dt>Empresa</dt><dd>{{ $contact->company->name }}</dd></div>@endif
     </dl>
-    @if ($contact->notes)
-      <div class="detail-notes">
-        <span class="muted">Observações</span>
-        <p>{!! nl2br(e($contact->notes)) !!}</p>
-      </div>
-    @endif
+    <p class="muted" style="margin:14px 0 0;font-size:.7rem">Somente o ID, as datas e o histórico são fixos. Todos os demais dados abaixo são campos do CRM.</p>
   </section>
 
   <section class="panel-card">
@@ -68,6 +59,8 @@
                 <span class="option-pill" style="--pill: {{ $color }}">{{ $value }}</span>
               @elseif ($field->type === 'url' && filled($value))
                 <a href="{{ $value }}" target="_blank" rel="noopener noreferrer">{{ $value }}</a>
+              @elseif ($field->type === 'date' && filled($value))
+                {{ \Illuminate\Support\Carbon::parse($value)->format('d/m/Y') }}
               @else
                 {{ filled($value) ? $value : '—' }}
               @endif

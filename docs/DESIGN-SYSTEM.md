@@ -159,17 +159,35 @@ Rótulo
 - Legenda com ponto de cor, origem e percentual.
 - Cores fixas: `#3B82F6`, `#7C3AED`, `#EC4899`, `#F59E0B`, `#10B981`, `#94A3B8`.
 
+### Campos do lead
+
+O lead é **totalmente orientado a campos personalizados**. Ficam fixos apenas:
+
+- **ID do lead** (`LD-...`), gerado automaticamente;
+- **data de criação** e **data de atualização**;
+- **histórico de alterações** (auditoria).
+
+Todos os demais dados são campos do CRM, inclusive **Nome, E-mail, Telefone, WhatsApp,
+Origem, Observações e Cargo**. Eles vêm como campos padrão, mas podem ser renomeados,
+ter o tipo alterado ou ser desativados. Também entram por padrão **Status, Temperatura,
+Data inicial e Próximo contato**.
+
+- Nenhum campo é obrigatório por padrão.
+- O rótulo do lead usa o campo `nome` quando preenchido; caso contrário, usa o ID permanente.
+- O formulário de lead renderiza somente os campos ativos do CRM.
+- Na visão Tabela, o campo `nome` vira a coluna **Lead**; os demais campos aparecem como colunas próprias.
+
 ### Tabela de leads (`.table-wrap`, `.table`)
 
-- Colunas: **ID do lead**, Lead, Contato, campos marcados como “mostrar na lista”, criado em e ações.
+- Colunas: **ID do lead**, **Lead** (nome de exibição), campos marcados como “mostrar na lista”, criado em e ações.
 - O ID longo é truncado visualmente, com o valor completo no `title` e na tela de detalhe.
 - Valores de campos de seleção usam `.option-pill`, com cor consistente por opção.
-- Em telas menores a tabela rola horizontalmente dentro de `.table-wrap`.
+- Em telas menores a tabela rola horizontalmente dentro de `.table-wrap`, com a coluna de ações fixa à direita.
 - Estado vazio orienta a cadastrar o primeiro lead.
 
 ### Detalhe do lead (`.lead-detail-grid`, `.detail-list`, `.timeline`)
 
-- Dois cards lado a lado: **Dados do lead** (campos fixos) e **Campos do CRM** (personalizados).
+- Dois cards lado a lado: **Dados fixos** (ID, datas e responsável) e **Campos do CRM** (todos os dados personalizados).
 - Campos desativados continuam visíveis quando têm valor, com badge `desativado` — preservando o histórico.
 - O bloco **Histórico do lead** usa `.timeline` com ícone, título amigável, autor e data.
 - O ID do lead (`LD-...`) é exibido no cabeçalho e no detalhe, sempre em fonte monoespaçada.
@@ -185,7 +203,7 @@ A mesma lista de leads pode ser visualizada de quatro formas, sem duplicar dados
 
 A barra de controles contém:
 - abas de visualização;
-- busca por ID, nome, e-mail ou telefone;
+- busca por ID ou por qualquer valor de campo;
 - seletor de agrupamento (Kanban), campo de data (Calendário) ou início/fim (Cronograma);
 - navegação de período (Calendário/Cronograma);
 - painel **Filtros por campo**, com controles por tipo (seleção, data, sim/não, número e texto).
@@ -195,6 +213,7 @@ As visões usam a mesma base filtrada. Se não houver campo de seleção/data, a
 ### Gestão de CRM (`.guideline-list`, `.field-admin`)
 
 - Três cartões explicam: ID do lead fixo, campos não são excluídos e ID do campo é estável.
+- Os campos padrão (Nome, E-mail, Telefone, WhatsApp, Origem, Data inicial, Próximo contato, Observações, Cargo, Status e Temperatura) podem ser editados, ter o tipo alterado ou ser desativados.
 - Formulário de criação: nome, tipo, opções (para seleção), obrigatório e “mostrar na lista”.
 - Cada campo configurado mostra `FLD-...`, tipo, quantidade de leads com dados, status e ações.
 - A edição fica em um `<details>` para manter a página limpa.

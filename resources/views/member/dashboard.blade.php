@@ -143,7 +143,7 @@
           @foreach ($recentLeads as $lead)
             <tr>
               <td>
-                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}">{{ $lead->name }}</a>
+                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}">{{ $lead->displayName() }}</a>
                 <small class="muted" style="display:block">{{ $lead->email ?: ($lead->phone ?: '—') }}</small>
               </td>
               <td><a class="lead-id" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}">{{ $lead->lead_id }}</a></td>

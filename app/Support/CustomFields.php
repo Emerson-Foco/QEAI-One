@@ -14,14 +14,45 @@ class CustomFields
     /** Cria os campos padrão de contatos, se ainda não existirem (defaults / template base). */
     public static function ensureDefaults(Organization $organization, string $entity = 'contact'): void
     {
-        if ($organization->customFields()->where('entity', $entity)->exists()) {
+        if ($entity !== 'contact') {
             return;
         }
 
-        if ($entity === 'contact') {
-            $organization->customFields()->createMany([
-                ['entity' => 'contact', 'key' => 'status', 'label' => 'Status', 'type' => 'select', 'options' => ['Novo', 'Em contato', 'Qualificado', 'Perdido'], 'show_in_list' => true, 'is_system' => true, 'is_active' => true, 'position' => 1],
-                ['entity' => 'contact', 'key' => 'temperatura', 'label' => 'Temperatura', 'type' => 'select', 'options' => ['Frio', 'Morno', 'Quente'], 'show_in_list' => true, 'is_system' => true, 'is_active' => true, 'position' => 2],
+        $defaults = [
+            'nome' => ['label' => 'Nome', 'type' => 'text', 'show_in_list' => true, 'position' => 0],
+            'status' => ['label' => 'Status', 'type' => 'select', 'options' => ['Novo', 'Em contato', 'Qualificado', 'Perdido'], 'show_in_list' => true, 'position' => 1],
+            'temperatura' => ['label' => 'Temperatura', 'type' => 'select', 'options' => ['Frio', 'Morno', 'Quente'], 'show_in_list' => true, 'position' => 2],
+            'email' => ['label' => 'E-mail', 'type' => 'email', 'show_in_list' => true, 'position' => 3],
+            'telefone' => ['label' => 'Telefone', 'type' => 'phone', 'show_in_list' => true, 'position' => 4],
+            'whatsapp' => ['label' => 'WhatsApp', 'type' => 'phone', 'show_in_list' => false, 'position' => 5],
+            'origem' => ['label' => 'Origem', 'type' => 'text', 'show_in_list' => true, 'position' => 6],
+            'data_inicial' => ['label' => 'Data inicial', 'type' => 'date', 'show_in_list' => true, 'position' => 7],
+            'proximo_contato' => ['label' => 'Próximo contato', 'type' => 'date', 'show_in_list' => true, 'position' => 8],
+            'observacoes' => ['label' => 'Observações', 'type' => 'textarea', 'show_in_list' => false, 'position' => 9],
+            'cargo' => ['label' => 'Cargo', 'type' => 'text', 'show_in_list' => false, 'position' => 10],
+        ];
+
+        $existing = $organization->customFields()
+            ->where('entity', 'contact')
+            ->pluck('key')
+            ->all();
+
+        foreach ($defaults as $key => $definition) {
+            if (in_array($key, $existing, true)) {
+                continue;
+            }
+
+            $organization->customFields()->create([
+                'entity' => 'contact',
+                'key' => $key,
+                'label' => $definition['label'],
+                'type' => $definition['type'],
+                'options' => $definition['options'] ?? null,
+                'required' => false,
+                'show_in_list' => $definition['show_in_list'],
+                'is_system' => true,
+                'is_active' => true,
+                'position' => $definition['position'],
             ]);
         }
     }

@@ -37,6 +37,22 @@ class Contact extends Model
         return $leadId;
     }
 
+    /** Nome de exibição: campo personalizado "nome" ou fallback para o ID permanente. */
+    public function displayName(): string
+    {
+        $custom = $this->custom ?: [];
+        $name = $custom['nome'] ?? null;
+        if (is_scalar($name) && trim((string) $name) !== '') {
+            return trim((string) $name);
+        }
+
+        if (trim((string) $this->name) !== '' && $this->name !== 'Lead') {
+            return (string) $this->name;
+        }
+
+        return (string) $this->lead_id;
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

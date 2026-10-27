@@ -377,6 +377,8 @@ label small { font-weight: 400; color: var(--muted); font-size: .74rem; }
 .cell-stack small { display: block; font-size: .72rem; color: var(--muted); margin-top: 2px; }
 .table-wrap { overflow-x: auto; }
 .table-wrap .table td, .table-wrap .table th { white-space: nowrap; }
+.table-wrap .table th:last-child, .table-wrap .table td:last-child { position: sticky; right: 0; background: #fff; box-shadow: -10px 0 14px -12px rgba(15, 23, 42, .28); }
+.table-wrap .table tbody tr:hover td:last-child { background: #FBFCFE; }
 .table-wrap .lead-id { display: block; max-width: 145px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .table-wrap .lead-name { display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
 .lead-id-banner { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #fff; border: 1px solid var(--border); border-radius: 13px; padding: 12px 16px; margin-bottom: 18px; box-shadow: var(--shadow-sm); }

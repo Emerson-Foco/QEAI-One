@@ -51,7 +51,10 @@ class CustomFieldTest extends TestCase
         $organization = $this->organization('Acme');
         $keys = CustomFields::forEntity($organization, 'contact')->pluck('key')->all();
 
-        $this->assertEqualsCanonicalizing(['status', 'temperatura'], $keys);
+        $this->assertEqualsCanonicalizing([
+            'nome', 'status', 'temperatura', 'email', 'telefone', 'whatsapp',
+            'origem', 'data_inicial', 'proximo_contato', 'observacoes', 'cargo',
+        ], $keys);
     }
 
     public function test_admin_creates_custom_field_and_contact_stores_values(): void

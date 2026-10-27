@@ -167,18 +167,13 @@ class ContactController extends Controller
         $this->authorize($organization);
         $fields = CustomFields::forEntity($organization, 'contact');
         $data = $this->validated($request, $organization, $fields);
-        $custom = CustomFields::collect($request, $fields);
+        $custom = $this->collectCustom($request, $fields);
+        $columns = $this->legacyColumns($custom);
 
         $contact = Contact::create([
             'organization_id' => $organization->id,
             'company_id' => $data['company_id'] ?? null,
-            'name' => $data['name'],
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'whatsapp' => $data['whatsapp'] ?? null,
-            'job_title' => $data['job_title'] ?? null,
-            'source' => $data['source'] ?? null,
-            'notes' => $data['notes'] ?? null,
+            ...$columns,
             'custom' => $custom,
             'owner_user_id' => auth()->id(),
             'created_by' => auth()->id(),
@@ -187,7 +182,7 @@ class ContactController extends Controller
 
         Audit::log('contact.created', 'organization', $organization->id, 'contact', $contact->id, null, [
             'lead_id' => $contact->lead_id,
-            'name' => $contact->name,
+            'name' => $contact->displayName(),
         ]);
 
         return redirect()
@@ -214,31 +209,22 @@ class ContactController extends Controller
         $fields = CustomFields::forEntity($organization, 'contact');
         $data = $this->validated($request, $organization, $fields);
 
-        $custom = CustomFields::collect($request, $fields);
-        $allKeys = CustomFields::allForEntity($organization, 'contact')->pluck('key');
-        $existing = $contact->custom ?? [];
-        foreach ($allKeys as $key) {
-            if (! array_key_exists($key, $custom) && array_key_exists($key, $existing)) {
-                $custom[$key] = $existing[$key];
-            }
-        }
-
-        $contact->update([
-            'company_id' => $data['company_id'] ?? null,
-            'name' => $data['name'],
-            'email' => $data['email'] ?? null,
-            'phone' => $data['phone'] ?? null,
-            'whatsapp' => $data['whatsapp'] ?? null,
-            'job_title' => $data['job_title'] ?? null,
-            'source' => $data['source'] ?? null,
-            'notes' => $data['notes'] ?? null,
+        $custom = $this->collectCustom($request, $fields, $contact->custom ?? []);
+        $updates = [
+            ...$this->legacyColumns($custom),
             'custom' => $custom,
-        ]);
-        $this->syncTags($organization, $contact, (string) $request->input('tags', ''));
+        ];
+        if ($request->has('company_id')) {
+            $updates['company_id'] = $data['company_id'] ?? null;
+        }
+        $contact->update($updates);
+        if ($request->has('tags')) {
+            $this->syncTags($organization, $contact, (string) $request->input('tags', ''));
+        }
 
         Audit::log('contact.updated', 'organization', $organization->id, 'contact', $contact->id, null, [
             'lead_id' => $contact->lead_id,
-            'name' => $contact->name,
+            'name' => $contact->displayName(),
         ]);
 
         return redirect()
@@ -287,7 +273,10 @@ class ContactController extends Controller
 
         $custom = $contact->custom ?: [];
         $custom[$field->key] = $value;
-        $contact->update(['custom' => $custom]);
+        $contact->update([
+            'custom' => $custom,
+            ...$this->legacyColumns($custom),
+        ]);
 
         Audit::log('contact.field_updated', 'organization', $organization->id, 'contact', $contact->id, null, [
             'lead_id' => $contact->lead_id,
@@ -314,19 +303,30 @@ class ContactController extends Controller
 
     private function filteredContacts(Organization $organization, string $search, array $filters, Collection $fields): Collection
     {
-        $query = Contact::with(['company', 'tags'])->where('organization_id', $organization->id);
+        $contacts = Contact::with(['company', 'tags'])
+            ->where('organization_id', $organization->id)
+            ->latest('id')
+            ->get();
 
         if ($search !== '') {
-            $query->where(function ($where) use ($search) {
-                $where->where('lead_id', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
-                    ->orWhere('whatsapp', 'like', "%{$search}%");
-            });
-        }
+            $needle = mb_strtolower($search);
+            $contacts = $contacts->filter(function (Contact $contact) use ($needle) {
+                if (mb_strpos(mb_strtolower((string) $contact->lead_id), $needle) !== false) {
+                    return true;
+                }
+                if (mb_strpos(mb_strtolower($contact->displayName()), $needle) !== false) {
+                    return true;
+                }
 
-        $contacts = $query->latest('id')->get();
+                foreach (($contact->custom ?: []) as $value) {
+                    if (is_scalar($value) && mb_strpos(mb_strtolower((string) $value), $needle) !== false) {
+                        return true;
+                    }
+                }
+
+                return false;
+            })->values();
+        }
 
         foreach ($fields as $field) {
             if (! array_key_exists($field->key, $filters)) {
@@ -544,10 +544,61 @@ class ContactController extends Controller
         }
     }
 
+    private function collectCustom(Request $request, Collection $fields, array $existing = []): array
+    {
+        $custom = CustomFields::collect($request, $fields);
+        foreach ($existing as $key => $value) {
+            if (! array_key_exists($key, $custom)) {
+                $custom[$key] = $value;
+            }
+        }
+
+        $legacyMap = [
+            'name' => 'nome',
+            'email' => 'email',
+            'phone' => 'telefone',
+            'whatsapp' => 'whatsapp',
+            'source' => 'origem',
+            'notes' => 'observacoes',
+            'job_title' => 'cargo',
+        ];
+
+        foreach ($legacyMap as $input => $key) {
+            if ($request->filled($input) && blank($custom[$key] ?? null)) {
+                $custom[$key] = trim((string) $request->input($input));
+            }
+        }
+
+        return $custom;
+    }
+
+    /** @return array<string, mixed> */
+    private function legacyColumns(array $custom): array
+    {
+        return [
+            'name' => mb_substr((string) (($custom['nome'] ?? null) ?: 'Lead'), 0, 180),
+            'email' => $this->limitText($custom['email'] ?? null, 180),
+            'phone' => $this->limitText($custom['telefone'] ?? null, 40),
+            'whatsapp' => $this->limitText($custom['whatsapp'] ?? null, 40),
+            'job_title' => $this->limitText($custom['cargo'] ?? null, 120),
+            'source' => $this->limitText($custom['origem'] ?? null, 60),
+            'notes' => $this->limitText($custom['observacoes'] ?? null, 5000),
+        ];
+    }
+
+    private function limitText(mixed $value, int $max): ?string
+    {
+        if ($value === null || $value === '' || is_array($value)) {
+            return null;
+        }
+
+        return mb_substr(trim((string) $value), 0, $max);
+    }
+
     private function validated(Request $request, Organization $organization, $fields): array
     {
         $rules = [
-            'name' => ['required', 'string', 'max:180'],
+            'name' => ['nullable', 'string', 'max:180'],
             'email' => ['nullable', 'email', 'max:180'],
             'phone' => ['nullable', 'string', 'max:40'],
             'whatsapp' => ['nullable', 'string', 'max:40'],
@@ -555,6 +606,7 @@ class ContactController extends Controller
             'source' => ['nullable', 'string', 'max:60'],
             'company_id' => ['nullable', 'integer'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'tags' => ['nullable', 'string', 'max:500'],
         ];
 
         $data = $request->validate(array_merge($rules, CustomFields::rules($fields)));

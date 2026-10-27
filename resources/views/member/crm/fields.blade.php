@@ -26,6 +26,11 @@
     <li><span class="guideline-icon">2</span><div><strong>Campos não são excluídos</strong><small>Ao desativar um campo, ele sai dos formulários, mas os dados já preenchidos permanecem no histórico dos leads.</small></div></li>
     <li><span class="guideline-icon">3</span><div><strong>ID do campo é estável</strong><small>Cada campo recebe um ID próprio (ex.: <span class="lead-id">FLD-...</span>) que não muda ao renomear ou alterar o tipo.</small></div></li>
   </ul>
+  <p class="muted" style="margin:14px 0 0;font-size:.78rem">
+    Já vêm como campos padrão: <strong>Nome, Status, Temperatura, E-mail, Telefone, WhatsApp, Origem,
+    Data inicial, Próximo contato, Observações e Cargo</strong>. Todos podem ser renomeados, ter o tipo
+    alterado ou ser desativados. Nenhum é obrigatório por padrão.
+  </p>
 </div>
 
 <div class="card">

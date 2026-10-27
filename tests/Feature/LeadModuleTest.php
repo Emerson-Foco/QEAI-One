@@ -8,6 +8,7 @@ use App\Models\CustomField;
 use App\Models\Organization;
 use App\Models\User;
 use App\Support\CustomFields;
+use App\Support\LeadIntake;
 use App\Support\OrgPermissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -233,6 +234,82 @@ class LeadModuleTest extends TestCase
             ->assertOk()
             ->assertSee('Buscável')
             ->assertSee($lead->lead_id);
+    }
+
+    public function test_lead_can_be_created_with_only_id_and_timestamps(): void
+    {
+        $admin = $this->user('admin@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $admin, 'admin');
+
+        $this->actingAs($admin)->post(route('member.org.contacts.store', $organization), [])->assertRedirect();
+
+        $lead = Contact::firstOrFail();
+        $this->assertStringStartsWith('LD-', $lead->lead_id);
+        $this->assertNotNull($lead->created_at);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'contact.created', 'entity_id' => $lead->id]);
+        $this->assertSame($lead->lead_id, $lead->displayName());
+    }
+
+    public function test_lead_form_uses_only_custom_fields(): void
+    {
+        $admin = $this->user('admin@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $admin, 'admin');
+
+        $this->actingAs($admin)->get(route('member.org.contacts.create', $organization))
+            ->assertOk()
+            ->assertSee('custom[nome]', false)
+            ->assertSee('custom[data_inicial]', false)
+            ->assertSee('custom[proximo_contato]', false)
+            ->assertDontSee('name="name"', false)
+            ->assertDontSee('name="phone"', false)
+            ->assertDontSee('name="source"', false)
+            ->assertDontSee('name="notes"', false);
+    }
+
+    public function test_default_lead_fields_are_not_required_and_can_be_deactivated(): void
+    {
+        $admin = $this->user('admin@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $admin, 'admin');
+
+        $nameField = CustomField::where('organization_id', $organization->id)->where('key', 'nome')->firstOrFail();
+        $this->assertFalse($nameField->required);
+        $this->assertTrue($nameField->is_active);
+
+        $this->actingAs($admin)->get(route('member.org.fields.index', $organization))
+            ->assertOk()
+            ->assertSee('Nome')
+            ->assertSee('Data inicial')
+            ->assertSee('Próximo contato');
+
+        $this->actingAs($admin)->post(route('member.org.fields.toggle', [$organization, $nameField]))->assertRedirect();
+        $this->assertFalse($nameField->fresh()->is_active);
+
+        $this->actingAs($admin)->get(route('member.org.contacts.create', $organization))
+            ->assertOk()
+            ->assertDontSee('custom[nome]', false);
+    }
+
+    public function test_legacy_payload_maps_to_custom_default_fields(): void
+    {
+        $organization = $this->organization('Acme');
+
+        $lead = LeadIntake::create($organization, [
+            'name' => 'Lead Legado',
+            'email' => 'legado@exemplo.com',
+            'phone' => '11999999999',
+            'source' => 'Indicação',
+            'notes' => 'Observação antiga',
+        ], 'api');
+
+        $this->assertSame('Lead Legado', $lead->custom['nome']);
+        $this->assertSame('legado@exemplo.com', $lead->custom['email']);
+        $this->assertSame('11999999999', $lead->custom['telefone']);
+        $this->assertSame('Indicação', $lead->custom['origem']);
+        $this->assertSame('Observação antiga', $lead->custom['observacoes']);
+        $this->assertSame('Lead Legado', $lead->displayName());
     }
 
     public function test_root_without_membership_cannot_manage_crm_fields(): void

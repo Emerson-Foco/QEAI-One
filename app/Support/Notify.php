@@ -26,6 +26,7 @@ class Notify
             ->get()
             ->filter(function (Membership $membership) use ($permission) {
                 $permissions = $membership->role?->permissions ?? [];
+
                 return in_array('*', $permissions, true) || in_array($permission, $permissions, true);
             })
             ->pluck('user_id')->unique()->values()->all();
@@ -56,8 +57,8 @@ class Notify
         self::send(
             $users,
             'lead.created',
-            'Novo lead: ' . $contact->name,
-            trim(($contact->email ? $contact->email . ' · ' : '') . ($contact->source ?: '')),
+            'Novo lead: '.$contact->displayName(),
+            trim(($contact->email ? $contact->email.' · ' : '').($contact->source ?: '')),
             route('member.org.contacts.index', $organization),
             $organization
         );
@@ -69,7 +70,7 @@ class Notify
         self::send(
             $users,
             'conversation.message',
-            'Nova mensagem de ' . ($conversation->contact?->name ?? 'Visitante'),
+            'Nova mensagem de '.($conversation->contact?->displayName() ?? 'Visitante'),
             $body,
             route('member.org.inbox.show', [$organization, $conversation]),
             $organization
@@ -80,7 +81,7 @@ class Notify
     {
         $organization = $task->organization;
         $users = $task->assigned_to ? [$task->assigned_to] : self::usersWithPermission($organization, 'org.leads');
-        self::send($users, 'task.due', 'Tarefa vencendo: ' . $task->title, 'Vencimento: ' . ($task->due_at?->format('d/m/Y H:i') ?? ''), route('member.org.tasks.index', $organization), $organization);
+        self::send($users, 'task.due', 'Tarefa vencendo: '.$task->title, 'Vencimento: '.($task->due_at?->format('d/m/Y H:i') ?? ''), route('member.org.tasks.index', $organization), $organization);
     }
 
     private static function email(int $userId, string $title, string $body, ?string $url): void
@@ -97,7 +98,7 @@ class Notify
             $html = view('emails.notification', ['user' => $user, 'title' => $title, 'body' => $body, 'url' => $url])->render();
             PlatformMail::send($user->email, $title, $html);
         } catch (\Throwable $exception) {
-            Log::warning('[QEAI notify] ' . $exception->getMessage());
+            Log::warning('[QEAI notify] '.$exception->getMessage());
         }
     }
 }

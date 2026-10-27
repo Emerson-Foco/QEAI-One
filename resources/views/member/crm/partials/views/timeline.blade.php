@@ -51,7 +51,7 @@
           @foreach ($timeline['bars'] as $bar)
             <div class="timeline-row">
               <div class="timeline-label">
-                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $bar['contact']]) }}">{{ $bar['contact']->name }}</a>
+                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $bar['contact']]) }}">{{ $bar['contact']->displayName() }}</a>
                 <small>{{ $bar['start']->format('d/m/Y') }} – {{ $bar['end']->format('d/m/Y') }}</small>
               </div>
               <div class="timeline-track">
@@ -60,8 +60,8 @@
                 @endif
                 <a class="timeline-bar" href="{{ route('member.org.contacts.show', [$organization, $bar['contact']]) }}"
                    style="left: {{ $bar['left'] }}%; width: {{ $bar['width'] }}%; background: {{ $bar['color'] }}"
-                   title="{{ $bar['contact']->name }}: {{ $bar['start']->format('d/m/Y') }} a {{ $bar['end']->format('d/m/Y') }}">
-                  <span>{{ $bar['contact']->name }}</span>
+                   title="{{ $bar['contact']->displayName() }}: {{ $bar['start']->format('d/m/Y') }} a {{ $bar['end']->format('d/m/Y') }}">
+                  <span>{{ $bar['contact']->displayName() }}</span>
                 </a>
               </div>
             </div>

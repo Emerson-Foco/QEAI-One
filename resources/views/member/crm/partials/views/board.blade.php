@@ -23,7 +23,7 @@
         <div class="board-column-body">
           @forelse ($groupLeads as $contact)
             <article class="board-card" draggable="true" data-board-card data-lead-id="{{ $contact->id }}">
-              <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">{{ $contact->name }}</a>
+              <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">{{ $contact->displayName() }}</a>
               <span class="lead-id" title="{{ $contact->lead_id }}">{{ $contact->lead_id }}</span>
 
               @if ($dateFieldForCard)
