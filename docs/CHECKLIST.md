@@ -11,9 +11,10 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 ### Ambiente e deploy
 - [x] Composer local, Laravel 12, MySQL (`qeai_one`), Git
 - [x] Repositório Git local (branch `main`) com commits por etapa
-- [ ] Repositório no GitHub e push
-- [ ] Deploy em `one.qeai.com.br` (docroot/link simbólico, `.env`, cron do agendador)
+- [x] Repositório no GitHub e push
+- [ ] Deploy em `one.qeai.com.br` (docroot em `public/`, `.env`, cron do agendador)
 - [ ] Ambiente de homologação (`homolog.qeai.com.br`) com banco separado
+- [x] Guia de deploy via Git + SSH (`docs/DEPLOY-GIT.md`)
 
 ### Instalação e acesso
 - [x] Instalador guiado estilo WordPress (requisitos → banco → ADM Root → identidade)
@@ -52,8 +53,8 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [ ] Política de retenção de dados e de logs
 
 ### Documentos legais
-- [ ] Termos de Uso
-- [ ] Política de Privacidade e de Cookies
+- [x] Termos de Uso publicados no site + aceite versionado na plataforma
+- [x] Política de Privacidade e de Cookies publicadas no site
 - [ ] Termo de Tratamento de Dados (DPA) — controlador/operador
 - [ ] Lista pública de subprocessadores
 - [ ] Encarregado (DPO) com contato público
@@ -93,7 +94,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **Governança do Root**: sem vínculo, só eventos administrativos de auditoria (sem leads/atendimento)
 - [x] **Segurança**: headers/CSP, CSV seguro, URLs seguras, segredos de webhook criptografados, WhatsApp com assinatura e rate limits
 
-## Fase 1 — Opera��o principal (CRM + atendimento)
+## Fase 1 — Opera��o principal (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)
 - [x] CRM: pipelines/negócios (kanban por etapas, valor, ganho/perdido) e tarefas/atividades
 - [x] **Captação: formulários personalizados** (com campos customizados) + página pública + incorporação por iframe
@@ -131,7 +132,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 ---
 
 ## Notas de infraestrutura (hospedagem compartilhada)
-- Fila: driver `database` + `schedule:run` (cron de 1 min).
+- Fila: `sync` na hospedagem compartilhada; `database` + worker em VPS. Agendador via `schedule:run` (cron de 1 min).
 - Cache/sessão: `database` (sem Redis).
 - E-mail: SMTP configurável pelo Root; provedor transacional no futuro, se o volume exigir.
 - Tempo real: polling no compartilhado; WebSocket só em VPS.

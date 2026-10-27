@@ -1,231 +1,92 @@
-# Q One — Deploy na Hostinger
+# Q One — Hostinger (referência rápida)
 
-Checklist operacional para publicar o Q One em `https://one.qeai.com.br` em
-hospedagem compartilhada PHP/MySQL.
+O guia completo de publicação, atualização, segurança e rollback está em
+[`DEPLOY-GIT.md`](DEPLOY-GIT.md). Este arquivo resume apenas as decisões
+específicas do hPanel.
 
-> Este documento não contém segredos. Use o gerenciador de senhas da QEAI para
-> armazenar `APP_KEY`, senha do banco e credenciais SMTP.
-
----
-
-## 1. Pré-requisitos
-
-- Subdomínio `one.qeai.com.br` criado na Hostinger.
-- PHP **8.3** (mínimo 8.2) com `mbstring`, `openssl`, `pdo_mysql`, `tokenizer`,
-  `xml`, `ctype`, `json`, `fileinfo` e `curl`.
-- Banco MySQL/MariaDB exclusivo (não reutilizar base de outro sistema).
-- SSL ativo (Let's Encrypt) e HTTPS forçado.
-- Cron da Hostinger disponível.
-- Site institucional publicado com `/termos` e `/privacidade` acessíveis.
-
----
-
-## 2. Estrutura de diretórios
-
-O docroot do subdomínio deve apontar para a pasta **`public/`** do projeto.
+## Estrutura
 
 ```
-/home/USUARIO/domains/one.qeai.com.br/
-├── app/
-├── bootstrap/
-├── config/
-├── database/
-├── public/          ← document root
-├── resources/
-├── routes/
-├── storage/
-├── vendor/
-├── artisan
-├── composer.json
-└── .env             ← fora do docroot
+/home/uUSUARIO/domains/one.qeai.com.br/qone/          projeto (fora do docroot)
+/home/uUSUARIO/domains/one.qeai.com.br/qone/public/   document root
 ```
 
-Se a Hostinger não permitir alterar o document root, use um diretório
-`public_html` apenas com um `.htaccess`/`index.php` encaminhando para `public/`
-ou abra suporte para ajustar o docroot. **Nunca** aponte o docroot para a raiz do
-projeto, pois `.env` e `storage/` ficariam expostos.
+- O projeto é clonado por Git em `qone/`.
+- O docroot do subdomínio aponta para `qone/public`.
+- Se o hPanel não permitir alterar o document root, abra suporte ou use um
+  encaminhamento seguro. **Nunca** aponte o docroot para `qone/`.
 
----
+## hPanel
 
-## 3. Arquivo `.env` de produção
+1. Crie o subdomínio `one.qeai.com.br`.
+2. Ative o SSL Let's Encrypt e **Forçar HTTPS**.
+3. Selecione PHP 8.3 e confirme as extensões exigidas pelo instalador.
+4. Crie banco e usuário MySQL exclusivos.
+5. Ative o acesso SSH e cadastre sua chave pública.
+6. Crie a tarefa cron:
 
-Crie `.env` na raiz (nunca versionar) com este modelo:
+   ```bash
+   /usr/bin/php /home/uUSUARIO/domains/one.qeai.com.br/qone/artisan schedule:run >> /dev/null 2>&1
+   ```
 
-```env
-APP_NAME="Q One"
-APP_ENV=production
-APP_KEY=base64:GERAR_UMA_CHAVE_UNICA
-APP_DEBUG=false
-APP_URL=https://one.qeai.com.br
-APP_TIMEZONE=America/Sao_Paulo
+   Se o binário for diferente:
 
-APP_LOCALE=pt_BR
-APP_FALLBACK_LOCALE=pt_BR
+   ```bash
+   /opt/alt/php83/usr/bin/php /home/uUSUARIO/domains/one.qeai.com.br/qone/artisan schedule:run >> /dev/null 2>&1
+   ```
 
-LOG_CHANNEL=stack
-LOG_LEVEL=warning
-
-DB_CONNECTION=mysql
-DB_HOST=localhost
-DB_PORT=3306
-DB_DATABASE=USUARIO_QONE
-DB_USERNAME=USUARIO_QONE
-DB_PASSWORD=SENHA_FORTE
-
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=true
-SESSION_SECURE_COOKIE=true
-SESSION_HTTP_ONLY=true
-SESSION_SAME_SITE=lax
-
-CACHE_STORE=database
-QUEUE_CONNECTION=sync
-
-FILESYSTEM_DISK=local
-
-MAIL_MAILER=log
-MAIL_FROM_ADDRESS="nao-responda@qeai.com.br"
-MAIL_FROM_NAME="Q One"
-
-QEAI_MODULES=dashboard,leads,crm_fields,settings,logs
-
-LEGAL_TERMS_URL=https://qeai.com.br/termos
-LEGAL_PRIVACY_URL=https://qeai.com.br/privacidade
-LEGAL_REQUIRE_ACCEPTANCE=true
-```
-
-Observações:
-- `APP_KEY` deve ser gerada uma única vez e guardada em local seguro.
-- SMTP real é configurado no painel Root (Configurações), não no `.env`.
-- `QUEUE_CONNECTION=sync` evita jobs pendentes sem worker na hospedagem compartilhada.
-- `SESSION_ENCRYPT=true` criptografa o conteúdo da sessão no banco.
-
----
-
-## 4. Envio dos arquivos
-
-1. Gere o build local com `vendor/` já instalado (`composer install --no-dev --optimize-autoloader`).
-2. Envie o projeto para a Hostinger via Git, SSH, FTP ou Gerenciador de Arquivos.
-3. Não envie:
-   - `.env` local;
-   - `storage/logs/*`, `storage/framework/cache/*`, `storage/framework/sessions/*`;
-   - `tests/`, `docs/`, `node_modules/`, `.git/`;
-   - bancos SQLite locais.
-4. Crie `.env` no servidor com os valores de produção.
-5. Permissões:
-   - `storage/` e `bootstrap/cache/` → `775` (ou `755` se o host exigir);
-   - arquivos → `644`;
-   - nunca `777`.
-
----
-
-## 5. Banco e instalação
-
-1. Crie banco e usuário MySQL exclusivos no hPanel.
-2. Acesse `https://one.qeai.com.br/install`.
-3. O instalador verifica requisitos, testa o banco, roda as migrations, cria o
-   **ADM Root** e grava a identidade da plataforma.
-4. Após concluir, o instalador fica bloqueado (`storage/app/installed.json`).
-5. Entre com o ADM Root e conclua o 2FA.
-
-Se usar SSH, o fluxo alternativo é:
+## Primeira instalação
 
 ```bash
-php artisan migrate --force
+cd ~/domains/one.qeai.com.br/qone
+cp .env.example .env
+nano .env
+composer install --no-dev --optimize-autoloader --no-interaction
+php artisan key:generate --force
+chmod 600 .env
+find storage bootstrap/cache -type d -exec chmod 775 {} \;
+find storage bootstrap/cache -type f -exec chmod 644 {} \;
 php artisan optimize
 ```
 
-Mas o instalador continua sendo o caminho recomendado para criar o primeiro ADM.
+Depois abra `https://one.qeai.com.br/install`, crie o ADM Root, ative o 2FA e
+configure o SMTP no painel.
 
----
-
-## 6. Otimização e permissões
-
-Com SSH:
-
-```bash
-php artisan optimize
-php artisan storage:link
-```
-
-Sem SSH, execute as rotas equivalentes via painel/terminal da Hostinger ou
-envie o projeto já otimizado. Após qualquer alteração de `.env`:
-
-```bash
-php artisan optimize:clear
-php artisan optimize
-```
-
----
-
-## 7. Cron
-
-Configure **a cada minuto** no hPanel:
-
-```bash
-/usr/bin/php /home/USUARIO/domains/one.qeai.com.br/artisan schedule:run >> /dev/null 2>&1
-```
-
-Se o caminho do PHP for diferente, use o binário indicado pela Hostinger
-(ex.: `/opt/alt/php83/usr/bin/php`).
-
----
-
-## 8. SMTP e e-mails
+## SMTP
 
 No painel Root → **Configurações**:
-1. Preencha host, porta, criptografia, usuário e senha SMTP.
-2. Salve.
-3. Use **Verificação de entrega** para enviar um e-mail de teste.
-4. Confirme SPF, DKIM e DMARC no DNS do domínio.
-5. Teste também convite e recuperação de senha.
 
-Sem SMTP configurado, convites e redefinições de senha não são enviados.
+- Host: `smtp.hostinger.com`
+- Porta: `465` (SSL/TLS) ou `587` (STARTTLS)
+- Usuário: endereço completo da caixa
+- Senha: senha da caixa
+- Remetente: endereço válido do domínio
 
----
+Use **Verificação de entrega** e confirme SPF, DKIM e DMARC no DNS.
 
-## 9. Pós-deploy — validação obrigatória
+## Atualização
 
-- [ ] `https://one.qeai.com.br/login` abre com HTTPS válido.
-- [ ] `APP_DEBUG=false` e erros não aparecem na tela.
-- [ ] `/install` retorna 404 após a instalação.
-- [ ] Login do ADM Root funciona.
-- [ ] 2FA do Root está ativo.
-- [ ] Cadastro público cria organização e aceita os termos.
-- [ ] Convite chega por e-mail e abre a tela de aceite.
-- [ ] Organização, membros, grupos e permissões funcionam.
-- [ ] Lead cria ID permanente e registra histórico.
-- [ ] Campos personalizados criam, editam, desativam e reativam.
-- [ ] Visões Tabela, Kanban, Calendário e Cronograma funcionam.
-- [ ] Preferência de filtros salva e recarrega por visão.
-- [ ] API de leads responde com chave válida e rejeita sem chave.
-- [ ] Webhooks de saída usam HTTPS e assinatura.
-- [ ] `/termos` e `/privacidade` estão publicados.
-- [ ] Usuário sem aceite é direcionado para `/termos/aceite`.
-- [ ] Backup do banco e do `.env` está configurado.
-- [ ] Logs de erro estão fora do docroot.
-- [ ] Nenhum usuário ou dado de teste está no banco.
+```bash
+cd ~/domains/one.qeai.com.br/qone
+mysqldump --single-transaction --quick -h DB_HOST -u DB_USER -p DB_NAME \
+  > ~/backups/qone-$(date +%F-%H%M).sql
 
----
+php artisan down --secret="CODIGO_TEMPORARIO"
+git fetch origin
+git reset --hard origin/main
+composer install --no-dev --optimize-autoloader --no-interaction
+php artisan migrate --force
+php artisan optimize
+php artisan up
+```
 
-## 10. Rollback
+Não use `git clean -fdx`: isso apagaria `.env`, `vendor/` e `storage/`.
 
-1. Ative manutenção: `php artisan down`.
-2. Restaure o backup do banco.
-3. Restaure a versão anterior do código.
-4. `php artisan optimize:clear && php artisan optimize`.
-5. `php artisan up`.
-
-Mantenha sempre um backup antes de migrations destrutivas.
-
----
-
-## 11. Limitações da hospedagem compartilhada
+## Limitações da hospedagem compartilhada
 
 - Sem Redis/WebSocket; inbox em tempo real e filas persistentes ficam limitados.
 - Cron mínimo de 1 minuto.
 - Envio de e-mail depende do SMTP e da reputação do domínio.
 - Para volume alto, webhooks concorrentes, IMAP e automações, migrar para VPS.
 
-Essas limitações estão documentadas em `docs/SECURITY.md` e no plano técnico.
+Essas limitações também estão em [`SECURITY.md`](SECURITY.md) e no plano técnico.

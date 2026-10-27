@@ -48,7 +48,7 @@ produção e para qualquer alteração futura.
 - Campos personalizados com tipo, opções e validação compatíveis.
 - CSV de logs neutraliza fórmulas (`=`, `+`, `-`, `@`).
 
-### Dados e termos`n- [ ] `LEGAL_REQUIRE_ACCEPTANCE=true` em produ��o`n- [ ] Termos de Uso publicados em `https://qeai.com.br/termos` e infraestrutura
+### Dados
 - Auditoria com encadeamento de hash em escopos `platform` e `organization`.
 - Credenciais de canais/SMTP criptografadas.
 - Tokens de API armazenados como hash; escopo por organização e rate limit.
@@ -83,10 +83,18 @@ produção e para qualquer alteração futura.
 - [ ] `TRUSTED_PROXIES` configurado se houver proxy/CDN
 - [ ] Cache de configuração/rotas/views gerado no deploy
 - [ ] Cron `schedule:run` ativo
-- [ ] Queue configurada (database) e worker/cron conforme hospedagem
+- [ ] Queue definida conforme a hospedagem (`sync` na compartilhada; worker em VPS)
 - [ ] Migrações executadas com `--force`
 - [ ] SMTP da plataforma testado
 - [ ] `storage/` e `bootstrap/cache/` graváveis apenas pelo necessário
+
+### Deploy Git
+- [ ] Deploy keys read-only, uma por repositório
+- [ ] `.git` fora do docroot; docroot em `public/`
+- [ ] `.env` com permissão `600`
+- [ ] `git reset --hard` sem `git clean -fdx`
+- [ ] Backup do banco e do `.env` antes de atualizar
+- [ ] Guia aplicado: `docs/DEPLOY-GIT.md`
 
 ### Banco e servidor
 - [ ] Usuário MySQL com permissões mínimas
@@ -99,7 +107,9 @@ produção e para qualquer alteração futura.
 - [ ] Logs de erro fora da pasta pública
 - [ ] Limite de upload e timeout coerentes
 
-### Dados e termos`n- [ ] `LEGAL_REQUIRE_ACCEPTANCE=true` em produ��o`n- [ ] Termos de Uso publicados em `https://qeai.com.br/termos`
+### Dados e termos
+- [ ] `LEGAL_REQUIRE_ACCEPTANCE=true` em produção
+- [ ] Termos de Uso publicados em `https://qeai.com/termos`
 - [ ] Nenhum usuário/QA/demo de teste no banco de produção
 - [ ] Nenhum lead/demo de teste
 - [ ] Organizações reais revisadas
@@ -139,8 +149,8 @@ A suíte cobre autenticação, organizações, permissões, convites, limites de
 CRM, campos personalizados, leads, visões, preferências, módulos, API, webhooks,
 inbox, social, anúncios, segurança de headers, CSV e isolamento entre organizações.
 
-- **126 testes automatizados / 539 asserções** executados com sucesso.
-- **44 verificações do site institucional** executadas com sucesso.
+- **127 testes automatizados / 550 asserções** executados com sucesso.
+- **45 verificações do site institucional** executadas com sucesso.
 - Verificações específicas: headers/CSP, XSS em URL, CSV injection, SSRF de webhooks,
   preferências por usuário/organização, isolamento de leads e campos, governança do
   Root sem vínculo e assinatura de webhooks.
