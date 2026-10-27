@@ -1,121 +1,311 @@
 # QEAI One — Design System
 
-Padrão visual da plataforma. Objetivo: consistência, legibilidade e aparência profissional,
-mantendo **HTML/CSS/JS puro** (sem build/Node).
+Padrão visual oficial da plataforma. Objetivo: **consistência, clareza e facilidade de uso**
+para qualquer pessoa com conhecimento básico de informática.
 
-Arquivo de estilos: `public/css/app.css`. Layout base: `resources/views/layouts/app.blade.php`
-(com variações `layouts/panel.blade.php` e `layouts/member.blade.php`).
+- CSS: `public/css/app.css`
+- JavaScript de interação: `public/js/app.js`
+- Ícones: componente Blade `<x-icon name="..." />` (`resources/views/components/icon.blade.php`)
+- Layouts: `layouts/app`, `layouts/auth`, `layouts/member`, `layouts/panel`
+- Referência visual: dashboard com **sidebar escura**, cards claros, KPIs, funil e gráficos;
+  autenticação em **tela dividida** (marca à esquerda, formulário à direita).
 
 ---
 
 ## 1. Princípios
 
-1. **Clareza primeiro** — hierarquia visual simples, muito espaço em branco, foco no conteúdo.
-2. **Consistência** — sempre reutilizar tokens e componentes; não criar variações soltas.
-3. **Acessível** — contraste adequado, foco visível, navegação por teclado, `aria-*` quando aplicável.
-4. **Sem dependências** — CSS próprio; nenhuma biblioteca de UI externa.
+1. **Simplicidade primeiro** — cada tela deve deixar claro o próximo passo. Evite telas densas.
+2. **Consistência** — reutilize tokens e componentes existentes; não crie variações soltas.
+3. **Hierarquia** — título → contexto → ação principal → conteúdo. Uma ação primária por bloco.
+4. **Acessibilidade** — contraste, foco visível (`:focus-visible`), navegação por teclado,
+   textos alternativos e `aria-label` em botões com ícone.
+5. **Sem dependências** — HTML/CSS/JS puro, sem Node, Vite ou bibliotecas de UI.
 
-## 2. Tokens (variáveis CSS)
+---
 
-Definidos em `:root`. A **cor primária pode ser trocada por organização/plataforma** (white label)
-via `Setting::primary_color`, injetada no `<head>` como `--primary`.
+## 2. Tokens
+
+Definidos em `:root` no `public/css/app.css`. A cor primária é **white label**: o ADM Root
+define `primary_color` em **Configurações** e o layout injeta `--primary` no `<head>`.
 
 | Token | Valor padrão | Uso |
 |---|---|---|
-| `--primary` | `#6D3DF5` | Ações principais, links, destaques |
-| `--secondary` | `#18C7D9` | Apoio (gráficos, ícones secundários) |
-| `--accent` | `#FF7048` | Alertas de destaque / ênfase |
-| `--dark` | `#0F1120` | Textos fortes, barras escuras |
-| `--ink` | `#22243A` | Texto padrão |
-| `--muted` | `#6B6C80` | Texto secundário |
-| `--border` | `#E7E5EF` | Bordas e divisores |
-| `--surface` | `#FFFFFF` | Fundo de cards |
-| `--soft` | `#F7F6FB` | Fundo da página / seções |
-| `--ok` / `--ok-bg` | `#1F7A4D` / `#EAF7EF` | Sucesso |
-| `--err` / `--err-bg` | `#A32A22` / `#FDEEEC` | Erro |
-| `--radius` | `14px` | Cantos de cards |
+| `--primary` | `#6D3DF5` | Ações principais, links, item ativo |
+| `--primary-600` | `#5B2EE8` | Hover / estados mais escuros |
+| `--primary-soft` | `#F1EDFE` | Fundos suaves, badges, ícones |
+| `--secondary` | `#2F80FF` | Apoio, gráficos, gradientes |
+| `--accent` | `#F97316` | Notificações, alertas de atenção |
+| `--dark` | `#0B1220` | Sidebar, títulos e textos fortes |
+| `--ink` | `#1E293B` | Texto padrão |
+| `--muted` | `#64748B` | Texto secundário |
+| `--border` | `#E6EAF2` | Bordas, divisores |
+| `--surface` | `#FFFFFF` | Cards e superfícies |
+| `--soft` | `#F5F7FC` | Fundo da aplicação |
+| `--ok` / `--ok-bg` | `#15803D` / `#ECFDF3` | Sucesso |
+| `--warn` / `--warn-bg` | `#B45309` / `#FFF7ED` | Atenção |
+| `--err` / `--err-bg` | `#DC2626` / `#FEF2F2` | Erro / ação destrutiva |
+| `--info` / `--info-bg` | `#2563EB` / `#EFF6FF` | Informação |
+| `--radius` | `16px` | Cards |
 | `--radius-sm` | `10px` | Inputs e botões |
-| `--shadow-sm` | `0 1px 2px rgba(16,12,40,.06)` | Cards em repouso |
-| `--shadow-md` | `0 12px 32px rgba(16,12,40,.10)` | Cards em destaque |
-| `--shadow-lg` | `0 24px 60px rgba(16,12,40,.16)` | Modais / hero |
+| `--shadow-sm` | `0 1px 2px rgba(15,23,42,.05)` | Cards em repouso |
+| `--shadow-md` | `0 14px 34px rgba(15,23,42,.08)` | Cards em destaque / dropdowns |
+| `--shadow-lg` | `0 28px 70px rgba(15,23,42,.16)` | Modais / destaques |
 
-Espaçamento: escala de 4px (`4, 8, 12, 16, 24, 32, 48, 64`). Tipografia: pilha de fontes do sistema
-(`Inter, system-ui, …`).
+**Espaçamento:** escala de 4px — `4, 8, 12, 16, 20, 24, 32, 40, 56`.
+**Tipografia:** `Inter`, `Segoe UI`, `system-ui`; fallback local (sem requisições externas).
+**Raio:** cards `16px`, inputs/botões `10px`, avatares círculo, ícones em quadrado arredondado `11–12px`.
 
-## 3. Tipografia
+### Tipografia
 
 | Elemento | Tamanho | Peso |
 |---|---|---|
-| `h1` | `1.9rem` (com `clamp`) | 700 |
-| `h2` | `1.25rem` | 650 |
-| `h3` | `1rem` | 650 |
-| Texto | `0.92rem` | 400 |
-| Secundário (`.muted`) | `0.85rem` | 400 |
-| `.eyebrow` | `0.7rem` uppercase, `letter-spacing .12em` | 700 |
+| `h1` | `clamp(1.55rem, 2.6vw, 1.95rem)` | 800 |
+| `h2` | `1.15rem` | 750 |
+| `h3` | `.98rem` | 700 |
+| Texto | `.88–.95rem` | 400 |
+| Secundário (`.muted`) | `.87rem` | 400 |
+| Rótulo de seção (`.nav-label`, `.page-kicker`) | `.6–.72rem` uppercase | 800 |
+
+---
+
+## 3. Estrutura de telas
+
+### 3.1 Aplicação autenticada — `.app-shell`
+
+```
+┌────────────────┬──────────────────────────────────────────────┐
+│ Sidebar escura │ Topbar: busca · notificações · usuário         │
+│ 264px          ├──────────────────────────────────────────────┤
+│ logo           │ Conteúdo (.app-content)                      │
+│ organização    │  Page header                                 │
+│ navegação      │  Cards, tabelas, formulários                 │
+│ usuário / sair │                                              │
+└────────────────┴──────────────────────────────────────────────┘
+```
+
+- Sidebar fixa (`position: sticky`, `height: 100vh`) com fundo em gradiente escuro.
+- Navegação agrupada por rótulos: **Principal**, **Comunicação**, **Marketing**, **Gestão**.
+- Item ativo: gradiente `--primary` → `#7C5CFF`, texto branco e sombra.
+- Topbar com busca de leads, sino com contador, avatar e menu do usuário.
+- Abaixo de **860px** a sidebar vira menu lateral (off-canvas) com botão hambúrguer e overlay.
+- Conteúdo com largura máxima de `1480px`, padding `26–28px`.
+
+Layouts:
+- `layouts/member` — painel da organização (sidebar completa).
+- `layouts/panel` — painel Root (badge laranja “Root Admin”, navegação da plataforma).
+- `layouts/app` — páginas públicas simples (formulários, convites, chat).
+- `layouts/auth` — login e cadastro.
+
+### 3.2 Autenticação — `.auth-split`
+
+Tela dividida em duas colunas:
+
+- **Esquerda (marca):** fundo escuro com brilhos em gradiente, logo claro, chamada
+  “Mais clientes. Mais oportunidades. Mais resultados.”, três benefícios e selo de segurança/LGPD.
+- **Direita (ação):** fundo `#F8FAFF`, card branco `470px` com logo, título, formulário,
+  divisor “ou” e link de cadastro/login.
+- Abaixo de **820px**: apenas a coluna do formulário, com logo compacta no topo.
+
+Login e cadastro usam exatamente esse layout (`auth/login.blade.php`, `auth/register.blade.php`).
+Recuperação de senha e verificação em duas etapas também usam o mesmo layout (`auth/forgot`, `auth/reset`, `auth/two-factor`).
+
+---
 
 ## 4. Componentes
 
 ### Botões (`.btn`)
-- Base: `.btn` (primário, fundo `--primary`).
-- `.btn.secondary` — contorno, fundo branco.
-- `.btn.danger` — contorno vermelho (ações destrutivas).
-- `.btn.small` — tamanho reduzido (tabelas/ações em linha).
-- `.btn.full` — largura total (formulários de login/cadastro).
-- Estados: `:hover`, `:focus-visible` (anel de foco), `:disabled` (opacidade).
 
-### Cards (`.card`)
-Bloco branco, borda `--border`, raio `--radius`, sombra suave. Variações `.card.narrow` (autenticação)
-e `.card.wide` (instalador). Cada card tem um `h2` no topo.
+| Classe | Uso |
+|---|---|
+| `.btn` | Ação primária (roxo) |
+| `.btn.secondary` | Ação secundária (contorno) |
+| `.btn.ghost` | Ação discreta |
+| `.btn.danger` | Excluir / ação destrutiva |
+| `.btn.small` | Ações em tabelas e cabeçalhos |
+| `.btn.full` | Largura total |
 
-### Formulários
-- `label` em coluna com `input`/`select`/`textarea` (classe automática).
-- Grade de 2 colunas: `.grid-2` (`.full` ocupa a linha inteira).
-- Checkbox: `.check` (linha; usado para opções e consentimento).
-- Erros: `.alert.err` no topo do formulário; `.error`/`field-error` junto ao campo.
+Altura mínima `42px` (toque confortável), ícone opcional de `16–18px`.
+Sempre com texto claro e verbo de ação (“Criar lead”, “Salvar alterações”).
+
+### Cards (`.card`, `.panel-card`)
+
+- `.card` — conteúdo geral (formulários, tabelas, configurações), padding `24px`.
+- `.panel-card` — blocos do dashboard, padding `20px`.
+- `.card.narrow` — autenticação/estado vazio (`460px`).
+- `.card-head` — título + descrição + ação alinhados.
+
+### KPIs (`.kpi-grid`, `.kpi-card`)
+
+Grade de 4 colunas em desktop; 2 em telas médias; 1 no celular.
+
+```
+[ícone colorido]                         [↑ 12%]
+Rótulo
+1.248
+1.248 novo(s) no período
+```
+
+- Ícones com tons: `blue`, `purple`, `green`, `orange`.
+- Variação positiva em verde, negativa em vermelho, “Novo” quando não há base anterior.
+- Valores monetários grandes usam formato compacto (`R$ 2,2 mi`) e o detalhe mostra o valor completo.
+
+### Funil (`.funnel`)
+
+- Barras trapezoidais via `clip-path`, cores: azul → roxo → rosa → verde.
+- Cada etapa mostra **quantidade** e **nome**; à direita, o percentual em relação à primeira etapa.
+- Rodapé com total de negócios e valor somado.
+- Estado vazio com ícone, texto curto e link para criar a primeira oportunidade.
+
+### Donut (`.donut`)
+
+- Gráfico com `conic-gradient` gerado no servidor; centro com total de leads.
+- Legenda com ponto de cor, origem e percentual.
+- Cores fixas: `#3B82F6`, `#7C3AED`, `#EC4899`, `#F59E0B`, `#10B981`, `#94A3B8`.
+
+### Tarefas (`.task-list`)
+
+- Checkbox circular à esquerda, título e vínculo, horário à direita.
+- Tarefas atrasadas recebem cor vermelha (`.overdue`).
+- Estado vazio positivo: “Nenhuma tarefa para hoje. Tudo em dia!”.
+
+### Atividades (`.activity-list`)
+
+- Ícone em círculo colorido por tipo (lead, oportunidade, tarefa, mensagem, formulário).
+- Título amigável + autor/entidade + tempo relativo.
+- Limite de 6 itens no dashboard; link para os logs completos.
 
 ### Alertas (`.alert`)
-`.alert.ok` (sucesso) e `.alert.err` (erro). Sempre no topo do conteúdo.
+
+`.alert.ok`, `.alert.err`, `.alert.warn`. Sempre no topo do conteúdo, com texto direto.
+Alertas de sucesso desaparecem automaticamente após 7 segundos.
+
+### Formulários
+
+- `label` em coluna, texto `0.81rem`, campo com borda `#D9E0EC` e raio `10px`.
+- Grid de 2 colunas: `.grid-2` (`.full` ocupa a linha inteira).
+- Checkbox: `.check` (linha, com `accent-color` da marca).
+- Erros: `.alert.err` no topo e/ou `.field-error`.
+- Login/cadastro: `.auth-input` com ícone à esquerda e botão de mostrar/ocultar senha.
 
 ### Tabelas (`.table`)
-Cabeçalho em maiúsculas pequenas; linhas com divisor; ações à direita (`.right`, `.row-actions.inline`).
-Badges (`.badge`) para status.
 
-### Navegação
-- `.topbar` — barra superior (marca, sino, usuário, sair).
-- `.panel-nav` — abas da seção atual (`.active`).
-- `.bell` — sino com contador de notificações (`.badge`).
-- `.pill` / `.eyebrow` — rotulagem de contexto.
-
-### Outros
+- Cabeçalho em maiúsculas pequenas (`0.66rem`), divisores suaves, hover de linha.
+- Ações à direita com `.row-actions` e `.btn.small`.
+- Em telas pequenas: rolagem horizontal (`display:block; overflow-x:auto`).
 - Paginação: `.pagination`, `.pagination-link`, `.pagination-status`.
-- Kanban: `.kanban`, `.kanban-col`, `.deal-card`, `.deal-value`, `.deal-meta`.
-- Chat: `.chat-log`, `.chat-msg.in/.out`, `.chat-bubble`.
-- Onboarding: `.onboarding-list` (`li.done`).
-- Estado vazio: `.empty-state`.
-- Selo de segurança de e-mail: `.verify-banner`.
-- Honeypot (formulários públicos): `.hp` (invisível para humanos).
 
-## 5. Layouts
+### Navegação e usuário
 
-- **Público** (`layouts/app`): landing, login, cadastro, formulários públicos, chat, convites.
-- **Painel da plataforma** (`layouts/panel`): visão do ADM Root (`/painel`).
-- **Painel da organização** (`layouts/member`): organização ativa (`/app/organizacoes/{org}`), com
-  seletor de organização quando o usuário participa de mais de uma.
+- `.side-link` — item de navegação com ícone, estado ativo em gradiente.
+- `.side-user` — cartão do usuário no rodapé da sidebar.
+- `.user-dropdown` — `<details>` com avatar, nome, organização e menu (configurações, trocar organização, sair).
+- `.icon-btn` — botão circular com ícone (sino, ajuda).
+- `.avatar` — iniciais do usuário/organização em gradiente.
+
+### Ícones
+
+```blade
+<x-icon name="users" :size="18" />
+```
+
+Nomes disponíveis: `home`, `users`, `user-plus`, `briefcase`, `building`, `check-square`,
+`calendar`, `message`, `inbox`, `bar-chart`, `chart-pie`, `settings`, `bell`, `search`,
+`help`, `chevron-down`, `chevron-right`, `plus`, `arrow-right`, `mail`, `lock`, `eye`,
+`eye-off`, `target`, `trending-up`, `dollar`, `handshake`, `phone`, `zap`, `grid`, `filter`,
+`menu`, `x`, `shield`, `key`, `code`, `megaphone`, `share`, `link`, `trash`, `pencil`,
+`download`, `clock`, `activity`, `logout`, `sparkles`, `list-check`, `circle`.
+
+Regras: usar `currentColor`, tamanho `14–22px` e sempre `aria-hidden` (o componente já aplica).
+
+---
+
+## 5. Mapa de navegação da organização
+
+| Menu | Rota | Permissão |
+|---|---|---|
+| Dashboard | `/app/organizacoes/{org}/dashboard` | `org.leads` |
+| Leads | `/crm/contatos` | `org.leads` |
+| Oportunidades | `/crm/negocios` | `org.leads` |
+| Clientes | `/crm/empresas` | `org.leads` |
+| Tarefas | `/crm/tarefas` | `org.leads` |
+| Conversas | `/atendimento` | `org.conversations` |
+| Canais | `/canais` | `org.channels` |
+| Formulários | `/crm/formularios` | `org.leads` |
+| Redes sociais | `/social` | `org.social` |
+| Anúncios | `/anuncios` | `org.ads` |
+| Campos | `/crm/campos` | `org.settings` |
+| Integrações | `/integracoes` | `org.api_keys` |
+| Configurações | `/` da organização | `org.settings` / `org.members` |
+| Logs | `/logs` | `org.logs` |
+
+Itens sem permissão **não são exibidos**. O Root vê a estrutura, mas dados de negócio
+continuam bloqueados sem vínculo com a organização (tela de governança).
+
+---
 
 ## 6. Responsividade
 
-- Breakpoints: `820px` (formulários/tabelas), `720px`/`620px` (nav e cards).
-- Tabelas viram scroll horizontal em telas pequenas (`.table { display:block; overflow-x:auto }`).
-- Grades de 2 colunas colapsam para 1.
+| Breakpoint | Comportamento |
+|---|---|
+| `> 1080px` | KPIs em 4 colunas; gráficos em 2 colunas; sidebar fixa |
+| `≤ 1080px` | KPIs em 2 colunas; gráficos empilhados |
+| `≤ 860px` | Sidebar off-canvas com hambúrguer e overlay; topbar compacta |
+| `≤ 820px` | Formulários em 1 coluna; tabelas com rolagem; login sem painel esquerdo |
+| `≤ 620px` | Busca oculta; KPIs em 1 coluna; avatar sem nome no topbar |
+| `≤ 420px` | Ajustes de padding e tipografia |
 
-## 7. White label
+Teste sempre: 360px (celular), 768px (tablet), 1024px, 1366px e 1920px.
 
-Nome, logo (previsto) e **cor primária** são configuráveis pelo ADM Root em **Configurações**.
-A cor primária é aplicada em `:root{--primary}` no layout, refletindo em botões, links e destaques.
+---
 
-## 8. Boas práticas
+## 7. Acessibilidade
 
-- Não hardcodar cores; usar tokens.
-- Ações destrutivas pedem `confirm()` e usam `.btn.danger`/`.secondary`.
-- Sempre exibir `session('status')` e `$errors` (já tratado nos layouts).
-- Textos em pt-BR, curtos e diretos.
+- Contraste mínimo AA para texto e botões.
+- Foco visível com anel de `3px` usando a cor primária.
+- Botões apenas com ícone recebem `aria-label` e `title`.
+- Formulários com `label for` ligado ao `id` do campo.
+- Menu off-canvas fecha com `Esc`, clique no overlay ou no botão “X”.
+- Não usar cor como único indicador de status (sempre acompanhar de texto).
+- Respeitar `prefers-reduced-motion` em novas animações (quando adicionadas).
+
+---
+
+## 8. White label
+
+- Nome, razão social, CNPJ e e-mail de contato: `PlatformSettingsController`.
+- Cor primária: `--primary`, aplicada no `<head>` de todos os layouts.
+- Logo: `public/img/logo.svg` (fundo claro) e `public/img/logo-light.svg` (fundo escuro).
+- Ao trocar a marca, manter as duas versões e a proporção `152×44` (ou múltiplo).
+
+---
+
+## 9. Boas práticas e o que evitar
+
+**Faça**
+- Use os tokens de cor; nunca valores soltos (`#6D3DF5` apenas no token).
+- Prefira textos curtos, em pt-BR, com verbos de ação.
+- Coloque uma ação primária por tela/bloco.
+- Exiba estados vazios com orientação do próximo passo.
+- Use `confirm()` para ações destrutivas e `@method('DELETE')` nos formulários.
+- Mantenha os formulários com `maxlength`, `autocomplete` e validação no servidor.
+
+**Evite**
+- Cards aninhados em excesso ou sombras fortes.
+- Mais de 3 níveis de navegação.
+- Tabelas sem ação clara ou sem estado vazio.
+- Ícones sem rótulo em ações importantes.
+- Cores de status fora dos tokens (`--ok`, `--warn`, `--err`).
+
+---
+
+## 10. Checklist de revisão de UI
+
+- [ ] A tela funciona em 360px, 768px e 1366px.
+- [ ] Sidebar e topbar mantêm o item ativo correto.
+- [ ] A ação principal está visível sem rolar a tela.
+- [ ] Formulários exibem erros e sucesso.
+- [ ] Tabelas têm cabeçalho legível e ações à direita.
+- [ ] Estados vazios orientam o próximo passo.
+- [ ] Nenhuma cor hardcoded fora dos tokens.
+- [ ] Foco de teclado visível em todos os controles.
+- [ ] Textos em pt-BR e sem jargão desnecessário.

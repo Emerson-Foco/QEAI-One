@@ -1,32 +1,55 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('title', 'Entrar — QEAI One')
-@section('robots', 'noindex,nofollow')
 
-@section('content')
-<div class="center">
-  <div class="card narrow">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="QEAI One"></div>
-    <span class="eyebrow">Acesso</span>
-    <h1>Bem-vindo de volta.</h1>
-    <p class="muted">Entre com seu e-mail para acessar o painel.</p>
+@section('auth')
+  <h1 class="auth-title">Acesse sua conta</h1>
+  <p class="auth-sub">Entre para continuar no QEAI One</p>
 
-    @if (session('status'))
-      <div class="alert ok">{{ session('status') }}</div>
-    @endif
-    @error('email')<div class="alert err">{{ $message }}</div>@enderror
+  @if (session('status'))
+    <div class="alert ok">{{ session('status') }}</div>
+  @endif
+  @error('email')<div class="alert err">{{ $message }}</div>@enderror
 
-    <form method="post" action="{{ route('login') }}">
-      @csrf
-      <label>E-mail<input type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"></label>
-      <label>Senha<input type="password" name="password" required autocomplete="current-password"></label>
-      <label class="check"><input type="checkbox" name="remember" value="1"> Lembrar de mim</label>
-      <button class="btn full">Entrar</button>
-    </form>
-    <p class="muted" style="margin-top:14px;font-size:.8rem">
-      <a href="{{ route('password.request') }}">Esqueci minha senha</a>
-      · <a href="{{ route('register') }}">Criar conta</a>
-    </p>
-  </div>
-</div>
+  <form method="post" action="{{ route('login') }}" class="auth-form">
+    @csrf
+    <label for="email">E-mail
+      <span class="auth-input">
+        <x-icon name="mail" :size="18"/>
+        <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="seu@empresa.com" required autofocus autocomplete="username">
+      </span>
+    </label>
+
+    <label for="password">Senha
+      <span class="auth-input">
+        <x-icon name="lock" :size="18"/>
+        <input id="password" type="password" name="password" placeholder="Sua senha" required autocomplete="current-password" data-password>
+        <button type="button" class="auth-toggle" data-toggle-password aria-label="Mostrar senha">
+          <x-icon name="eye" :size="18"/>
+        </button>
+      </span>
+    </label>
+
+    <div class="auth-row">
+      <label class="check" style="margin:0">
+        <input type="checkbox" name="remember" value="1">
+        <span>Lembrar de mim</span>
+      </label>
+      <a class="auth-link" href="{{ route('password.request') }}">Esqueceu a senha?</a>
+    </div>
+
+    <button class="btn auth-submit">
+      Entrar
+      <x-icon name="arrow-right" :size="18"/>
+    </button>
+  </form>
+
+  <div class="auth-divider"><span>ou</span></div>
+
+  <a class="btn secondary auth-alt" href="{{ route('register') }}">
+    <x-icon name="building" :size="18"/>
+    Criar conta para minha empresa
+  </a>
+
+  <p class="auth-bottom">Ainda não tem uma conta? <a href="{{ route('register') }}">Cadastre sua empresa</a></p>
 @endsection

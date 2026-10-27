@@ -17,7 +17,7 @@
   </form>
 </div>
 
-<div class="card">
+<div class="card" id="nova-tarefa">
   <h2>Nova tarefa</h2>
   <form method="post" action="{{ route('member.org.tasks.store', $organization) }}">
     @csrf

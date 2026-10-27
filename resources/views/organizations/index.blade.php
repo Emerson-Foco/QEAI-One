@@ -36,7 +36,7 @@
           <td><span class="badge">{{ $organization->status }}</span></td>
           <td class="right">
             <div class="row-actions inline">
-              <a class="btn secondary small" href="{{ route('member.org.show', $organization) }}">Painel</a>
+              <a class="btn secondary small" href="{{ route('member.org.dashboard', $organization) }}">Painel</a>
               <a class="btn secondary small" href="{{ route('panel.organizations.show', $organization) }}">Detalhes</a>
             </div>
           </td>

@@ -1,38 +1,61 @@
-@extends('layouts.app')
+@extends('layouts.auth')
 
 @section('title', 'Criar conta — QEAI One')
-@section('robots', 'noindex,nofollow')
 
-@section('content')
-<div class="center">
-  <div class="card narrow">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="QEAI One"></div>
-    <span class="eyebrow">Criar conta</span>
-    <h1>Crie sua organização no QEAI One.</h1>
-    <p class="muted">Para empresas (B2B). Você será o proprietário da organização.</p>
+@section('auth')
+  <h1 class="auth-title">Crie sua organização</h1>
+  <p class="auth-sub">Comece grátis. Você será o proprietário da conta.</p>
 
-    @if ($errors->any())
-      <div class="alert err">{{ $errors->first() }}</div>
-    @endif
+  @if ($errors->any())
+    <div class="alert err">{{ $errors->first() }}</div>
+  @endif
 
-    <form method="post" action="{{ route('register') }}">
-      @csrf
-      <label>Empresa / organização<input name="company_name" value="{{ old('company_name') }}" required maxlength="160"></label>
-      <label>CNPJ (opcional)<input name="document" value="{{ old('document') }}" maxlength="24"></label>
-      <div class="grid-2">
-        <label>Seu nome<input name="name" value="{{ old('name') }}" required maxlength="120"></label>
-        <label>E-mail<input type="email" name="email" value="{{ old('email') }}" required maxlength="180" autocomplete="username"></label>
-        <label>Senha<input type="password" name="password" minlength="10" maxlength="72" required autocomplete="new-password"><small>Mínimo de 10 caracteres.</small></label>
-        <label>Confirme a senha<input type="password" name="password_confirmation" minlength="10" maxlength="72" required autocomplete="new-password"></label>
-      </div>
-      <label class="check">
-        <input type="checkbox" name="terms" value="1" required>
-        <span>Li e aceito os <a href="https://qeai.com.br/privacidade" target="_blank" rel="noopener">Termos de Uso e Política de Privacidade</a>.</span>
+  <form method="post" action="{{ route('register') }}" class="auth-form">
+    @csrf
+    <label for="company_name">Empresa / organização
+      <input id="company_name" name="company_name" value="{{ old('company_name') }}" placeholder="Nome da sua empresa" required maxlength="160" autocomplete="organization">
+    </label>
+
+    <label for="document"><span>CNPJ <small>(opcional)</small></span>
+      <input id="document" name="document" value="{{ old('document') }}" placeholder="00.000.000/0000-00" maxlength="24" inputmode="numeric">
+    </label>
+
+    <label for="name">Seu nome
+      <input id="name" name="name" value="{{ old('name') }}" placeholder="Nome e sobrenome" required maxlength="120" autocomplete="name">
+    </label>
+
+    <label for="email">E-mail
+      <span class="auth-input">
+        <x-icon name="mail" :size="18"/>
+        <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="voce@empresa.com" required maxlength="180" autocomplete="username">
+      </span>
+    </label>
+
+    <div class="auth-grid">
+      <label for="password">Senha
+        <span class="auth-input">
+          <x-icon name="lock" :size="18"/>
+          <input id="password" type="password" name="password" minlength="10" maxlength="72" placeholder="Mín. 10" required autocomplete="new-password" data-password>
+        </span>
       </label>
-      <button class="btn full">Criar conta</button>
-    </form>
+      <label for="password_confirmation">Confirmar senha
+        <span class="auth-input">
+          <x-icon name="lock" :size="18"/>
+          <input id="password_confirmation" type="password" name="password_confirmation" minlength="10" maxlength="72" placeholder="Repetir" required autocomplete="new-password">
+        </span>
+      </label>
+    </div>
 
-    <p class="muted" style="margin-top:14px;font-size:.8rem">Já tem conta? <a href="{{ route('login') }}">Entrar</a></p>
-  </div>
-</div>
+    <label class="check auth-terms">
+      <input type="checkbox" name="terms" value="1" required @checked(old('terms'))>
+      <span>Li e aceito os <a href="https://qeai.com.br/privacidade" target="_blank" rel="noopener">Termos de Uso e a Política de Privacidade</a>.</span>
+    </label>
+
+    <button class="btn auth-submit">
+      Criar minha conta
+      <x-icon name="arrow-right" :size="18"/>
+    </button>
+  </form>
+
+  <p class="auth-bottom">Já tem uma conta? <a href="{{ route('login') }}">Entrar</a></p>
 @endsection

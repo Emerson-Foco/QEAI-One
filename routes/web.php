@@ -29,6 +29,7 @@ use App\Http\Controllers\MemberController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\OrganizationMemberController;
 use App\Http\Controllers\OrganizationPanelController;
+use App\Http\Controllers\OrganizationDashboardController;
 use App\Http\Controllers\OrganizationRoleController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlatformSettingsController;
@@ -116,6 +117,7 @@ Route::middleware(['auth', 'installed', 'org'])
     ->name('member.org.')
     ->group(function () {
         Route::get('/', [OrganizationPanelController::class, 'show'])->name('show');
+        Route::get('dashboard', OrganizationDashboardController::class)->name('dashboard');
         Route::get('logs', [OrganizationController::class, 'logs'])->name('logs');
 
         Route::get('crm/campos', [CustomFieldController::class, 'index'])->name('fields.index');
@@ -208,6 +210,10 @@ Route::middleware(['auth', 'installed', 'root'])->prefix('painel')->name('panel.
     Route::get('/', function () {
         return view('dashboard', [
             'reportedInvites' => \App\Models\AuditLog::where('action', 'invite.reported')->count(),
+            'organizationsCount' => \App\Models\Organization::count(),
+            'activeOrganizations' => \App\Models\Organization::where('status', 'active')->count(),
+            'usersCount' => \App\Models\User::count(),
+            'latestOrganizations' => \App\Models\Organization::withCount('memberships')->latest('id')->limit(5)->get(),
         ]);
     })->name('dashboard');
 

@@ -61,8 +61,11 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 ---
 
 ### Design e UX
-- [x] **Design system** documentado em `docs/DESIGN-SYSTEM.md` + CSS profissional (tokens, componentes, responsivo)
-- [x] Acesso do **Root** ao painel da organização (botões na lista/detalhe + "Minhas organizações")
+- [x] **Design system v2** em `docs/DESIGN-SYSTEM.md` (tokens, sidebar, dashboard, auth dividido, ícones, responsivo)
+- [x] **Login e cadastro em tela dividida** com marca, benefícios e card de formulário
+- [x] **Dashboard da organização** com KPIs, funil, leads por origem, tarefas do dia e atividades recentes
+- [x] **Sidebar escura agrupada** (Principal, Comunicação, Marketing, Gestão) + topbar com busca e menu do usuário
+- [x] Acesso do **Root** ao painel da organização (botões na lista/detalhe + "Minhas organizações") com tela de governança quando não há vínculo
 
 ## Fase 1 — MVP operacional (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)

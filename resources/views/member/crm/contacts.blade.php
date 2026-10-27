@@ -34,7 +34,7 @@
   </div>
 @endif
 
-<div class="card">
+<div class="card" id="novo-contato">
   <h2>Novo contato</h2>
   <form method="post" action="{{ route('member.org.contacts.store', $organization) }}">
     @csrf

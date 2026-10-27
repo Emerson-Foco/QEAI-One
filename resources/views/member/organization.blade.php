@@ -5,12 +5,15 @@
 @section('panel')
 <div class="page-head">
   <div>
-    <span class="pill">Organização</span>
+    <span class="pill">Configurações</span>
     <h1>{{ $organization->name }}</h1>
     <p class="muted">
       Plano: <strong>{{ $organization->plan?->name ?? '—' }}</strong>
       @if ($membership) · Seu grupo: <strong>{{ $membership->role?->name ?? '—' }}</strong> @endif
     </p>
+  </div>
+  <div class="btn-row">
+    <a class="btn secondary" href="{{ route('member.org.dashboard', $organization) }}"><x-icon name="home" :size="16"/> Ir para o dashboard</a>
   </div>
 </div>
 
