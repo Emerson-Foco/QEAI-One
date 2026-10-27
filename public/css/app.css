@@ -617,6 +617,9 @@ label small { font-weight: 400; color: var(--muted); font-size: .74rem; }
 .auth-divider span { position: relative; background: #fff; padding: 0 12px; }
 .auth-alt { width: 100%; height: 46px; border-radius: 11px; font-size: .84rem; }
 .auth-bottom { text-align: center; font-size: .8rem; color: var(--muted); margin: 22px 0 0; }
+.legal-summary { padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 11px; background: var(--soft); color: var(--muted); font-size: .79rem; line-height: 1.6; }
+.legal-summary p { margin: 0 0 8px; }
+.legal-summary p:last-child { margin-bottom: 0; }
 .auth-terms { margin: 4px 0 18px; font-size: .78rem; }
 .auth-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
 .auth-foot { margin: 26px 0 0; text-align: center; font-size: .68rem; color: #94A3B8; }

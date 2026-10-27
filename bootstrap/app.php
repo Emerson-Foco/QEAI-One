@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureMember;
 use App\Http\Middleware\EnsureModuleEnabled;
 use App\Http\Middleware\EnsureOrganizationAccess;
 use App\Http\Middleware\EnsureRootAdmin;
+use App\Http\Middleware\EnsureTermsAccepted;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'member' => EnsureMember::class,
             'org' => EnsureOrganizationAccess::class,
             'module' => EnsureModuleEnabled::class,
+            'terms' => EnsureTermsAccepted::class,
             'api.key' => AuthenticateApiKey::class,
         ]);
 

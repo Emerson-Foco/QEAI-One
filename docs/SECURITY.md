@@ -48,7 +48,7 @@ produção e para qualquer alteração futura.
 - Campos personalizados com tipo, opções e validação compatíveis.
 - CSV de logs neutraliza fórmulas (`=`, `+`, `-`, `@`).
 
-### Dados e infraestrutura
+### Dados e termos`n- [ ] `LEGAL_REQUIRE_ACCEPTANCE=true` em produ��o`n- [ ] Termos de Uso publicados em `https://qeai.com.br/termos` e infraestrutura
 - Auditoria com encadeamento de hash em escopos `platform` e `organization`.
 - Credenciais de canais/SMTP criptografadas.
 - Tokens de API armazenados como hash; escopo por organização e rate limit.
@@ -99,7 +99,7 @@ produção e para qualquer alteração futura.
 - [ ] Logs de erro fora da pasta pública
 - [ ] Limite de upload e timeout coerentes
 
-### Dados
+### Dados e termos`n- [ ] `LEGAL_REQUIRE_ACCEPTANCE=true` em produ��o`n- [ ] Termos de Uso publicados em `https://qeai.com.br/termos`
 - [ ] Nenhum usuário/QA/demo de teste no banco de produção
 - [ ] Nenhum lead/demo de teste
 - [ ] Organizações reais revisadas

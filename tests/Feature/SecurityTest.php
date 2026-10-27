@@ -123,6 +123,29 @@ class SecurityTest extends TestCase
         $this->assertStringContainsString("'=cmd", $content);
     }
 
+    public function test_terms_acceptance_gate_is_required_for_existing_users_in_production_mode(): void
+    {
+        config(['legal.require_acceptance' => true]);
+
+        $user = $this->user('existente@empresa.com');
+        $organization = $this->organization('Acme');
+        $this->addMember($organization, $user, 'admin');
+
+        $this->actingAs($user)->get(route('member.dashboard'))
+            ->assertRedirect(route('legal.accept'));
+
+        $this->actingAs($user)->get(route('legal.accept'))
+            ->assertOk()
+            ->assertSee('Termos de Uso');
+
+        $this->actingAs($user)->post(route('legal.accept.store'))->assertRedirect(route('member.dashboard'));
+
+        $user->refresh();
+        $this->assertNotNull($user->terms_accepted_at);
+        $this->assertSame((string) config('legal.terms_version'), $user->terms_version);
+        $this->actingAs($user)->get(route('member.dashboard'))->assertOk();
+    }
+
     public function test_view_preferences_are_scoped_by_user_and_organization(): void
     {
         $user = $this->user('multi@empresa.com');

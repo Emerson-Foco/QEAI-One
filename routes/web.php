@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\TermsAcceptanceController;
 use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Crm\AdsController;
@@ -80,6 +81,11 @@ Route::post('/reverificar-email', [EmailVerificationController::class, 'send'])
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
+Route::middleware(['auth', 'installed'])->group(function () {
+    Route::get('/termos/aceite', [TermsAcceptanceController::class, 'show'])->name('legal.accept');
+    Route::post('/termos/aceite', [TermsAcceptanceController::class, 'store'])->name('legal.accept.store');
+});
+
 // Convites (público)
 Route::get('/convite/{token}', [InviteAcceptController::class, 'show'])->name('invite.show');
 Route::post('/convite/{token}', [InviteAcceptController::class, 'accept']);
@@ -119,7 +125,7 @@ Route::middleware('module:channels')->group(function () {
 });
 
 // Área do membro (usuário da organização)
-Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.')->group(function () {
+Route::middleware(['auth', 'installed', 'member', 'terms'])->prefix('app')->name('member.')->group(function () {
     Route::get('/', [MemberController::class, 'index'])->name('dashboard');
 
     Route::get('notificacoes', [NotificationController::class, 'index'])->name('notifications.index');
@@ -128,7 +134,7 @@ Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.
 });
 
 // Painel da organização (escopado por organização e permissão)
-Route::middleware(['auth', 'installed', 'org', 'module'])
+Route::middleware(['auth', 'installed', 'org', 'module', 'terms'])
     ->prefix('app/organizacoes/{organization}')
     ->name('member.org.')
     ->group(function () {
@@ -227,7 +233,7 @@ Route::middleware(['auth', 'installed', 'org', 'module'])
         Route::delete('grupos/{role}', [OrganizationRoleController::class, 'destroy'])->name('roles.destroy');
     });
 
-Route::middleware(['auth', 'installed', 'root'])->prefix('painel')->name('panel.')->group(function () {
+Route::middleware(['auth', 'installed', 'root', 'terms'])->prefix('painel')->name('panel.')->group(function () {
     Route::get('/', function () {
         return view('dashboard', [
             'reportedInvites' => AuditLog::where('action', 'invite.reported')->count(),
