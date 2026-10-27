@@ -3,11 +3,8 @@
 namespace Tests\Feature;
 
 use App\Http\Middleware\EnsureInstalled;
-use App\Models\Company;
 use App\Models\Contact;
-use App\Models\Deal;
 use App\Models\Organization;
-use App\Models\Pipeline;
 use App\Models\User;
 use App\Support\CustomFields;
 use App\Support\OrgPermissions;
@@ -61,45 +58,29 @@ class DashboardTest extends TestCase
         ]);
     }
 
-    public function test_member_sees_dashboard_with_kpis_and_funnel(): void
+    public function test_member_sees_lead_dashboard(): void
     {
         $user = $this->user('admin@empresa.com');
         $organization = $this->organization('Acme');
         $this->addMember($organization, $user, 'admin');
 
-        Contact::create([
+        $contact = Contact::create([
             'organization_id' => $organization->id,
             'name' => 'Mariana Costa',
             'email' => 'mariana@cliente.com',
             'source' => 'Site',
             'created_by' => $user->id,
         ]);
-        Company::create([
-            'organization_id' => $organization->id,
-            'name' => 'Tech Soluções',
-            'created_by' => $user->id,
-        ]);
-
-        $pipeline = Pipeline::ensureDefaultFor($organization);
-        $stage = $pipeline->stages()->orderBy('position')->firstOrFail();
-        Deal::create([
-            'organization_id' => $organization->id,
-            'pipeline_id' => $pipeline->id,
-            'stage_id' => $stage->id,
-            'title' => 'Implantação de CRM',
-            'value_cents' => 250000,
-            'status' => 'open',
-            'owner_user_id' => $user->id,
-            'created_by' => $user->id,
-        ]);
 
         $this->actingAs($user)->get(route('member.org.dashboard', $organization))
             ->assertOk()
-            ->assertSee('Funil de vendas')
+            ->assertSee('Total de leads')
             ->assertSee('Leads por origem')
-            ->assertSee('Tarefas de hoje')
+            ->assertSee('Leads recentes')
+            ->assertSee('Mariana Costa')
+            ->assertSee($contact->lead_id)
             ->assertSee('Site')
-            ->assertSee('R$ 2.500,00');
+            ->assertSee('Gestão de CRM');
     }
 
     public function test_outsider_cannot_access_dashboard(): void

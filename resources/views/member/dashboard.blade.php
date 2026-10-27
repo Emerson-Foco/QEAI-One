@@ -5,13 +5,14 @@
 @section('panel')
 @php
   $firstName = collect(explode(' ', (string) auth()->user()->name))->filter()->first() ?: 'você';
+  $canFields = \App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.crm_fields');
 @endphp
 
 <div class="page-header">
   <div>
     <span class="page-kicker">Visão geral</span>
     <h1>Olá, {{ $firstName }}!</h1>
-    <p class="muted">Aqui está um resumo do seu funil de vendas e da sua operação.</p>
+    <p class="muted">Aqui está o resumo dos seus leads e da configuração do CRM.</p>
   </div>
   <div class="page-actions">
     <form class="period-chip" method="get" action="{{ route('member.org.dashboard', $organization) }}">
@@ -25,17 +26,16 @@
 </div>
 
 <div class="quick-actions" style="margin-bottom:18px">
-  <a class="quick-action" href="{{ route('member.org.contacts.index', $organization) }}#novo-contato">
+  <a class="quick-action" href="{{ route('member.org.contacts.create', $organization) }}">
     <x-icon name="user-plus" :size="15"/> Novo lead
   </a>
-  <a class="quick-action" href="{{ route('member.org.pipeline.index', $organization) }}#novo-negocio">
-    <x-icon name="briefcase" :size="15"/> Nova oportunidade
-  </a>
-  <a class="quick-action" href="{{ route('member.org.tasks.index', $organization) }}#nova-tarefa">
-    <x-icon name="check-square" :size="15"/> Nova tarefa
-  </a>
-  <a class="quick-action" href="{{ route('member.org.forms.index', $organization) }}">
-    <x-icon name="filter" :size="15"/> Criar formulário
+  @if ($canFields)
+    <a class="quick-action" href="{{ route('member.org.fields.index', $organization) }}">
+      <x-icon name="settings" :size="15"/> Gestão de CRM
+    </a>
+  @endif
+  <a class="quick-action" href="{{ route('member.org.contacts.index', $organization) }}">
+    <x-icon name="users" :size="15"/> Ver todos os leads
   </a>
 </div>
 
@@ -56,48 +56,40 @@
         @endif
       </div>
       <div class="kpi-label">{{ $kpi['label'] }}</div>
-      <div class="kpi-value">{{ $kpi['value'] }}</div>
+      <div class="kpi-value" title="{{ $kpi['value'] }}">{{ $kpi['value'] }}</div>
       <div class="kpi-foot">{{ $kpi['detail'] }}</div>
     </div>
   @endforeach
 </div>
 
-<div class="dashboard-grid">
-  <section class="panel-card">
+@if ($totalLeads === 0)
+  <section class="panel-card" style="margin-bottom:18px">
     <div class="panel-head">
-      <div class="panel-title">
-        <x-icon name="filter" :size="18"/>
-        <h2>Funil de vendas</h2>
-      </div>
-      <a class="panel-link" href="{{ route('member.org.pipeline.index', $organization) }}">Ver detalhes <x-icon name="arrow-right" :size="14"/></a>
+      <div class="panel-title"><x-icon name="sparkles" :size="18"/><h2>Comece por aqui</h2></div>
     </div>
-
-    @if (collect($funnel)->sum('count') > 0)
-      <div class="funnel">
-        @foreach ($funnel as $index => $row)
-          <div class="funnel-row">
-            <div class="funnel-track">
-              <div class="funnel-bar funnel-step-{{ $index + 1 }}" style="width: {{ $row['width'] }}%">
-                <strong>{{ number_format($row['count'], 0, ',', '.') }}</strong>
-                <small>{{ $row['name'] }}</small>
-              </div>
-            </div>
-            <span class="funnel-pct">{{ $row['percent'] }}%</span>
-          </div>
-        @endforeach
-      </div>
-      <div class="funnel-foot">
-        <span><strong>{{ number_format($funnelTotal, 0, ',', '.') }}</strong> negócios no funil</span>
-        <span><strong>R$ {{ number_format($funnelValue / 100, 2, ',', '.') }}</strong> em valor</span>
-      </div>
-    @else
-      <div class="empty-state">
-        <x-icon name="briefcase" :size="26"/>
-        <p style="margin:0">Nenhuma oportunidade no funil ainda.<br><a href="{{ route('member.org.pipeline.index', $organization) }}#novo-negocio">Criar a primeira oportunidade</a></p>
-      </div>
-    @endif
+    <div class="start-grid">
+      @if ($canFields)
+        <a class="start-step" href="{{ route('member.org.fields.index', $organization) }}">
+          <span class="start-number">1</span>
+          <strong>Configure os campos do CRM</strong>
+          <small>Crie os campos que a sua empresa usa para qualificar um lead.</small>
+        </a>
+      @endif
+      <a class="start-step" href="{{ route('member.org.contacts.create', $organization) }}">
+        <span class="start-number">2</span>
+        <strong>Cadastre o primeiro lead</strong>
+        <small>Preencha os dados e acompanhe tudo pelo ID permanente do lead.</small>
+      </a>
+      <a class="start-step" href="{{ route('member.org.contacts.index', $organization) }}">
+        <span class="start-number">3</span>
+        <strong>Acompanhe a lista de leads</strong>
+        <small>Busque, edite e consulte o histórico de cada lead da organização.</small>
+      </a>
+    </div>
   </section>
+@endif
 
+<div class="dashboard-grid">
   <section class="panel-card">
     <div class="panel-head">
       <div class="panel-title">
@@ -112,7 +104,7 @@
         <div class="donut" style="background: conic-gradient({{ $donutGradient }})">
           <div class="donut-center">
             <strong>{{ number_format($sourceTotal, 0, ',', '.') }}</strong>
-            <small>leads</small>
+            <small>leads no período</small>
           </div>
         </div>
         <div class="legend">
@@ -128,75 +120,38 @@
     @else
       <div class="empty-state">
         <x-icon name="chart-pie" :size="26"/>
-        <p style="margin:0">Nenhum lead captado no período.<br><a href="{{ route('member.org.contacts.index', $organization) }}#novo-contato">Cadastrar um lead</a></p>
+        <p style="margin:0">Nenhum lead captado no período.<br><a href="{{ route('member.org.contacts.create', $organization) }}">Cadastrar um lead</a></p>
       </div>
-    @endif
-  </section>
-</div>
-
-<div class="dashboard-grid">
-  <section class="panel-card">
-    <div class="panel-head">
-      <div class="panel-title">
-        <x-icon name="check-square" :size="18"/>
-        <h2>Tarefas de hoje</h2>
-      </div>
-      <a class="panel-link" href="{{ route('member.org.tasks.index', $organization) }}">Ver todas <x-icon name="arrow-right" :size="14"/></a>
-    </div>
-
-    @if ($tasks->isEmpty())
-      <div class="empty-state">
-        <x-icon name="check-square" :size="26"/>
-        <p style="margin:0">Nenhuma tarefa para hoje. Tudo em dia! 🎉</p>
-      </div>
-    @else
-      <ul class="task-list">
-        @foreach ($tasks as $task)
-          <li class="task-item {{ $task->due_at && $task->due_at->lt(today()) ? 'overdue' : '' }}">
-            <form class="task-form" method="post" action="{{ route('member.org.tasks.toggle', [$organization, $task]) }}">
-              @csrf
-              <button class="task-check" type="submit" aria-label="Concluir tarefa">✓</button>
-            </form>
-            <div class="task-body">
-              <strong>{{ $task->title }}</strong>
-              <small>{{ $task->contact?->name ?? $task->deal?->title ?? 'Sem vínculo' }}</small>
-            </div>
-            <span class="task-time">{{ $task->due_at?->format('H:i') }}</span>
-          </li>
-        @endforeach
-      </ul>
     @endif
   </section>
 
   <section class="panel-card">
     <div class="panel-head">
-      <div class="panel-title">
-        <x-icon name="clock" :size="18"/>
-        <h2>Atividades recentes</h2>
-      </div>
-      @if (\App\Support\OrgAccess::can(auth()->user(), $organization, 'org.logs'))
-        <a class="panel-link" href="{{ route('member.org.logs', $organization) }}">Ver todas <x-icon name="arrow-right" :size="14"/></a>
-      @endif
+      <div class="panel-title"><x-icon name="clock" :size="18"/><h2>Leads recentes</h2></div>
+      <a class="panel-link" href="{{ route('member.org.contacts.index', $organization) }}">Ver todos <x-icon name="arrow-right" :size="14"/></a>
     </div>
 
-    @if ($activities->isEmpty())
+    @if ($recentLeads->isEmpty())
       <div class="empty-state">
-        <x-icon name="activity" :size="26"/>
-        <p style="margin:0">As atividades da equipe aparecerão aqui.</p>
+        <x-icon name="users" :size="26"/>
+        <p style="margin:0">Os últimos leads cadastrados aparecerão aqui.</p>
       </div>
     @else
-      <ul class="activity-list">
-        @foreach ($activities as $activity)
-          <li class="activity-item">
-            <span class="activity-icon {{ $activity['tone'] }}"><x-icon :name="$activity['icon']" :size="17"/></span>
-            <div class="activity-body">
-              <strong>{{ $activity['title'] }}</strong>
-              <small>{{ $activity['detail'] }}</small>
-            </div>
-            <span class="activity-time">{{ $activity['time'] }}</span>
-          </li>
-        @endforeach
-      </ul>
+      <table class="table">
+        <thead><tr><th>Lead</th><th>ID</th><th>Criado</th></tr></thead>
+        <tbody>
+          @foreach ($recentLeads as $lead)
+            <tr>
+              <td>
+                <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}">{{ $lead->name }}</a>
+                <small class="muted" style="display:block">{{ $lead->email ?: ($lead->phone ?: '—') }}</small>
+              </td>
+              <td><a class="lead-id" href="{{ route('member.org.contacts.show', [$organization, $lead]) }}">{{ $lead->lead_id }}</a></td>
+              <td class="nowrap">{{ $lead->created_at?->format('d/m') }}</td>
+            </tr>
+          @endforeach
+        </tbody>
+      </table>
     @endif
   </section>
 </div>

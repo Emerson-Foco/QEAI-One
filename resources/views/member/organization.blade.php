@@ -35,8 +35,22 @@
   </ul>
 </div>
 
-@if ($onboardingPending && ! empty($onboarding))
-  <div class="card">
+<div class="card">
+  <h2>Módulos</h2>
+  <p class="muted">Nesta etapa, o QEAI One está focado no essencial: dashboard, leads e configuração do CRM. Os demais módulos continuam preservados e podem ser reativados quando fizer sentido.</p>
+  <div class="module-grid">
+    @foreach (\App\Support\Modules::catalog() as $key => $label)
+      @php $enabled = \App\Support\Modules::enabled($key); @endphp
+      <div class="module-item {{ $enabled ? '' : 'is-off' }}">
+        <span class="module-dot"></span>
+        <div><strong>{{ $label }}</strong><small>{{ $enabled ? 'Ativo' : 'Desativado nesta etapa' }}</small></div>
+        <span class="badge {{ $enabled ? 'ok' : '' }}">{{ $enabled ? 'ativo' : 'off' }}</span>
+      </div>
+    @endforeach
+  </div>
+</div>
+
+@if ($onboardingPending && ! empty($onboarding))  <div class="card">
     <h2>Primeiros passos</h2>
     <ul class="onboarding-list">
       @foreach ($onboarding as $step)

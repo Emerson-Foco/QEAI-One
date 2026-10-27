@@ -1,40 +1,48 @@
 <?php
 
+use App\Http\Controllers\AdsImportController;
+use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\Auth\EmailVerificationController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\ChatController;
+use App\Http\Controllers\Crm\AdsController;
+use App\Http\Controllers\Crm\ChannelController;
 use App\Http\Controllers\Crm\CompanyController;
 use App\Http\Controllers\Crm\ContactController;
 use App\Http\Controllers\Crm\CustomFieldController;
 use App\Http\Controllers\Crm\DealController;
 use App\Http\Controllers\Crm\FormController;
-use App\Http\Controllers\Crm\IntegrationController;
-use App\Http\Controllers\PublicFormController;
-use App\Http\Controllers\ChatController;
-use App\Http\Controllers\Crm\ChannelController;
 use App\Http\Controllers\Crm\InboxController;
-use App\Http\Controllers\Crm\SocialController;
-use App\Http\Controllers\Crm\AdsController;
-use App\Http\Controllers\InboundReceiveController;
-use App\Http\Controllers\Api\LeadController;
+use App\Http\Controllers\Crm\IntegrationController;
 use App\Http\Controllers\Crm\PipelineController;
+use App\Http\Controllers\Crm\SocialController;
 use App\Http\Controllers\Crm\TaskController;
-use App\Http\Controllers\Auth\EmailVerificationController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\PasswordResetController;
-use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\FieldTemplateController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InboundReceiveController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InviteAcceptController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\OrganizationDashboardController;
+use App\Http\Controllers\OrganizationFeatureController;
 use App\Http\Controllers\OrganizationMemberController;
 use App\Http\Controllers\OrganizationPanelController;
-use App\Http\Controllers\OrganizationDashboardController;
 use App\Http\Controllers\OrganizationRoleController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\PlatformSettingsController;
-use App\Http\Controllers\FieldTemplateController;
+use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\SecurityController;
+use App\Http\Controllers\WhatsAppController;
+use App\Models\AuditLog;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -53,8 +61,8 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
 
-    Route::get('/cadastro', [\App\Http\Controllers\Auth\RegisterController::class, 'show'])->name('register');
-    Route::post('/cadastro', [\App\Http\Controllers\Auth\RegisterController::class, 'store']);
+    Route::get('/cadastro', [RegisterController::class, 'show'])->name('register');
+    Route::post('/cadastro', [RegisterController::class, 'store']);
 
     Route::get('/esqueci-senha', [PasswordResetController::class, 'request'])->name('password.request');
     Route::post('/esqueci-senha', [PasswordResetController::class, 'email'])->name('password.email');
@@ -79,40 +87,48 @@ Route::get('/convite/{token}/nao-reconheco', [InviteAcceptController::class, 're
 Route::post('/convite/{token}/nao-reconheco', [InviteAcceptController::class, 'report'])->name('invite.report');
 
 // Formulários públicos de captação
-Route::get('/f/{slug}', [PublicFormController::class, 'show'])->name('form.show');
-Route::post('/f/{slug}', [PublicFormController::class, 'submit'])->name('form.submit');
+Route::middleware('module:forms')->group(function () {
+    Route::get('/f/{slug}', [PublicFormController::class, 'show'])->name('form.show');
+    Route::post('/f/{slug}', [PublicFormController::class, 'submit'])->name('form.submit');
+});
 
 // API pública de captação (chave por organização)
-Route::middleware('api.key')->prefix('api/v1')->group(function () {
+Route::middleware(['module:leads', 'api.key'])->prefix('api/v1')->group(function () {
     Route::post('/leads', [LeadController::class, 'store'])->name('api.leads.store');
 });
 
 // Entrada de leads (webhooks de entrada / Meta Lead Ads)
-Route::get('/hooks/meta/{token}', [InboundReceiveController::class, 'metaVerify'])->name('hooks.meta.verify');
-Route::post('/hooks/meta/{token}', [InboundReceiveController::class, 'metaReceive'])->name('hooks.meta.receive');
-Route::post('/hooks/ads/{token}', [\App\Http\Controllers\AdsImportController::class, 'store'])->name('hooks.ads');
-Route::post('/hooks/{token}', [InboundReceiveController::class, 'generic'])->name('hooks.generic');
+Route::middleware('module:integrations')->group(function () {
+    Route::get('/hooks/meta/{token}', [InboundReceiveController::class, 'metaVerify'])->name('hooks.meta.verify');
+    Route::post('/hooks/meta/{token}', [InboundReceiveController::class, 'metaReceive'])->name('hooks.meta.receive');
+    Route::post('/hooks/ads/{token}', [AdsImportController::class, 'store'])->name('hooks.ads');
+    Route::post('/hooks/{token}', [InboundReceiveController::class, 'generic'])->name('hooks.generic');
+});
 
 // Chat público no site do cliente
-Route::get('/chat/{token}', [ChatController::class, 'show'])->name('chat.show');
-Route::post('/chat/{token}', [ChatController::class, 'send'])->name('chat.send');
-Route::get('/chat/{token}/messages', [ChatController::class, 'messages'])->name('chat.messages');
+Route::middleware('module:inbox')->group(function () {
+    Route::get('/chat/{token}', [ChatController::class, 'show'])->name('chat.show');
+    Route::post('/chat/{token}', [ChatController::class, 'send'])->name('chat.send');
+    Route::get('/chat/{token}/messages', [ChatController::class, 'messages'])->name('chat.messages');
+});
 
 // WhatsApp Cloud API (webhook do Meta) — credenciais do cliente
-Route::get('/webhooks/whatsapp/{token}', [\App\Http\Controllers\WhatsAppController::class, 'verify'])->name('webhooks.whatsapp.verify');
-Route::post('/webhooks/whatsapp/{token}', [\App\Http\Controllers\WhatsAppController::class, 'receive'])->name('webhooks.whatsapp.receive');
+Route::middleware('module:channels')->group(function () {
+    Route::get('/webhooks/whatsapp/{token}', [WhatsAppController::class, 'verify'])->name('webhooks.whatsapp.verify');
+    Route::post('/webhooks/whatsapp/{token}', [WhatsAppController::class, 'receive'])->name('webhooks.whatsapp.receive');
+});
 
 // Área do membro (usuário da organização)
 Route::middleware(['auth', 'installed', 'member'])->prefix('app')->name('member.')->group(function () {
     Route::get('/', [MemberController::class, 'index'])->name('dashboard');
 
-    Route::get('notificacoes', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('notificacoes/ler-todas', [\App\Http\Controllers\NotificationController::class, 'readAll'])->name('notifications.readAll');
-    Route::post('notificacoes/{notification}/ler', [\App\Http\Controllers\NotificationController::class, 'read'])->name('notifications.read');
+    Route::get('notificacoes', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notificacoes/ler-todas', [NotificationController::class, 'readAll'])->name('notifications.readAll');
+    Route::post('notificacoes/{notification}/ler', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 // Painel da organização (escopado por organização e permissão)
-Route::middleware(['auth', 'installed', 'org'])
+Route::middleware(['auth', 'installed', 'org', 'module'])
     ->prefix('app/organizacoes/{organization}')
     ->name('member.org.')
     ->group(function () {
@@ -120,16 +136,18 @@ Route::middleware(['auth', 'installed', 'org'])
         Route::get('dashboard', OrganizationDashboardController::class)->name('dashboard');
         Route::get('logs', [OrganizationController::class, 'logs'])->name('logs');
 
-        Route::get('crm/campos', [CustomFieldController::class, 'index'])->name('fields.index');
-        Route::post('crm/campos', [CustomFieldController::class, 'store'])->name('fields.store');
-        Route::put('crm/campos/{field}', [CustomFieldController::class, 'update'])->name('fields.update');
-        Route::delete('crm/campos/{field}', [CustomFieldController::class, 'destroy'])->name('fields.destroy');
-
         Route::get('crm/contatos', [ContactController::class, 'index'])->name('contacts.index');
+        Route::get('crm/contatos/novo', [ContactController::class, 'create'])->name('contacts.create');
         Route::post('crm/contatos', [ContactController::class, 'store'])->name('contacts.store');
+        Route::get('crm/contatos/{contact}', [ContactController::class, 'show'])->name('contacts.show');
         Route::get('crm/contatos/{contact}/editar', [ContactController::class, 'edit'])->name('contacts.edit');
         Route::put('crm/contatos/{contact}', [ContactController::class, 'update'])->name('contacts.update');
         Route::delete('crm/contatos/{contact}', [ContactController::class, 'destroy'])->name('contacts.destroy');
+
+        Route::get('crm/campos', [CustomFieldController::class, 'index'])->name('fields.index');
+        Route::post('crm/campos', [CustomFieldController::class, 'store'])->name('fields.store');
+        Route::post('crm/campos/{field}/alternar', [CustomFieldController::class, 'toggle'])->name('fields.toggle');
+        Route::put('crm/campos/{field}', [CustomFieldController::class, 'update'])->name('fields.update');
 
         Route::get('crm/empresas', [CompanyController::class, 'index'])->name('companies.index');
         Route::post('crm/empresas', [CompanyController::class, 'store'])->name('companies.store');
@@ -209,11 +227,11 @@ Route::middleware(['auth', 'installed', 'org'])
 Route::middleware(['auth', 'installed', 'root'])->prefix('painel')->name('panel.')->group(function () {
     Route::get('/', function () {
         return view('dashboard', [
-            'reportedInvites' => \App\Models\AuditLog::where('action', 'invite.reported')->count(),
-            'organizationsCount' => \App\Models\Organization::count(),
-            'activeOrganizations' => \App\Models\Organization::where('status', 'active')->count(),
-            'usersCount' => \App\Models\User::count(),
-            'latestOrganizations' => \App\Models\Organization::withCount('memberships')->latest('id')->limit(5)->get(),
+            'reportedInvites' => AuditLog::where('action', 'invite.reported')->count(),
+            'organizationsCount' => Organization::count(),
+            'activeOrganizations' => Organization::where('status', 'active')->count(),
+            'usersCount' => User::count(),
+            'latestOrganizations' => Organization::withCount('memberships')->latest('id')->limit(5)->get(),
         ]);
     })->name('dashboard');
 
@@ -230,7 +248,7 @@ Route::middleware(['auth', 'installed', 'root'])->prefix('painel')->name('panel.
     Route::get('organizacoes/{organization}', [OrganizationController::class, 'show'])->name('organizations.show');
     Route::get('organizacoes/{organization}/logs', [OrganizationController::class, 'logs'])->name('organizations.logs');
     Route::put('organizacoes/{organization}/plano', [OrganizationController::class, 'updatePlan'])->name('organizations.plan');
-    Route::put('organizacoes/{organization}/recursos', [\App\Http\Controllers\OrganizationFeatureController::class, 'update'])->name('organizations.features');
+    Route::put('organizacoes/{organization}/recursos', [OrganizationFeatureController::class, 'update'])->name('organizations.features');
 
     Route::post('organizacoes/{organization}/membros', [OrganizationMemberController::class, 'store'])->name('members.store');
     Route::put('organizacoes/{organization}/membros/{membership}', [OrganizationMemberController::class, 'update'])->name('members.update');

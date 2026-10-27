@@ -1,120 +1,97 @@
 @extends('layouts.member')
 
-@section('title', 'Contatos — ' . $organization->name)
+@section('title', 'Leads — ' . $organization->name)
 
 @section('panel')
-<div class="page-head">
+<div class="page-header">
   <div>
-    <span class="pill">CRM</span>
-    <h1>Contatos</h1>
-    <p class="muted">Pessoas desta organização.</p>
+    <span class="page-kicker">CRM</span>
+    <h1>Leads</h1>
+    <p class="muted">Todos os leads da organização, com histórico e campos personalizados.</p>
   </div>
-  <div class="btn-row">
-    <a class="btn {{ $view === 'table' ? '' : 'secondary' }}" href="{{ route('member.org.contacts.index', [$organization, 'view' => 'table']) }}">Tabela</a>
-    <a class="btn {{ $view === 'board' ? '' : 'secondary' }}" href="{{ route('member.org.contacts.index', [$organization, 'view' => 'board', 'group' => $groupField?->key]) }}">Quadro</a>
+  <div class="page-actions">
+    @if (\App\Support\OrgAccess::canData(auth()->user(), $organization, 'org.crm_fields'))
+      <a class="btn secondary" href="{{ route('member.org.fields.index', $organization) }}">
+        <x-icon name="settings" :size="16"/> Gestão de CRM
+      </a>
+    @endif
+    <a class="btn" href="{{ route('member.org.contacts.create', $organization) }}">
+      <x-icon name="plus" :size="16"/> Novo lead
+    </a>
   </div>
 </div>
 
-@if ($view === 'board' && $groupField)
-  <div class="card">
-    <form method="get" class="inline-form">
-      <input type="hidden" name="view" value="board">
-      <label style="flex-direction:row;align-items:center;gap:8px;margin:0">Agrupar por
-        <select name="group" onchange="this.form.submit()">
-          @foreach ($fields->where('type', 'select') as $f)
-            <option value="{{ $f->key }}" @selected($groupField->key === $f->key)>{{ $f->label }}</option>
-          @endforeach
-        </select>
-      </label>
-    </form>
-  </div>
-@else
-  <div class="card">
-    <form method="get" class="inline-form"><input type="hidden" name="view" value="table"><input name="q" value="{{ $search }}" placeholder="Buscar nome, e-mail ou telefone"><button class="btn secondary">Buscar</button></form>
-  </div>
-@endif
+<div class="lead-summary">
+  <div><span class="muted">Total de leads</span><strong>{{ number_format($total, 0, ',', '.') }}</strong></div>
+  <div><span class="muted">Novos este mês</span><strong>{{ number_format($newThisMonth, 0, ',', '.') }}</strong></div>
+  <div><span class="muted">Campos ativos</span><strong>{{ $fields->count() }}</strong></div>
+</div>
 
-<div class="card" id="novo-contato">
-  <h2>Novo contato</h2>
-  <form method="post" action="{{ route('member.org.contacts.store', $organization) }}">
-    @csrf
-    <div class="grid-2">
-      <label>Nome<input name="name" required maxlength="180"></label>
-      <label>E-mail<input type="email" name="email" maxlength="180"></label>
-      <label>Telefone<input name="phone" maxlength="40"></label>
-      <label>WhatsApp<input name="whatsapp" maxlength="40"></label>
-      <label>Cargo<input name="job_title" maxlength="120"></label>
-      <label>Origem<input name="source" maxlength="60" placeholder="site, indicação, anúncio…"></label>
-      <label>Empresa<select name="company_id"><option value="">—</option>@foreach ($companies as $company)<option value="{{ $company->id }}">{{ $company->name }}</option>@endforeach</select></label>
-      <label>Tags (separadas por vírgula)<input name="tags" maxlength="300"></label>
-      @include('member.crm.partials.field-inputs', ['fields' => $fields, 'values' => []])
-      <label class="full">Observações<textarea name="notes" rows="3" maxlength="5000"></textarea></label>
-    </div>
-    <button class="btn">Criar contato</button>
+<div class="card">
+  <form method="get" class="inline-form" style="margin:0">
+    <input name="q" value="{{ $search }}" placeholder="Buscar por ID do lead, nome, e-mail ou telefone" aria-label="Buscar leads" style="min-width:320px;flex:1">
+    <button class="btn secondary"><x-icon name="search" :size="16"/> Buscar</button>
+    @if ($search !== '')
+      <a class="btn ghost" href="{{ route('member.org.contacts.index', $organization) }}">Limpar</a>
+    @endif
   </form>
 </div>
 
-@if ($view === 'board' && $groups)
-  <div class="kanban">
-    @foreach ($groups as $label => $groupContacts)
-      <div class="kanban-col">
-        <h3>{{ $label }} · {{ $groupContacts->count() }}</h3>
-        @foreach ($groupContacts as $contact)
-          <div class="deal-card">
-            <strong>{{ $contact->name }}</strong>
-            <div class="deal-meta">{{ $contact->company?->name ?? ($contact->email ?: '—') }}</div>
-            <div class="row-actions inline" style="margin-top:8px">
+<div class="card">
+  @if ($contacts->isEmpty())
+    <div class="empty-state">
+      <x-icon name="users" :size="30"/>
+      <h2 style="margin-top:8px">{{ $search !== '' ? 'Nenhum lead encontrado' : 'Nenhum lead cadastrado ainda' }}</h2>
+      <p class="muted">{{ $search !== '' ? 'Tente outro termo de busca.' : 'Cadastre o primeiro lead para começar a acompanhar sua operação.' }}</p>
+      @if ($search === '')
+        <a class="btn" href="{{ route('member.org.contacts.create', $organization) }}"><x-icon name="plus" :size="16"/> Cadastrar primeiro lead</a>
+      @endif
+    </div>
+  @else
+    <div class="lead-list">
+      @foreach ($contacts as $contact)
+        @php
+          $initials = collect(explode(' ', (string) $contact->name))->filter()->take(2)->map(fn ($part) => mb_strtoupper(mb_substr($part, 0, 1)))->implode('') ?: 'L';
+        @endphp
+        <article class="lead-item">
+          <div class="lead-item-main">
+            <span class="avatar sm">{{ $initials }}</span>
+            <div style="min-width:0">
+              <a class="lead-name" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">{{ $contact->name }}</a>
+              <div class="lead-item-contact">{{ $contact->email ?: 'sem e-mail' }}</div>
+              @if ($contact->phone || $contact->whatsapp)
+                <div class="lead-item-contact">{{ $contact->phone ?: $contact->whatsapp }}</div>
+              @endif
+              <span class="lead-id" title="{{ $contact->lead_id }}">{{ $contact->lead_id }}</span>
+            </div>
+          </div>
+
+          <div class="lead-item-fields">
+            @foreach ($listFields as $field)
+              @php $value = $contact->custom[$field->key] ?? null; @endphp
+              <span class="lead-chip">
+                <small>{{ $field->label }}</small>
+                @if ($field->type === 'boolean')
+                  {{ $value ? 'Sim' : 'Não' }}
+                @else
+                  {{ filled($value) ? $value : '—' }}
+                @endif
+              </span>
+            @endforeach
+          </div>
+
+          <div class="lead-item-side">
+            <span class="muted nowrap">{{ $contact->created_at?->format('d/m/Y') }}</span>
+            <div class="row-actions inline">
+              <a class="btn secondary small" href="{{ route('member.org.contacts.show', [$organization, $contact]) }}">Ver</a>
               <a class="btn secondary small" href="{{ route('member.org.contacts.edit', [$organization, $contact]) }}">Editar</a>
             </div>
           </div>
-        @endforeach
-      </div>
-    @endforeach
-  </div>
-@elseif ($contacts)
-  <div class="card">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Nome</th><th>Contato</th><th>Empresa</th>
-          @foreach ($listFields as $field)<th>{{ $field->label }}</th>@endforeach
-          <th>Tags</th><th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse ($contacts as $contact)
-          <tr>
-            <td><strong>{{ $contact->name }}</strong>@if ($contact->job_title)<br><small class="muted">{{ $contact->job_title }}</small>@endif</td>
-            <td>{{ $contact->email ?: '—' }}<br><small class="muted">{{ $contact->phone ?: ($contact->whatsapp ?: '') }}</small></td>
-            <td>{{ $contact->company?->name ?? '—' }}</td>
-            @foreach ($listFields as $field)
-              @php $value = $contact->custom[$field->key] ?? null; @endphp
-              <td>@if ($field->type === 'boolean'){{ $value ? 'Sim' : 'Não' }}@else{{ ($value !== null && $value !== '') ? $value : '—' }}@endif</td>
-            @endforeach
-            <td>@foreach ($contact->tags as $tag)<span class="badge">{{ $tag->name }}</span> @endforeach</td>
-            <td class="right">
-              <div class="row-actions inline">
-                <a class="btn secondary small" href="{{ route('member.org.contacts.edit', [$organization, $contact]) }}">Editar</a>
-                <form method="post" action="{{ route('member.org.contacts.destroy', [$organization, $contact]) }}" onsubmit="return confirm('Remover contato?');">
-                  @csrf @method('DELETE')
-                  <button class="btn secondary small">Excluir</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-        @empty
-          <tr><td colspan="{{ 5 + $listFields->count() }}" class="muted">Nenhum contato ainda.</td></tr>
-        @endforelse
-      </tbody>
-    </table>
+        </article>
+      @endforeach
+    </div>
 
-    @if ($contacts->hasPages())
-      <nav class="pagination">
-        @if ($contacts->onFirstPage())<span class="pagination-link is-disabled">← Anterior</span>@else<a class="pagination-link" href="{{ $contacts->previousPageUrl() }}">← Anterior</a>@endif
-        <span class="pagination-status">Página {{ $contacts->currentPage() }} de {{ $contacts->lastPage() }}</span>
-        @if ($contacts->hasMorePages())<a class="pagination-link" href="{{ $contacts->nextPageUrl() }}">Próxima →</a>@else<span class="pagination-link is-disabled">Próxima →</span>@endif
-      </nav>
-    @endif
-  </div>
-@endif
+    {{ $contacts->links() }}
+  @endif
+</div>
 @endsection

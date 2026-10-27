@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 
 class Contact extends Model
 {
@@ -16,6 +17,24 @@ class Contact extends Model
     protected function casts(): array
     {
         return ['custom' => 'array'];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Contact $contact) {
+            if (empty($contact->lead_id)) {
+                $contact->lead_id = self::generateLeadId();
+            }
+        });
+    }
+
+    public static function generateLeadId(): string
+    {
+        do {
+            $leadId = 'LD-'.strtoupper((string) Str::ulid());
+        } while (static::where('lead_id', $leadId)->exists());
+
+        return $leadId;
     }
 
     public function organization(): BelongsTo

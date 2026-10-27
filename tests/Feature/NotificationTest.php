@@ -93,7 +93,7 @@ class NotificationTest extends TestCase
         $this->actingAs($admin)->get(route('member.org.show', $organization))
             ->assertOk()
             ->assertSee('Primeiros passos')
-            ->assertSee('Conectar um canal');
+            ->assertSee('Cadastrar o primeiro lead');
     }
 
     public function test_task_due_command_notifies_assignee(): void

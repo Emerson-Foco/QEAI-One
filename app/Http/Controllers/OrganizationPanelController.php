@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Organization;
 use App\Support\OrgAccess;
 use App\Support\OrgPermissions;
+use App\Support\PlanResolver;
 
 class OrganizationPanelController extends Controller
 {
@@ -19,12 +20,11 @@ class OrganizationPanelController extends Controller
         $canSettings = OrgAccess::can($user, $organization, 'org.settings');
 
         $onboarding = [];
-        if (OrgAccess::canData($user, $organization, 'org.channels')) {
-            $onboarding[] = ['label' => 'Conectar um canal (chat ou e-mail)', 'done' => $organization->channels()->exists(), 'url' => route('member.org.channels.index', $organization)];
-        }
         if (OrgAccess::canData($user, $organization, 'org.leads')) {
-            $onboarding[] = ['label' => 'Criar um formulário de captação', 'done' => $organization->forms()->exists(), 'url' => route('member.org.forms.index', $organization)];
-            $onboarding[] = ['label' => 'Cadastrar o primeiro contato', 'done' => $organization->contacts()->exists(), 'url' => route('member.org.contacts.index', $organization)];
+            $onboarding[] = ['label' => 'Cadastrar o primeiro lead', 'done' => $organization->contacts()->exists(), 'url' => route('member.org.contacts.create', $organization)];
+        }
+        if (OrgAccess::canData($user, $organization, 'org.crm_fields')) {
+            $onboarding[] = ['label' => 'Configurar os campos do CRM', 'done' => $organization->customFields()->where('entity', 'contact')->where('is_system', false)->exists(), 'url' => route('member.org.fields.index', $organization)];
         }
         if ($canMembers) {
             $onboarding[] = ['label' => 'Convidar a equipe', 'done' => $organization->memberships()->where('status', 'active')->count() > 1, 'url' => route('member.org.show', $organization)];
@@ -39,7 +39,7 @@ class OrganizationPanelController extends Controller
             'canMembers' => $canMembers,
             'canLogs' => $canLogs,
             'canSettings' => $canSettings,
-            'features' => \App\Support\PlanResolver::summary($organization),
+            'features' => PlanResolver::summary($organization),
             'onboarding' => $onboarding,
             'onboardingPending' => collect($onboarding)->contains(fn ($s) => ! $s['done']),
             'invites' => $canMembers ? $organization->invites()->with('role')->latest('id')->limit(50)->get() : collect(),

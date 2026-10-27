@@ -32,5 +32,6 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="QEAI_MODULES" value="dashboard,leads,crm_fields,settings,logs,companies,pipeline,tasks,inbox,channels,forms,social,ads,integrations"/>
     </php>
 </phpunit>

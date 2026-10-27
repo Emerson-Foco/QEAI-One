@@ -63,9 +63,22 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 ### Design e UX
 - [x] **Design system v2** em `docs/DESIGN-SYSTEM.md` (tokens, sidebar, dashboard, auth dividido, ícones, responsivo)
 - [x] **Login e cadastro em tela dividida** com marca, benefícios e card de formulário
-- [x] **Dashboard da organização** com KPIs, funil, leads por origem, tarefas do dia e atividades recentes
-- [x] **Sidebar escura agrupada** (Principal, Comunicação, Marketing, Gestão) + topbar com busca e menu do usuário
-- [x] Acesso do **Root** ao painel da organização (botões na lista/detalhe + "Minhas organizações") com tela de governança quando não há vínculo
+- [x] **Sidebar escura** com navegação enxuta: Dashboard, Leads, Gestão de CRM, Configurações e Logs
+- [x] **Dashboard focado em leads**: total, novos no período, campos ativos, origem principal, donut e leads recentes
+- [x] Acesso do **Root** ao painel da organização com tela de governança quando não há vínculo
+
+### Núcleo atual — Leads e Gestão de CRM
+- [x] **ID permanente do lead** (`LD-...`) gerado no cadastro, usado na busca, no histórico e na API/webhooks
+- [x] **Lista de leads** em cards com ID, contato, campos configurados e ações
+- [x] **Cadastro/edição de lead** com campos fixos + campos personalizados ativos
+- [x] **Detalhe do lead** com dados, campos (inclusive desativados) e **histórico** de movimentações
+- [x] **Gestão de CRM** com criação de campos (nome, tipo, opções, obrigatório, mostrar na lista)
+- [x] **ID permanente do campo** (`FLD-...`) para automações, estável ao renomear ou alterar o tipo
+- [x] Campos **não podem ser excluídos**: apenas desativados/reativados, preservando o histórico
+- [x] Alteração de **tipo** exige confirmação quando o campo já possui dados
+- [x] Permissão dedicada **`org.crm_fields`** para configurar o CRM
+- [x] **Módulos** controlados por `config/modules.php` (`QEAI_MODULES`): não-core ocultos da navegação
+- [x] **Isolamento por organização** validado em testes para leads, campos e permissões
 
 ## Fase 1 — MVP operacional (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)

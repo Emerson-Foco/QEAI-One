@@ -20,14 +20,26 @@ class CustomFields
 
         if ($entity === 'contact') {
             $organization->customFields()->createMany([
-                ['entity' => 'contact', 'key' => 'status', 'label' => 'Status', 'type' => 'select', 'options' => ['Novo', 'Em contato', 'Qualificado', 'Perdido'], 'show_in_list' => true, 'is_system' => true, 'position' => 1],
-                ['entity' => 'contact', 'key' => 'temperatura', 'label' => 'Temperatura', 'type' => 'select', 'options' => ['Frio', 'Morno', 'Quente'], 'show_in_list' => true, 'is_system' => true, 'position' => 2],
+                ['entity' => 'contact', 'key' => 'status', 'label' => 'Status', 'type' => 'select', 'options' => ['Novo', 'Em contato', 'Qualificado', 'Perdido'], 'show_in_list' => true, 'is_system' => true, 'is_active' => true, 'position' => 1],
+                ['entity' => 'contact', 'key' => 'temperatura', 'label' => 'Temperatura', 'type' => 'select', 'options' => ['Frio', 'Morno', 'Quente'], 'show_in_list' => true, 'is_system' => true, 'is_active' => true, 'position' => 2],
             ]);
         }
     }
 
     /** @return Collection<int, CustomField> */
     public static function forEntity(Organization $organization, string $entity = 'contact'): Collection
+    {
+        self::ensureDefaults($organization, $entity);
+
+        return $organization->customFields()
+            ->where('entity', $entity)
+            ->where('is_active', true)
+            ->orderBy('position')->orderBy('id')
+            ->get();
+    }
+
+    /** Todos os campos, inclusive desativados (para histórico e gestão). @return Collection<int, CustomField> */
+    public static function allForEntity(Organization $organization, string $entity = 'contact'): Collection
     {
         self::ensureDefaults($organization, $entity);
 
@@ -46,11 +58,11 @@ class CustomFields
      * Aplica uma definição de campos (template) a uma organização.
      * Não remove campos existentes; só cria os que faltam.
      *
-     * @param array<int, array{label:string,type:string,options:?array,required?:bool,show_in_list?:bool}> $definitions
+     * @param  array<int, array{label:string,type:string,options:?array,required?:bool,show_in_list?:bool}>  $definitions
      */
     public static function applyTemplate(Organization $organization, array $definitions, string $entity = 'contact'): int
     {
-        $allowedTypes = array_keys(\App\Models\CustomField::types());
+        $allowedTypes = array_keys(CustomField::types());
         $created = 0;
         $position = (int) $organization->customFields()->where('entity', $entity)->max('position');
 
@@ -64,7 +76,7 @@ class CustomFields
             $key = $base;
             $suffix = 2;
             while ($organization->customFields()->where('entity', $entity)->where('key', $key)->exists()) {
-                $key = $base . '-' . $suffix++;
+                $key = $base.'-'.$suffix++;
             }
 
             $organization->customFields()->create([
@@ -76,6 +88,7 @@ class CustomFields
                 'required' => (bool) ($definition['required'] ?? false),
                 'show_in_list' => (bool) ($definition['show_in_list'] ?? false),
                 'is_system' => false,
+                'is_active' => true,
                 'position' => ++$position,
             ]);
             $created++;
@@ -101,7 +114,7 @@ class CustomFields
             if ($field->type === 'select' && ! empty($field->options)) {
                 $rule[] = Rule::in($field->options);
             }
-            $rules['custom.' . $field->key] = $rule;
+            $rules['custom.'.$field->key] = $rule;
         }
 
         return $rules;
@@ -114,10 +127,11 @@ class CustomFields
         foreach ($fields as $field) {
             $key = $field->key;
             if ($field->type === 'boolean') {
-                $values[$key] = $request->boolean('custom.' . $key);
+                $values[$key] = $request->boolean('custom.'.$key);
+
                 continue;
             }
-            $value = $request->input('custom.' . $key);
+            $value = $request->input('custom.'.$key);
             $values[$key] = is_string($value) ? trim($value) : $value;
         }
 

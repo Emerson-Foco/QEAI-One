@@ -75,15 +75,35 @@ class LeadIntake
     {
         return [
             'id' => $contact->id,
+            'lead_id' => $contact->lead_id,
+            'organization_id' => $contact->organization_id,
             'name' => $contact->name,
             'email' => $contact->email,
             'phone' => $contact->phone,
             'whatsapp' => $contact->whatsapp,
             'job_title' => $contact->job_title,
             'source' => $contact->source,
-            'custom' => $contact->custom ?: new \stdClass(),
+            'custom' => $contact->custom ?: new \stdClass,
+            'fields' => self::fieldsPayload($contact),
             'created_at' => $contact->created_at?->toIso8601String(),
         ];
+    }
+
+    /** @return array<int, array{field_id:string,key:string,label:string,type:string,value:mixed}> */
+    private static function fieldsPayload(Contact $contact): array
+    {
+        $custom = $contact->custom ?: [];
+
+        return CustomFields::forEntity($contact->organization, 'contact')
+            ->map(fn ($field) => [
+                'field_id' => $field->field_id,
+                'key' => $field->key,
+                'label' => $field->label,
+                'type' => $field->type,
+                'value' => $custom[$field->key] ?? null,
+            ])
+            ->values()
+            ->all();
     }
 
     private static function text($value, int $max): ?string

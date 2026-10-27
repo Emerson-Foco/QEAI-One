@@ -22,7 +22,7 @@
       <div class="auth-aside-body">
         <p class="auth-kicker">CRM inteligente<br>para o seu negócio</p>
         <h1>Mais clientes.<br>Mais oportunidades.<br><span>Mais resultados.</span></h1>
-        <p class="auth-lead">O QEAI One reúne CRM, atendimento, captação de leads e automações em um só lugar — para você vender mais e crescer com organização.</p>
+        <p class="auth-lead">O QEAI One organiza seus leads em um CRM simples, com campos personalizáveis, histórico completo e um dashboard direto para acompanhar seus resultados.</p>
 
         <ul class="auth-benefits">
           <li>

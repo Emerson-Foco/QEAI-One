@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Crm;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Company;
 use App\Models\Contact;
 use App\Models\Organization;
 use App\Models\Tag;
+use App\Models\User;
 use App\Support\Audit;
 use App\Support\CustomFields;
 use App\Support\OrgAccess;
@@ -31,42 +33,59 @@ class ContactController extends Controller
 
         $fields = CustomFields::forEntity($organization, 'contact');
         $listFields = $fields->where('show_in_list', true);
-        $view = $request->input('view') === 'board' ? 'board' : 'table';
-        $groupKey = (string) $request->input('group', (string) optional($fields->firstWhere('type', 'select'))->key);
-        $groupField = $fields->firstWhere('key', $groupKey);
 
         $query = Contact::with(['company', 'tags'])->where('organization_id', $organization->id);
-        if ($search = $request->input('q')) {
+        if ($search = trim((string) $request->input('q'))) {
             $query->where(function ($where) use ($search) {
-                $where->where('name', 'like', "%{$search}%")
+                $where->where('lead_id', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('whatsapp', 'like', "%{$search}%");
             });
-        }
-
-        $groups = null;
-        if ($view === 'board' && $groupField !== null && $groupField->type === 'select') {
-            $all = $query->latest('id')->limit(300)->get();
-            $groups = [];
-            foreach (($groupField->options ?? []) as $option) {
-                $groups[$option] = $all->filter(fn ($c) => (string) ($c->custom[$groupKey] ?? '') === (string) $option);
-            }
-            $groups['Sem valor'] = $all->filter(fn ($c) => empty($c->custom[$groupKey] ?? null));
-            $contacts = null;
-        } else {
-            $contacts = $query->latest('id')->paginate(25)->withQueryString();
         }
 
         return view('member.crm.contacts', [
             'organization' => $organization,
-            'contacts' => $contacts,
-            'companies' => Company::where('organization_id', $organization->id)->orderBy('name')->get(),
+            'contacts' => $query->latest('id')->paginate(25)->withQueryString(),
             'search' => $search,
             'fields' => $fields,
             'listFields' => $listFields,
-            'view' => $view,
-            'groupField' => $groupField,
-            'groups' => $groups,
+            'total' => Contact::where('organization_id', $organization->id)->count(),
+            'newThisMonth' => Contact::where('organization_id', $organization->id)->where('created_at', '>=', now()->startOfMonth())->count(),
+        ]);
+    }
+
+    public function create(Organization $organization)
+    {
+        $this->authorize($organization);
+
+        return view('member.crm.lead-form', [
+            'organization' => $organization,
+            'contact' => null,
+            'fields' => CustomFields::forEntity($organization, 'contact'),
+        ]);
+    }
+
+    public function show(Organization $organization, Contact $contact)
+    {
+        $this->authorize($organization);
+        $this->ensure($organization, $contact);
+
+        $history = AuditLog::where('scope', 'organization')
+            ->where('organization_id', $organization->id)
+            ->where('entity_type', 'contact')
+            ->where('entity_id', $contact->id)
+            ->latest('id')
+            ->limit(50)
+            ->get();
+
+        return view('member.crm.lead-show', [
+            'organization' => $organization,
+            'contact' => $contact->load(['owner', 'company', 'tags']),
+            'fields' => CustomFields::allForEntity($organization, 'contact'),
+            'history' => $history,
+            'actors' => User::whereIn('id', $history->pluck('actor_user_id')->filter()->unique())->pluck('name', 'id'),
         ]);
     }
 
@@ -93,9 +112,14 @@ class ContactController extends Controller
         ]);
         $this->syncTags($organization, $contact, (string) $request->input('tags', ''));
 
-        Audit::log('contact.created', 'organization', $organization->id, 'contact', $contact->id, null, ['name' => $contact->name]);
+        Audit::log('contact.created', 'organization', $organization->id, 'contact', $contact->id, null, [
+            'lead_id' => $contact->lead_id,
+            'name' => $contact->name,
+        ]);
 
-        return back()->with('status', 'Contato criado.');
+        return redirect()
+            ->route('member.org.contacts.show', [$organization, $contact])
+            ->with('status', 'Lead criado com o ID '.$contact->lead_id.'.');
     }
 
     public function edit(Organization $organization, Contact $contact)
@@ -103,10 +127,9 @@ class ContactController extends Controller
         $this->authorize($organization);
         $this->ensure($organization, $contact);
 
-        return view('member.crm.contact-edit', [
+        return view('member.crm.lead-form', [
             'organization' => $organization,
             'contact' => $contact->load('tags'),
-            'companies' => Company::where('organization_id', $organization->id)->orderBy('name')->get(),
             'fields' => CustomFields::forEntity($organization, 'contact'),
         ]);
     }
@@ -118,6 +141,15 @@ class ContactController extends Controller
         $fields = CustomFields::forEntity($organization, 'contact');
         $data = $this->validated($request, $organization, $fields);
 
+        $custom = CustomFields::collect($request, $fields);
+        $allKeys = CustomFields::allForEntity($organization, 'contact')->pluck('key');
+        $existing = $contact->custom ?? [];
+        foreach ($allKeys as $key) {
+            if (! array_key_exists($key, $custom) && array_key_exists($key, $existing)) {
+                $custom[$key] = $existing[$key];
+            }
+        }
+
         $contact->update([
             'company_id' => $data['company_id'] ?? null,
             'name' => $data['name'],
@@ -127,13 +159,18 @@ class ContactController extends Controller
             'job_title' => $data['job_title'] ?? null,
             'source' => $data['source'] ?? null,
             'notes' => $data['notes'] ?? null,
-            'custom' => CustomFields::collect($request, $fields),
+            'custom' => $custom,
         ]);
         $this->syncTags($organization, $contact, (string) $request->input('tags', ''));
 
-        Audit::log('contact.updated', 'organization', $organization->id, 'contact', $contact->id, null, ['name' => $contact->name]);
+        Audit::log('contact.updated', 'organization', $organization->id, 'contact', $contact->id, null, [
+            'lead_id' => $contact->lead_id,
+            'name' => $contact->name,
+        ]);
 
-        return redirect()->route('member.org.contacts.index', $organization)->with('status', 'Contato atualizado.');
+        return redirect()
+            ->route('member.org.contacts.show', [$organization, $contact])
+            ->with('status', 'Lead atualizado.');
     }
 
     public function destroy(Organization $organization, Contact $contact)
@@ -143,11 +180,12 @@ class ContactController extends Controller
 
         $name = $contact->name;
         $contactId = $contact->id;
+
         $contact->delete();
 
         Audit::log('contact.deleted', 'organization', $organization->id, 'contact', $contactId, ['name' => $name], null);
 
-        return back()->with('status', 'Contato removido.');
+        return redirect()->route('member.org.contacts.index', $organization)->with('status', 'Lead removido.');
     }
 
     private function validated(Request $request, Organization $organization, $fields): array

@@ -7,8 +7,12 @@ para qualquer pessoa com conhecimento básico de informática.
 - JavaScript de interação: `public/js/app.js`
 - Ícones: componente Blade `<x-icon name="..." />` (`resources/views/components/icon.blade.php`)
 - Layouts: `layouts/app`, `layouts/auth`, `layouts/member`, `layouts/panel`
-- Referência visual: dashboard com **sidebar escura**, cards claros, KPIs, funil e gráficos;
+- Referência visual: dashboard com **sidebar escura**, cards claros, KPIs e gráficos;
   autenticação em **tela dividida** (marca à esquerda, formulário à direita).
+
+> **Escopo atual do produto:** Dashboard, Leads e Gestão de CRM, além de autenticação,
+> organização, equipe/permissões e logs. Os demais módulos estão preservados no código,
+> mas ocultos da navegação até serem reativados em `config/modules.php`.
 
 ---
 
@@ -149,30 +153,41 @@ Rótulo
 - Variação positiva em verde, negativa em vermelho, “Novo” quando não há base anterior.
 - Valores monetários grandes usam formato compacto (`R$ 2,2 mi`) e o detalhe mostra o valor completo.
 
-### Funil (`.funnel`)
-
-- Barras trapezoidais via `clip-path`, cores: azul → roxo → rosa → verde.
-- Cada etapa mostra **quantidade** e **nome**; à direita, o percentual em relação à primeira etapa.
-- Rodapé com total de negócios e valor somado.
-- Estado vazio com ícone, texto curto e link para criar a primeira oportunidade.
-
 ### Donut (`.donut`)
 
 - Gráfico com `conic-gradient` gerado no servidor; centro com total de leads.
 - Legenda com ponto de cor, origem e percentual.
 - Cores fixas: `#3B82F6`, `#7C3AED`, `#EC4899`, `#F59E0B`, `#10B981`, `#94A3B8`.
 
-### Tarefas (`.task-list`)
+### Lista de leads (`.lead-list`)
 
-- Checkbox circular à esquerda, título e vínculo, horário à direita.
-- Tarefas atrasadas recebem cor vermelha (`.overdue`).
-- Estado vazio positivo: “Nenhuma tarefa para hoje. Tudo em dia!”.
+- Cada lead é uma linha/card com: avatar de iniciais, nome, e-mail/telefone, **ID permanente** e chips dos campos configurados.
+- Chips mostram o rótulo do campo e o valor (`Status`, `Temperatura`, `Segmento`, `Orçamento`).
+- Ações `Ver` e `Editar` ficam à direita; em telas pequenas a linha vira bloco vertical.
+- O ID longo é truncado visualmente na lista, mas o valor completo aparece no `title` e na tela de detalhe.
+- Estado vazio orienta a cadastrar o primeiro lead.
 
-### Atividades (`.activity-list`)
+### Detalhe do lead (`.lead-detail-grid`, `.detail-list`, `.timeline`)
 
-- Ícone em círculo colorido por tipo (lead, oportunidade, tarefa, mensagem, formulário).
-- Título amigável + autor/entidade + tempo relativo.
-- Limite de 6 itens no dashboard; link para os logs completos.
+- Dois cards lado a lado: **Dados do lead** (campos fixos) e **Campos do CRM** (personalizados).
+- Campos desativados continuam visíveis quando têm valor, com badge `desativado` — preservando o histórico.
+- O bloco **Histórico do lead** usa `.timeline` com ícone, título amigável, autor e data.
+- O ID do lead (`LD-...`) é exibido no cabeçalho e no detalhe, sempre em fonte monoespaçada.
+
+### Gestão de CRM (`.guideline-list`, `.field-admin`)
+
+- Três cartões explicam: ID do lead fixo, campos não são excluídos e ID do campo é estável.
+- Formulário de criação: nome, tipo, opções (para seleção), obrigatório e “mostrar na lista”.
+- Cada campo configurado mostra `FLD-...`, tipo, quantidade de leads com dados, status e ações.
+- A edição fica em um `<details>` para manter a página limpa.
+- Ao alterar o tipo de um campo com dados, exibe alerta e exige confirmação explícita.
+- Nunca há botão de excluir: apenas **Desativar** e **Reativar**.
+
+### Módulos (`.module-grid`, `.start-grid`)
+
+- `.module-grid` lista os módulos ativos e desativados na página de configurações.
+- `.start-grid` apresenta os primeiros passos no dashboard quando ainda não há leads.
+- O controle técnico fica em `config/modules.php` (`QEAI_MODULES` no `.env`).
 
 ### Alertas (`.alert`)
 
@@ -225,21 +240,24 @@ Regras: usar `currentColor`, tamanho `14–22px` e sempre `aria-hidden` (o compo
 |---|---|---|
 | Dashboard | `/app/organizacoes/{org}/dashboard` | `org.leads` |
 | Leads | `/crm/contatos` | `org.leads` |
-| Oportunidades | `/crm/negocios` | `org.leads` |
-| Clientes | `/crm/empresas` | `org.leads` |
-| Tarefas | `/crm/tarefas` | `org.leads` |
-| Conversas | `/atendimento` | `org.conversations` |
-| Canais | `/canais` | `org.channels` |
-| Formulários | `/crm/formularios` | `org.leads` |
-| Redes sociais | `/social` | `org.social` |
-| Anúncios | `/anuncios` | `org.ads` |
-| Campos | `/crm/campos` | `org.settings` |
-| Integrações | `/integracoes` | `org.api_keys` |
+| Gestão de CRM | `/crm/campos` | `org.crm_fields` |
 | Configurações | `/` da organização | `org.settings` / `org.members` |
 | Logs | `/logs` | `org.logs` |
 
 Itens sem permissão **não são exibidos**. O Root vê a estrutura, mas dados de negócio
 continuam bloqueados sem vínculo com a organização (tela de governança).
+
+### Módulos desativados nesta etapa
+
+Os módulos abaixo continuam no código e com os dados preservados, mas **não aparecem**
+na navegação enquanto não forem reativados em `QEAI_MODULES`:
+
+`companies`, `pipeline`, `tasks`, `inbox`, `channels`, `forms`, `social`, `ads`, `integrations`.
+
+O núcleo ativo é: `dashboard`, `leads`, `crm_fields`, `settings`, `logs`.
+O middleware `module` bloqueia (404) o acesso direto às telas de módulos desativados e também
+aos endpoints públicos correspondentes (formulários, chat, webhooks e WhatsApp).
+A API de leads permanece ativa enquanto o módulo `leads` estiver habilitado.
 
 ---
 

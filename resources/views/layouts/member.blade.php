@@ -13,6 +13,8 @@
       : \App\Models\Organization::whereHas('memberships', fn ($q) => $q->where('user_id', $user->id)->where('status', 'active'))->orderBy('name')->get();
   $unreadCount = $user->unreadNotificationsCount();
   $canLeads = $currentOrg ? \App\Support\OrgAccess::canData($user, $currentOrg, 'org.leads') : false;
+  $canFields = $currentOrg ? \App\Support\OrgAccess::canData($user, $currentOrg, 'org.crm_fields') : false;
+  $canSettings = $currentOrg ? \App\Support\OrgAccess::can($user, $currentOrg, 'org.settings') : false;
 @endphp
 
 @if (! $user->email_verified_at)
@@ -59,73 +61,30 @@
     <nav class="side-nav" aria-label="Navegação principal">
       @if ($currentOrg)
         <span class="nav-label">Principal</span>
-        @if ($canLeads)
+        @if ($canLeads && \App\Support\Modules::enabled('dashboard'))
           <a class="side-link {{ request()->routeIs('member.org.dashboard') ? 'active' : '' }}" href="{{ route('member.org.dashboard', $currentOrg) }}">
             <x-icon name="home" :size="18"/> Dashboard
           </a>
+        @endif
+        @if ($canLeads && \App\Support\Modules::enabled('leads'))
           <a class="side-link {{ request()->routeIs('member.org.contacts.*') ? 'active' : '' }}" href="{{ route('member.org.contacts.index', $currentOrg) }}">
             <x-icon name="users" :size="18"/> Leads
           </a>
-          <a class="side-link {{ request()->routeIs('member.org.pipeline.*') || request()->routeIs('member.org.deals.*') ? 'active' : '' }}" href="{{ route('member.org.pipeline.index', $currentOrg) }}">
-            <x-icon name="briefcase" :size="18"/> Oportunidades
-          </a>
-          <a class="side-link {{ request()->routeIs('member.org.companies.*') ? 'active' : '' }}" href="{{ route('member.org.companies.index', $currentOrg) }}">
-            <x-icon name="building" :size="18"/> Clientes
-          </a>
-          <a class="side-link {{ request()->routeIs('member.org.tasks.*') ? 'active' : '' }}" href="{{ route('member.org.tasks.index', $currentOrg) }}">
-            <x-icon name="check-square" :size="18"/> Tarefas
+        @endif
+        @if ($canFields && \App\Support\Modules::enabled('crm_fields'))
+          <a class="side-link {{ request()->routeIs('member.org.fields.*') ? 'active' : '' }}" href="{{ route('member.org.fields.index', $currentOrg) }}">
+            <x-icon name="list-check" :size="18"/> Gestão de CRM
           </a>
         @endif
 
-        @if ($canLeads || \App\Support\OrgAccess::canData($user, $currentOrg, 'org.conversations') || \App\Support\OrgAccess::canData($user, $currentOrg, 'org.channels'))
-          <span class="nav-label">Comunicação</span>
-          @if (\App\Support\OrgAccess::canData($user, $currentOrg, 'org.conversations'))
-            <a class="side-link {{ request()->routeIs('member.org.inbox.*') ? 'active' : '' }}" href="{{ route('member.org.inbox.index', $currentOrg) }}">
-              <x-icon name="message" :size="18"/> Conversas
+        @if ($canSettings || \App\Support\OrgAccess::can($user, $currentOrg, 'org.members') || \App\Support\OrgAccess::can($user, $currentOrg, 'org.logs'))
+          <span class="nav-label">Administração</span>
+          @if (($canSettings || \App\Support\OrgAccess::can($user, $currentOrg, 'org.members')) && \App\Support\Modules::enabled('settings'))
+            <a class="side-link {{ request()->routeIs('member.org.show') ? 'active' : '' }}" href="{{ route('member.org.show', $currentOrg) }}">
+              <x-icon name="settings" :size="18"/> Configurações
             </a>
           @endif
-          @if (\App\Support\OrgAccess::canData($user, $currentOrg, 'org.channels'))
-            <a class="side-link {{ request()->routeIs('member.org.channels.*') ? 'active' : '' }}" href="{{ route('member.org.channels.index', $currentOrg) }}">
-              <x-icon name="grid" :size="18"/> Canais
-            </a>
-          @endif
-          @if ($canLeads)
-            <a class="side-link {{ request()->routeIs('member.org.forms.*') ? 'active' : '' }}" href="{{ route('member.org.forms.index', $currentOrg) }}">
-              <x-icon name="filter" :size="18"/> Formulários
-            </a>
-          @endif
-        @endif
-
-        @if (\App\Support\OrgAccess::canData($user, $currentOrg, 'org.social') || \App\Support\OrgAccess::canData($user, $currentOrg, 'org.ads'))
-          <span class="nav-label">Marketing</span>
-          @if (\App\Support\OrgAccess::canData($user, $currentOrg, 'org.social'))
-            <a class="side-link {{ request()->routeIs('member.org.social.*') ? 'active' : '' }}" href="{{ route('member.org.social.index', $currentOrg) }}">
-              <x-icon name="share" :size="18"/> Redes sociais
-            </a>
-          @endif
-          @if (\App\Support\OrgAccess::canData($user, $currentOrg, 'org.ads'))
-            <a class="side-link {{ request()->routeIs('member.org.ads.*') ? 'active' : '' }}" href="{{ route('member.org.ads.index', $currentOrg) }}">
-              <x-icon name="megaphone" :size="18"/> Anúncios
-            </a>
-          @endif
-        @endif
-
-        @if (\App\Support\OrgAccess::can($user, $currentOrg, 'org.settings') || \App\Support\OrgAccess::can($user, $currentOrg, 'org.members') || \App\Support\OrgAccess::can($user, $currentOrg, 'org.logs'))
-          <span class="nav-label">Gestão</span>
-          @if ($canLeads && \App\Support\OrgAccess::canData($user, $currentOrg, 'org.settings'))
-            <a class="side-link {{ request()->routeIs('member.org.fields.*') ? 'active' : '' }}" href="{{ route('member.org.fields.index', $currentOrg) }}">
-              <x-icon name="list-check" :size="18"/> Campos
-            </a>
-          @endif
-          @if (\App\Support\OrgAccess::canData($user, $currentOrg, 'org.api_keys'))
-            <a class="side-link {{ request()->routeIs('member.org.integrations.*') ? 'active' : '' }}" href="{{ route('member.org.integrations.index', $currentOrg) }}">
-              <x-icon name="key" :size="18"/> Integrações
-            </a>
-          @endif
-          <a class="side-link {{ request()->routeIs('member.org.show') ? 'active' : '' }}" href="{{ route('member.org.show', $currentOrg) }}">
-            <x-icon name="settings" :size="18"/> Configurações
-          </a>
-          @if (\App\Support\OrgAccess::can($user, $currentOrg, 'org.logs'))
+          @if (\App\Support\OrgAccess::can($user, $currentOrg, 'org.logs') && \App\Support\Modules::enabled('logs'))
             <a class="side-link {{ request()->routeIs('member.org.logs') ? 'active' : '' }}" href="{{ route('member.org.logs', $currentOrg) }}">
               <x-icon name="shield" :size="18"/> Logs
             </a>
@@ -175,7 +134,7 @@
       @if ($currentOrg && $canLeads)
         <form class="searchbar" method="get" action="{{ route('member.org.contacts.index', $currentOrg) }}" role="search">
           <x-icon name="search" :size="18"/>
-          <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar leads, clientes, oportunidades..." aria-label="Buscar">
+          <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar leads por nome, e-mail, telefone ou ID..." aria-label="Buscar leads">
         </form>
       @endif
 

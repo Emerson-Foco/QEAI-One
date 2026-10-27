@@ -60,7 +60,7 @@ class CrmTest extends TestCase
         $organization = $this->organization('Acme');
         $this->addMember($organization, $user, 'agent');
 
-        $this->actingAs($user)->get(route('member.org.contacts.index', $organization))->assertOk()->assertSee('Novo contato');
+        $this->actingAs($user)->get(route('member.org.contacts.index', $organization))->assertOk()->assertSee('Novo lead');
 
         $this->actingAs($user)->post(route('member.org.contacts.store', $organization), [
             'name' => 'Maria Souza',

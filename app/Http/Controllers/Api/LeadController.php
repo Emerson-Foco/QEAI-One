@@ -28,7 +28,12 @@ class LeadController extends Controller
         ]);
 
         return response()->json([
-            'data' => ['id' => $contact->id, 'name' => $contact->name, 'email' => $contact->email],
+            'data' => [
+                'id' => $contact->id,
+                'lead_id' => $contact->lead_id,
+                'name' => $contact->name,
+                'email' => $contact->email,
+            ],
         ], 201);
     }
 }
