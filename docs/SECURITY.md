@@ -109,7 +109,7 @@ produção e para qualquer alteração futura.
 
 ### Dados e termos
 - [ ] `LEGAL_REQUIRE_ACCEPTANCE=true` em produção
-- [ ] Termos de Uso publicados em `https://qeai.com/termos`
+- [ ] Termos de Uso publicados em `https://qeai.com.br/termos`
 - [ ] Nenhum usuário/QA/demo de teste no banco de produção
 - [ ] Nenhum lead/demo de teste
 - [ ] Organizações reais revisadas
@@ -150,7 +150,7 @@ CRM, campos personalizados, leads, visões, preferências, módulos, API, webhoo
 inbox, social, anúncios, segurança de headers, CSV e isolamento entre organizações.
 
 - **127 testes automatizados / 550 asserções** executados com sucesso.
-- **45 verificações do site institucional** executadas com sucesso.
+- **46 verificações do site institucional** executadas com sucesso.
 - Verificações específicas: headers/CSP, XSS em URL, CSV injection, SSRF de webhooks,
   preferências por usuário/organização, isolamento de leads e campos, governança do
   Root sem vínculo e assinatura de webhooks.

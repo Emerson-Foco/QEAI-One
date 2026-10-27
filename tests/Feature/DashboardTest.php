@@ -93,7 +93,7 @@ class DashboardTest extends TestCase
 
     public function test_root_without_membership_sees_governance_notice_instead_of_business_data(): void
     {
-        $root = $this->user('root@qeai.com', true);
+        $root = $this->user('root@qeai.com.br', true);
         $organization = $this->organization('Acme');
 
         $this->actingAs($root)->get(route('member.org.dashboard', $organization))

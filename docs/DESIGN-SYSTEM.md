@@ -358,3 +358,4 @@ Teste sempre: 360px (celular), 768px (tablet), 1024px, 1366px e 1920px.
 8. Novas visões devem reutilizar a base filtrada do `ContactController` e registrar preferência por visão.
 9. Nunca publique textos de teste, demonstração, debug ou instruções internas.
 10. Após alterações, rode `php artisan test`, `vendor/bin/pint` e `php artisan view:cache`.
+11. URLs devem ser dinâmicas: use `route()`/`url()` e `APP_URL`/`SITE_URL`; não fixe domínio no código.

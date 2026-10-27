@@ -103,7 +103,7 @@ class SecurityTest extends TestCase
 
     public function test_csv_export_neutralizes_formula_injection(): void
     {
-        $root = $this->user('root@qeai.com', true);
+        $root = $this->user('root@qeai.com.br', true);
 
         AuditLog::create([
             'scope' => 'platform',
@@ -193,7 +193,7 @@ class SecurityTest extends TestCase
 
     public function test_root_without_membership_only_sees_administrative_audit_events(): void
     {
-        $root = $this->user('root@qeai.com', true);
+        $root = $this->user('root@qeai.com.br', true);
         $admin = $this->user('admin@empresa.com');
         $organization = $this->organization('Acme');
         $this->addMember($organization, $admin, 'admin');

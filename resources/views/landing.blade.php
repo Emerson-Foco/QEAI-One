@@ -34,7 +34,7 @@
 
       <div class="landing-preview" aria-hidden="true">
         <div class="landing-mock">
-          <div class="landing-mock-head"><i></i><i></i><i></i><span>app.qeai.com.br</span></div>
+          <div class="landing-mock-head"><i></i><i></i><i></i><span>Q One · CRM</span></div>
           <div class="landing-mock-kpis">
             <div class="landing-mock-kpi"><small>LEADS</small><strong>1.248</strong></div>
             <div class="landing-mock-kpi"><small>OPORTUNIDADES</small><strong>320</strong></div>
