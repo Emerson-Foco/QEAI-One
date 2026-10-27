@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Não reconheço este convite — QEAI One')
+@section('title', 'Não reconheço este convite — Q One')
 @section('robots', 'noindex,nofollow')
 
 @section('content')
 <div class="center">
   <div class="card narrow">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="QEAI One"></div>
+    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="Q One"></div>
     <span class="eyebrow">Segurança</span>
     <h1>Não reconhece este convite?</h1>
     <p class="muted">

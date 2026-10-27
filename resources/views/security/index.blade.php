@@ -1,6 +1,6 @@
 @extends('layouts.panel')
 
-@section('title', 'Segurança — QEAI One')
+@section('title', 'Segurança — Q One')
 
 @section('panel')
 <div class="page-head">

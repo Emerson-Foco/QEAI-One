@@ -1,10 +1,10 @@
 @extends('layouts.auth')
 
-@section('title', 'Entrar — QEAI One')
+@section('title', 'Entrar — Q One')
 
 @section('auth')
   <h1 class="auth-title">Acesse sua conta</h1>
-  <p class="auth-sub">Entre para continuar no QEAI One</p>
+  <p class="auth-sub">Entre para continuar no Q One</p>
 
   @if (session('status'))
     <div class="alert ok">{{ session('status') }}</div>

@@ -13,8 +13,8 @@
 <div class="app-shell">
   <aside class="sidebar" id="app-sidebar">
     <div class="sidebar-brand">
-      <a href="{{ route('panel.dashboard') }}" aria-label="QEAI One">
-        <img src="{{ asset('img/logo-light.svg') }}" alt="QEAI One" width="148" height="43">
+      <a href="{{ route('panel.dashboard') }}" aria-label="Q One">
+        <img src="{{ asset('img/logo-light.svg') }}" alt="Q One" width="104" height="56">
       </a>
       <button class="sidebar-close" type="button" data-nav-close aria-label="Fechar menu">
         <x-icon name="x" :size="20"/>

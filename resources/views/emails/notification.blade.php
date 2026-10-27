@@ -5,7 +5,7 @@
     <h2 style="margin-top:0">{{ $title }}</h2>
     <p>{{ $body }}</p>
     @if ($url)
-      <p><a href="{{ $url }}" style="display:inline-block;background:#6D3DF5;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Abrir no QEAI One</a></p>
+      <p><a href="{{ $url }}" style="display:inline-block;background:#6D3DF5;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Abrir no Q One</a></p>
     @endif
   </div>
 </body>

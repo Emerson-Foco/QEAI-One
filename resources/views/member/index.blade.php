@@ -1,6 +1,6 @@
 @extends('layouts.member')
 
-@section('title', 'Minhas organizações — QEAI One')
+@section('title', 'Minhas organizações — Q One')
 
 @section('panel')
 @php $firstName = collect(explode(' ', (string) auth()->user()->name))->filter()->first() ?: 'você'; @endphp

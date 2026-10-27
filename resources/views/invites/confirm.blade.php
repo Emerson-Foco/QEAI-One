@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Aceitar convite — QEAI One')
+@section('title', 'Aceitar convite — Q One')
 @section('robots', 'noindex,nofollow')
 
 @section('content')
 <div class="center">
   <div class="card narrow">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="QEAI One"></div>
+    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="Q One"></div>
     <span class="eyebrow">Convite</span>
     <h1>Aceitar convite para {{ $invite->organization->name }}</h1>
     <p class="muted">

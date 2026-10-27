@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'Instalação — QEAI One')
+@section('title', 'Instalação — Q One')
 @section('robots', 'noindex,nofollow')
 
 @section('content')
 <div class="center">
   <div class="card wide">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="QEAI One"></div>
+    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="Q One"></div>
     <span class="eyebrow">Instalação</span>
-    <h1>Vamos preparar o QEAI One.</h1>
+    <h1>Vamos preparar o Q One.</h1>
 
     @php
       $steps = ['requirements' => 'Requisitos', 'database' => 'Banco de dados', 'admin' => 'ADM Root', 'identity' => 'Identidade'];

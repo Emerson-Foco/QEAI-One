@@ -79,6 +79,9 @@ class InviteAcceptController extends Controller
             $data = $request->validate([
                 'name' => ['required', 'string', 'max:120'],
                 'password' => ['required', 'string', 'min:10', 'max:72', 'confirmed'],
+                'terms' => ['accepted'],
+            ], [
+                'terms.accepted' => 'É necessário aceitar os Termos de Uso e a Política de Privacidade.',
             ]);
             $user = User::create([
                 'name' => $data['name'],
@@ -86,7 +89,11 @@ class InviteAcceptController extends Controller
                 'password' => $data['password'],
             ]);
             // Recebimento e aceite do convite por e-mail comprovam a posse do endereço.
-            $user->forceFill(['email_verified_at' => now()])->save();
+            $user->forceFill([
+                'email_verified_at' => now(),
+                'terms_accepted_at' => now(),
+                'terms_version' => (string) config('legal.terms_version'),
+            ])->save();
         }
 
         $membership = $invite->organization->memberships()->firstOrCreate(
@@ -108,7 +115,7 @@ class InviteAcceptController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('member.dashboard')->with('status', 'Convite aceito. Bem-vindo(a) ao QEAI One!');
+        return redirect()->route('member.dashboard')->with('status', 'Convite aceito. Bem-vindo(a) ao Q One!');
     }
 
     public function reportForm(string $token)

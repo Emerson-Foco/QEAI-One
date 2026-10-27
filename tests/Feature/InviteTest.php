@@ -111,10 +111,11 @@ class InviteTest extends TestCase
 
         $this->get(route('invite.show', $token))->assertOk()->assertSee('Participe de Acme');
 
-        $response = $this->post('/convite/' . $token, [
+        $response = $this->post('/convite/'.$token, [
             'name' => 'Pessoa Convidada',
             'password' => 'senha-do-convidado-123',
             'password_confirmation' => 'senha-do-convidado-123',
+            'terms' => '1',
         ]);
 
         $response->assertRedirect(route('member.dashboard'));

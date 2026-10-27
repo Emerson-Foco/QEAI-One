@@ -55,7 +55,7 @@ class EmailVerificationController extends Controller
         try {
             PlatformMail::send(
                 $user->email,
-                'Confirme seu e-mail — ' . Setting::get('company_name', 'QEAI One'),
+                'Confirme seu e-mail — ' . Setting::get('company_name', 'Q One'),
                 view('emails.verify_email', ['user' => $user, 'link' => $link])->render()
             );
         } catch (\Throwable $exception) {

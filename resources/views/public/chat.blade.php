@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Chat — ' . ($organization->name ?? 'QEAI One'))
+@section('title', 'Chat — ' . ($organization->name ?? 'Q One'))
 @section('robots', 'noindex,nofollow')
 
 @section('content')
 <div class="center">
   <div class="card narrow">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="{{ $organization->name ?? 'QEAI One' }}"></div>
+    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="{{ $organization->name ?? 'Q One' }}"></div>
     <h1>{{ $channel->name }}</h1>
     <p class="muted">Fale com a gente. Informe nome/e-mail (opcional) e sua mensagem.</p>
 

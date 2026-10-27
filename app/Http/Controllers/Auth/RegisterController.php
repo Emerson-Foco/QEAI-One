@@ -46,6 +46,10 @@ class RegisterController extends Controller
             'email' => mb_strtolower($data['email']),
             'password' => $data['password'],
         ]);
+        $user->forceFill([
+            'terms_accepted_at' => now(),
+            'terms_version' => (string) config('legal.terms_version'),
+        ])->save();
 
         $organization = Organizations::provision($data['company_name'], $data['document'] ?? null, $user);
 

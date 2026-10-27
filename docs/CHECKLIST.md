@@ -1,4 +1,4 @@
-# QEAI One — Checklist do projeto
+# Q One — Checklist do projeto
 
 Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 
@@ -93,7 +93,7 @@ Legenda: `[x]` concluído e testado · `[~]` em andamento · `[ ]` pendente
 - [x] **Governança do Root**: sem vínculo, só eventos administrativos de auditoria (sem leads/atendimento)
 - [x] **Segurança**: headers/CSP, CSV seguro, URLs seguras, segredos de webhook criptografados, WhatsApp com assinatura e rate limits
 
-## Fase 1 — MVP operacional (CRM + atendimento)
+## Fase 1 — Opera��o principal (CRM + atendimento)
 - [x] **CRM: contatos + empresas** (escopo por organização, permissão `org.leads`, tags, auditoria)
 - [x] CRM: pipelines/negócios (kanban por etapas, valor, ganho/perdido) e tarefas/atividades
 - [x] **Captação: formulários personalizados** (com campos customizados) + página pública + incorporação por iframe

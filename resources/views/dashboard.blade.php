@@ -1,13 +1,13 @@
 @extends('layouts.panel')
 
-@section('title', 'Visão geral — QEAI One')
+@section('title', 'Visão geral — Q One')
 
 @section('panel')
 <div class="page-header">
   <div>
     <span class="page-kicker">Plataforma</span>
     <h1>Olá, {{ auth()->user()->name }}!</h1>
-    <p class="muted">Aqui está a visão geral do QEAI One.</p>
+    <p class="muted">Aqui está a visão geral do Q One.</p>
   </div>
   <div class="page-actions">
     <a class="btn secondary" href="{{ route('panel.organizations.index') }}"><x-icon name="building" :size="16"/> Organizações</a>

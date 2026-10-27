@@ -67,7 +67,7 @@ class InviteController extends Controller
         try {
             PlatformMail::send(
                 $invite->email,
-                'Convite para ' . $organization->name . ' no QEAI One',
+                'Convite para ' . $organization->name . ' no Q One',
                 view('emails.invite', [
                     'organization' => $organization,
                     'role' => $role,

@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Esqueci minha senha — QEAI One')
+@section('title', 'Esqueci minha senha — Q One')
 
 @section('auth')
   <h1 class="auth-title">Esqueceu a senha?</h1>

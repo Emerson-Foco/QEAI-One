@@ -5,9 +5,9 @@
 @section('panel')
 <div class="page-header">
   <div>
-    <span class="page-kicker">Governança</span>
+    <span class="page-kicker">Acesso</span>
     <h1>{{ $organization->name }}</h1>
-    <p class="muted">Esta organização está protegida pelas regras de acesso e privacidade da plataforma.</p>
+    <p class="muted">Esta organização possui regras de acesso definidas pelo administrador.</p>
   </div>
   <div class="page-actions">
     <a class="btn secondary" href="{{ route('member.org.show', $organization) }}"><x-icon name="settings" :size="16"/> Configurações da organização</a>
@@ -17,11 +17,11 @@
 <div class="card">
   <div class="empty-state" style="border:0;background:transparent;padding:26px 10px">
     <x-icon name="shield" :size="34"/>
-    <h2 style="margin-top:10px">Dados de negócio protegidos</h2>
+    <h2 style="margin-top:10px">Acesso aos dados</h2>
     @if ($isRootWithoutMembership)
       <p class="muted" style="max-width:560px;margin:0 auto 14px">
-        Você é <strong>ADM Root</strong>, mas não possui vínculo com esta organização. Por governança,
-        o acesso a leads, oportunidades e atendimento exige que um administrador da organização
+        Você é <strong>ADM Root</strong>, mas não possui vínculo com esta organização. Para acessar
+        leads, oportunidades e atendimento, é necessário que um administrador da organização
         conceda a você um grupo de acesso com a permissão <strong>Leads e CRM</strong>.
       </p>
     @else
@@ -41,7 +41,7 @@
   <div class="card">
     <div class="card-head">
       <div>
-        <h2>Auditoria da plataforma</h2>
+        <h2>Painel da plataforma</h2>
         <p class="muted">Ações administrativas continuam disponíveis no painel Root e ficam registradas nos logs.</p>
       </div>
     </div>

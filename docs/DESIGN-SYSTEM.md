@@ -1,4 +1,4 @@
-# QEAI One — Design System
+# Q One — Design System
 
 Padrão visual oficial da plataforma. Objetivo: **consistência, clareza e facilidade de uso**
 para qualquer pessoa com conhecimento básico de informática.

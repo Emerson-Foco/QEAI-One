@@ -48,7 +48,7 @@ class SecurityController extends Controller
             $user->save();
         }
 
-        $uri = Totp::provisioningUri((string) $user->two_factor_secret, $user->email, (string) Setting::get('company_name', 'QEAI One'));
+        $uri = Totp::provisioningUri((string) $user->two_factor_secret, $user->email, (string) Setting::get('company_name', 'Q One'));
         Audit::log('auth.2fa_started', 'platform', null, 'user', $user->id);
 
         return redirect()->route('panel.security.index')

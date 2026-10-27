@@ -22,7 +22,7 @@ class PlatformMail
         }
 
         $from = (string) Setting::get('smtp_username');
-        $fromName = (string) Setting::get('smtp_from_name', 'QEAI One');
+        $fromName = (string) Setting::get('smtp_from_name', 'Q One');
 
         Config::set('mail.mailers.platform_smtp', [
             'transport' => 'smtp',

@@ -153,7 +153,7 @@ class InstallController extends Controller
         return view('install', [
             'step' => 'identity',
             'values' => [
-                'company_name' => Setting::get('company_name', 'QEAI One'),
+                'company_name' => Setting::get('company_name', 'Q One'),
                 'company_legal_name' => Setting::get('company_legal_name', ''),
                 'company_document' => Setting::get('company_document', ''),
                 'contact_email' => Setting::get('contact_email', ''),
@@ -162,7 +162,7 @@ class InstallController extends Controller
                 'smtp_port' => Setting::get('smtp_port', '465'),
                 'smtp_encryption' => Setting::get('smtp_encryption', 'ssl'),
                 'smtp_username' => Setting::get('smtp_username', ''),
-                'smtp_from_name' => Setting::get('smtp_from_name', 'QEAI One'),
+                'smtp_from_name' => Setting::get('smtp_from_name', 'Q One'),
             ],
         ]);
     }

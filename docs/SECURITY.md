@@ -1,4 +1,4 @@
-# QEAI One — Segurança
+# Q One — Segurança
 
 Checklist e regras de segurança da plataforma. Este documento é a referência para
 produção e para qualquer alteração futura.

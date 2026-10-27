@@ -2,7 +2,7 @@
 
 /*
 |--------------------------------------------------------------------------
-| Módulos do QEAI One
+| Módulos do Q One
 |--------------------------------------------------------------------------
 | O núcleo do produto é composto por Dashboard, Leads e Gestão de CRM.
 | Os demais módulos continuam no código e podem ser reativados aos poucos

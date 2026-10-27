@@ -45,7 +45,7 @@ class PasswordResetController extends Controller
             try {
                 PlatformMail::send(
                     $user->email,
-                    'Redefinição de senha — ' . Setting::get('company_name', 'QEAI One'),
+                    'Redefinição de senha — ' . Setting::get('company_name', 'Q One'),
                     view('emails.password_reset', ['user' => $user, 'link' => $link])->render()
                 );
             } catch (\Throwable $exception) {

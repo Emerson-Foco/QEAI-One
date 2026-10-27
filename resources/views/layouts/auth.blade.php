@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>@yield('title', 'QEAI One')</title>
+  <title>@yield('title', 'Q One')</title>
   <meta name="robots" content="@yield('robots', 'noindex,nofollow')">
   <meta name="theme-color" content="#0B1220">
   <link rel="icon" href="{{ asset('img/logo.svg') }}" type="image/svg+xml">
@@ -17,12 +17,12 @@
       <div class="auth-glow auth-glow-1" aria-hidden="true"></div>
       <div class="auth-glow auth-glow-2" aria-hidden="true"></div>
 
-      <img class="auth-logo" src="{{ asset('img/logo-light.svg') }}" alt="QEAI One" width="176" height="51">
+      <img class="auth-logo" src="{{ asset('img/logo-light.svg') }}" alt="Q One" width="132" height="71">
 
       <div class="auth-aside-body">
         <p class="auth-kicker">CRM inteligente<br>para o seu negócio</p>
         <h1>Mais clientes.<br>Mais oportunidades.<br><span>Mais resultados.</span></h1>
-        <p class="auth-lead">O QEAI One organiza seus leads em um CRM simples, com campos personalizáveis, histórico completo e um dashboard direto para acompanhar seus resultados.</p>
+        <p class="auth-lead">O Q One organiza seus leads em um CRM simples, com campos personalizáveis, histórico completo e um dashboard direto para acompanhar seus resultados.</p>
 
         <ul class="auth-benefits">
           <li>
@@ -39,29 +39,21 @@
           </li>
         </ul>
       </div>
-
-      <div class="auth-trust">
-        <span class="auth-trust-icon"><x-icon name="shield" :size="22"/></span>
-        <div>
-          <strong>Segurança e privacidade</strong>
-          <small>Dados protegidos, auditoria completa e conformidade com a LGPD.</small>
-        </div>
-      </div>
     </aside>
 
     <main class="auth-main">
       <div class="auth-mobile-brand">
-        <img src="{{ asset('img/logo.svg') }}" alt="QEAI One" width="148" height="43">
+        <img src="{{ asset('img/logo.svg') }}" alt="Q One" width="104" height="56">
       </div>
 
       <div class="auth-card">
         <a class="auth-brand" href="{{ route('home') }}">
-          <img src="{{ asset('img/logo.svg') }}" alt="QEAI One" width="164" height="48">
+          <img src="{{ asset('img/logo.svg') }}" alt="Q One" width="124" height="67">
         </a>
         @yield('auth')
       </div>
 
-      <p class="auth-foot">© {{ date('Y') }} QEAI One · Plataforma segura para empresas</p>
+      <p class="auth-foot">© {{ date('Y') }} Q One · Plataforma para empresas<br><a href="{{ config('legal.terms_url') }}" target="_blank" rel="noopener">Termos de Uso</a> · <a href="{{ config('legal.privacy_url') }}" target="_blank" rel="noopener">Privacidade</a></p>
     </main>
   </div>
 

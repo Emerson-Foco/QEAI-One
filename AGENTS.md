@@ -1,4 +1,4 @@
-# Instruções do projeto QEAI One
+# Instruções do projeto Q One
 
 Leia antes de alterar a plataforma:
 

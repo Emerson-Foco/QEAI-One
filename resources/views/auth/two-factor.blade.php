@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Verificação em duas etapas — QEAI One')
+@section('title', 'Verificação em duas etapas — Q One')
 
 @section('auth')
   <h1 class="auth-title">Confirme o código</h1>

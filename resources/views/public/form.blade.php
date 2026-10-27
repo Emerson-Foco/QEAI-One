@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', $form->name . ' — ' . ($organization->name ?? 'QEAI One'))
+@section('title', $form->name . ' — ' . ($organization->name ?? 'Q One'))
 @section('robots', 'noindex,nofollow')
 
 @section('content')
 <div class="center">
   <div class="card narrow">
-    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="{{ $organization->name ?? 'QEAI One' }}"></div>
+    <div class="brand"><img src="{{ asset('img/logo.svg') }}" alt="{{ $organization->name ?? 'Q One' }}"></div>
     <h1>{{ $form->name }}</h1>
 
     @if (session('form_success'))

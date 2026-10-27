@@ -65,7 +65,7 @@ class PlatformSettingsController extends Controller
         try {
             PlatformMail::send(
                 $data['to'],
-                'Verificação de e-mail - '.Setting::get('company_name', 'QEAI One'),
+                'Verificação de e-mail - '.Setting::get('company_name', 'Q One'),
                 '<p>Se você recebeu este e-mail, o SMTP da plataforma está funcionando.</p>'
             );
         } catch (\Throwable $exception) {
@@ -81,7 +81,7 @@ class PlatformSettingsController extends Controller
     private function current(): array
     {
         return [
-            'company_name' => (string) Setting::get('company_name', 'QEAI One'),
+            'company_name' => (string) Setting::get('company_name', 'Q One'),
             'company_legal_name' => (string) Setting::get('company_legal_name', ''),
             'company_document' => (string) Setting::get('company_document', ''),
             'contact_email' => (string) Setting::get('contact_email', ''),
@@ -90,7 +90,7 @@ class PlatformSettingsController extends Controller
             'smtp_port' => (string) Setting::get('smtp_port', '465'),
             'smtp_encryption' => (string) Setting::get('smtp_encryption', 'ssl'),
             'smtp_username' => (string) Setting::get('smtp_username', ''),
-            'smtp_from_name' => (string) Setting::get('smtp_from_name', 'QEAI One'),
+            'smtp_from_name' => (string) Setting::get('smtp_from_name', 'Q One'),
             'smtp_configured' => PlatformMail::configured() ? '1' : '',
         ];
     }

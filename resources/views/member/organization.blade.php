@@ -1,6 +1,6 @@
 @extends('layouts.member')
 
-@section('title', $organization->name . ' — QEAI One')
+@section('title', $organization->name . ' — Q One')
 
 @section('panel')
 <div class="page-head">
@@ -37,7 +37,7 @@
 
 <div class="card">
   <h2>Módulos</h2>
-  <p class="muted">Nesta etapa, o QEAI One está focado no essencial: dashboard, leads e configuração do CRM. Os demais módulos continuam preservados e podem ser reativados quando fizer sentido.</p>
+  <p class="muted">Nesta etapa, o Q One está focado no essencial: dashboard, leads e configuração do CRM. Os demais módulos continuam preservados e podem ser reativados quando fizer sentido.</p>
   <div class="module-grid">
     @foreach (\App\Support\Modules::catalog() as $key => $label)
       @php $enabled = \App\Support\Modules::enabled($key); @endphp

@@ -18,7 +18,7 @@ class ExampleTest extends TestCase
     public function test_landing_page_renders_when_installed(): void
     {
         $this->withMarker(true, function () {
-            $this->get('/')->assertOk()->assertSee('QEAI One');
+            $this->get('/')->assertOk()->assertSee('Q One');
         });
     }
 

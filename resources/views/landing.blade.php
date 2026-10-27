@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'QEAI One — CRM e atendimento para empresas')
+@section('title', 'Q One — CRM e atendimento para empresas')
 @section('body_class', 'landing')
 
 @section('content')
 <div class="landing-hero">
   <div class="container">
     <nav class="landing-nav">
-      <a href="{{ route('home') }}"><img src="{{ asset('img/logo-light.svg') }}" alt="QEAI One" width="158" height="46"></a>
+      <a href="{{ route('home') }}"><img src="{{ asset('img/logo-light.svg') }}" alt="Q One" width="124" height="67"></a>
       <div class="landing-links">
         <a href="#recursos">Recursos</a>
         <a href="#como-funciona">Como funciona</a>
@@ -20,15 +20,15 @@
       <div>
         <span class="landing-kicker"><x-icon name="sparkles" :size="13"/> CRM inteligente para o seu negócio</span>
         <h1>Mais clientes.<br>Mais oportunidades.<br><span>Mais resultados.</span></h1>
-        <p>O QEAI One organiza seus leads em um CRM simples, com campos personalizáveis, histórico completo e um dashboard direto — sem planilhas e sem complicação.</p>
+        <p>O Q One organiza seus leads em um CRM simples, com campos personalizáveis, histórico completo e um dashboard direto — sem planilhas e sem complicação.</p>
         <div class="btn-row" style="margin-top:22px">
           <a class="btn" href="{{ route('register') }}">Criar conta grátis <x-icon name="arrow-right" :size="17"/></a>
           <a class="btn secondary" href="{{ route('login') }}">Já tenho conta</a>
         </div>
         <div class="landing-stats">
           <div><strong>Multiempresa</strong><small>cada empresa com sua própria base</small></div>
-          <div><strong>LGPD</strong><small>auditoria e controle de acesso</small></div>
-          <div><strong>Sem instalação</strong><small>acesse pelo navegador</small></div>
+          <div><strong>Campos personalizáveis</strong><small>adapte o CRM ao seu processo</small></div>
+          <div><strong>Acesso online</strong><small>use pelo navegador, sem instalação</small></div>
         </div>
       </div>
 
@@ -74,9 +74,9 @@
         <p>Acompanhe a quantidade de leads, as novidades do período e a origem de cada contato.</p>
       </article>
       <article class="feature-card">
-        <span class="feature-icon"><x-icon name="shield" :size="21"/></span>
-        <h3>Segurança e permissões</h3>
-        <p>Cada organização com sua própria base, grupos de acesso e registros de auditoria.</p>
+        <span class="feature-icon"><x-icon name="clock" :size="21"/></span>
+        <h3>Histórico completo</h3>
+        <p>Cada lead mantém o ID permanente, a data de criação e o registro das alterações ao longo do tempo.</p>
       </article>
     </div>
   </div>
@@ -112,18 +112,19 @@
 <section class="landing-cta">
   <div class="container">
     <h2>Comece a organizar sua operação hoje</h2>
-    <p>Crie sua organização e comece a usar o QEAI One com a sua equipe.</p>
+    <p>Crie sua organização e comece a usar o Q One com a sua equipe.</p>
     <a class="btn" href="{{ route('register') }}">Criar conta grátis <x-icon name="arrow-right" :size="17"/></a>
   </div>
 </section>
 
 <footer class="landing-footer">
   <div class="container">
-    <span>© {{ date('Y') }} QEAI One. Todos os direitos reservados.</span>
+    <span>© {{ date('Y') }} Q One. Todos os direitos reservados.</span>
     <span>
       <a href="{{ route('login') }}">Entrar</a> ·
       <a href="{{ route('register') }}">Criar conta</a> ·
-      <a href="https://qeai.com.br/privacidade" target="_blank" rel="noopener">Privacidade</a>
+      <a href="{{ config('legal.terms_url') }}" target="_blank" rel="noopener">Termos</a> ·
+      <a href="{{ config('legal.privacy_url') }}" target="_blank" rel="noopener">Privacidade</a>
     </span>
   </div>
 </footer>

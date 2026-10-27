@@ -15,7 +15,7 @@ class HomeController extends Controller
         }
 
         return view('landing', [
-            'company' => Setting::get('company_name', 'QEAI One'),
+            'company' => Setting::get('company_name', 'Q One'),
         ]);
     }
 }

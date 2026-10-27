@@ -1,6 +1,6 @@
 @extends('layouts.auth')
 
-@section('title', 'Criar conta — QEAI One')
+@section('title', 'Criar conta — Q One')
 
 @section('auth')
   <h1 class="auth-title">Crie sua organização</h1>
@@ -48,7 +48,7 @@
 
     <label class="check auth-terms">
       <input type="checkbox" name="terms" value="1" required @checked(old('terms'))>
-      <span>Li e aceito os <a href="https://qeai.com.br/privacidade" target="_blank" rel="noopener">Termos de Uso e a Política de Privacidade</a>.</span>
+      <span>Li e aceito os <a href="{{ config('legal.terms_url') }}" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="{{ config('legal.privacy_url') }}" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
     </label>
 
     <button class="btn auth-submit">

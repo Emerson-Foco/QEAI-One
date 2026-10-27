@@ -98,7 +98,7 @@ class DashboardTest extends TestCase
 
         $this->actingAs($root)->get(route('member.org.dashboard', $organization))
             ->assertOk()
-            ->assertSee('Dados de negócio protegidos')
+            ->assertSee('Acesso aos dados')
             ->assertSee('ADM Root');
     }
 

@@ -39,6 +39,8 @@ class RegisterTest extends TestCase
         $this->assertAuthenticated();
 
         $user = User::where('email', 'fulano@empresa.com')->firstOrFail();
+        $this->assertNotNull($user->terms_accepted_at);
+        $this->assertSame((string) config('legal.terms_version'), $user->terms_version);
         $organization = Organization::where('name', 'Minha Empresa')->firstOrFail();
         $this->assertSame($user->id, $organization->owner_user_id);
         $this->assertDatabaseHas('memberships', ['organization_id' => $organization->id, 'user_id' => $user->id, 'status' => 'active']);
