@@ -1,8 +1,5 @@
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
+    # Hospedagem compartilhada: não usar Options/overrides.
     RewriteEngine On
 
     # Aceita apenas o subdomínio oficial. Isso evita acessar o Q One
