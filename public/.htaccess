@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Aceita apenas o subdomínio oficial. Isso evita acessar o Q One
+    # pela pasta /one do site principal ou por IP.
+    RewriteCond %{HTTP_HOST} !^one\.qeai\.com\.br$ [NC]
+    RewriteRule ^ - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
